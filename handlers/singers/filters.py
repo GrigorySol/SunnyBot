@@ -5,12 +5,12 @@ from db import BotDB
 BotDB = BotDB('sunny_bot.db')
 
 
-class NewUserFilter(SimpleCustomFilter):
-    """Check whether the user is new"""
+class NewsingerFilter(SimpleCustomFilter):
+    """Check whether the singer is new"""
 
-    key = "is_new_user"
+    key = "is_new_singer"
 
     def check(self, message: Message):
-        user_id = message.from_user.id
-        exists = BotDB.user_exists(user_id)
+        singer_id = message.from_user.id
+        exists = BotDB.singer_exists(singer_id)
         return not exists

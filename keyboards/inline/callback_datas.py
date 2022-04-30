@@ -5,15 +5,15 @@ register_callback = CallbackData(prefix="registration")
 search_callback = CallbackData("type", prefix="search")
 
 
-class UserRegFilter(AdvancedCustomFilter):
-    key = 'user_config'
+class SingerRegFilter(AdvancedCustomFilter):
+    key = 'singer_config'
 
-    def check(self, call: types.CallbackQuery, config: CallbackDataFilter):
-        return config.check(query=call)
+    def check(self, call: types.CallbackQuery, singer: CallbackDataFilter):
+        return singer.check(query=call)
 
 
-class UserSearchFilter(AdvancedCustomFilter):
-    key = 'user_config'
+class SingerSearchFilter(AdvancedCustomFilter):
+    key = 'singer_config'
 
-    def check(self, call: types.CallbackQuery, config: CallbackDataFilter):
-        return config.check(query=call)
+    def check(self, call: types.CallbackQuery, singer: CallbackDataFilter):
+        return singer.check(query=call)
