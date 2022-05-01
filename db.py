@@ -21,7 +21,7 @@ class BotDB:
     def get_singer_id(self, singer_id: int):
         """Receive the singer id from the database"""
         db_singer_id = self._cursor.execute("SELECT id FROM singers WHERE singer_id = ?", (singer_id,))
-        return db_singer_id.fetchall()[0]
+        return db_singer_id.fetchall()[0][0]
 
     def get_singer_singername(self, _id: int):
         """Receive the telegram username from the database"""
@@ -48,6 +48,35 @@ class BotDB:
                                         "WHERE singer_suit.singer_id = ?", (_id,))
         return db_suits.fetchall()[0]
 
+    def get_all_singers(self):
+        """Return (name lastname, id) of the all singers from database"""
+        db_singers = self._cursor.execute("SELECT first_name || ' ' || last_name AS fullname, id "
+                                          "FROM singers")
+        return db_singers.fetchall()
+
+    def get_voice_list(self):
+        """Return all available voices from database."""
+        voices = self._cursor.execute("SELECT voice FROM voices")
+        return voices.fetchall()
+
+    def search_singer_voice(self, singer_id: int):
+        """ """
+        db_singer_voice = self._cursor.execute("SELECT GROUP_CONCAT(voices.voice, ', ') FROM singers "
+                                               "JOIN singer_voice ON singer_voice.singer_id = singers.id "
+                                               "JOIN voices ON voices.id = singer_voice.voice_id "
+                                               "WHERE singers.singer_id = ?", (singer_id,))
+        return db_singer_voice.fetchall()
+
+    def search_singers_by_voice(self, voice: str):
+        """Return (name lastname, id) of the singers of the chosen voice from database"""
+        db_singer = self._cursor.execute(
+            "SELECT singers.first_name || ' ' || singers.last_name AS fullname, singers.id "
+            "FROM singers "
+            "JOIN singer_voice ON singer_voice.singer_id = singers.id "
+            "JOIN voices ON voices.id = singer_voice.voice_id "
+            "WHERE voices.voice = ?", (voice,))
+        return db_singer.fetchall()
+
     """TODO: Replace below code to above"""
 
     def count_singers(self):
@@ -55,35 +84,14 @@ class BotDB:
         db_singer_id = self._cursor.execute("SELECT COUNT(*) from `singers`")
         return db_singer_id.fetchall()[0][0]
 
+    """
     def show_singers(self):
-        """Show all singers from database"""
         db_singer_id = self._cursor.execute("SELECT singers.singer_name, singers.first_name, singers.last_name, "
                                             "GROUP_CONCAT(voices.voice, ', ') FROM singers "
                                             "JOIN singer_voice ON singer_voice.singer_id = singers.id "
                                             "JOIN voices ON voices.id = singer_voice.voice_id GROUP BY singers.id")
         return db_singer_id.fetchall()
-
-    def search_singer_voice(self, singer_id: int):
-        """ """
-        db_singer_id = self._cursor.execute("SELECT GROUP_CONCAT(voices.voice, ', ') FROM singers "
-                                            "JOIN singer_voice ON singer_voice.singer_id = singers.id "
-                                            "JOIN voices ON voices.id = singer_voice.voice_id "
-                                            "WHERE singers.singer_id = ?", (singer_id,))
-        return db_singer_id.fetchall()
-
-    def get_voice_list(self):
-        """Return all available voices from database."""
-        voices = self._cursor.execute("SELECT voice FROM voices")
-        return voices.fetchall()
-
-    def search_singers_by_voice(self, voice: str):
-        """ """
-        db_singer_id = self._cursor.execute(
-            "SELECT singers.singer_name, singers.first_name, singers.last_name FROM singers "
-            "JOIN singer_voice ON singer_voice.singer_id = singers.id "
-            "JOIN voices ON voices.id = singer_voice.voice_id "
-            "WHERE voices.voice = ?", (voice,))
-        return db_singer_id.fetchall()
+    """
 
     def search_singer_by_name(self, msg: str):
         """ """

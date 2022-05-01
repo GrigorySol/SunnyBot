@@ -43,13 +43,13 @@ def show_voice(message: Message):
 @bot.callback_query_handler(func=lambda c: c.data == "show_all")
 def show_all_singers(call: CallbackQuery):
     """Displays callback buttons with all singers"""
-    singers = BotDB.show_singers()
-    call_data = "search:singer"
+    singers = BotDB.get_all_singers()
+    call_config = "singer"
     data = []
     for singer in singers:
-        data.append(f"{singer[1]} {singer[2]}")
+        data.append((singer[0], f"{call_config}:{singer[1]}"))
     bot.send_message(call.message.chat.id, show_all_singers_text,
-                     reply_markup=callback_buttons(data, call_data=call_data))
+                     reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
@@ -67,17 +67,15 @@ def back_btn(call: CallbackQuery):
 @bot.inline_handler(func=lambda query: len(query.query))
 def singer_query(query: InlineQuery):
     """Inline User Search"""
-    singers = BotDB.show_singers()
-    call_data = "search:singer"
-    result = []
+    singers = BotDB.get_all_singers()
+    call_config = "singer"
+    data = []
     for i, singer in enumerate(singers):
-        if query.query.lower().strip() in "".join(singer).lower():
-            print(singer)
-            result.append(InlineQueryResultArticle(i, f"{singer[1]} {singer[2]} ({singer[3]})",
-                                                   InputTextMessageContent(f"Поёт в {singer[3]}"),
-                                                   reply_markup=callback_buttons([f"{singer[1]} {singer[2]}"],
-                                                                                 call_data=call_data)))
-    bot.answer_inline_query(query.id, result)
+        if query.query.lower().strip() in "".join(singer[0]).lower():
+            btn = callback_buttons([(singer[0], f"{call_config}:{singer[1]}")])
+            content = InputTextMessageContent(f"___________")
+            data.append(InlineQueryResultArticle(i, singer[0], content, reply_markup=btn))
+    bot.answer_inline_query(query.id, data)
 
 
 @bot.message_handler()
