@@ -26,7 +26,7 @@ class BotDB:
     def get_singer_singername(self, _id: int):
         """Receive the telegram username from the database"""
         db_singername = self._cursor.execute("SELECT singer_name FROM singers WHERE id = ?", (_id,))
-        return db_singername.fetchall()[0]
+        return db_singername.fetchall()[0][0]
 
     def get_singer_fullname(self, _id: int):
         """Receive the singer name and lastname from the database"""

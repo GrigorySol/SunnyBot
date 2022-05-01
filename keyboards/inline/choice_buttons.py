@@ -41,14 +41,14 @@ def callback_buttons(data: List, row=2):
     return markup
 
 
-def singer_info_buttons(singername, btn_names):
+def singer_info_buttons(singername, sid, btn_names):
+    print(f"{singername}, {sid}, {btn_names}")
     markup = InlineKeyboardMarkup(row_width=2)
     send_msg_btn = InlineKeyboardButton("Написать", url=f"t.me/{singername}")
     buttons = [send_msg_btn]
     for name in btn_names:
-        btn = InlineKeyboardButton(name, callback_data=f"info:{name}_{singername}")
+        btn = InlineKeyboardButton(name, callback_data=f"info:{name}:{sid}")
         buttons.append(btn)
     markup.add(*buttons)
     markup.add(close_btn)
     return markup
-
