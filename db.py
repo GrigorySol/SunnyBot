@@ -15,13 +15,40 @@ class BotDB:
 
     def singer_exists(self, singer_id: int) -> bool:
         """Returns False if the singer is not in the database"""
-        existing = self._cursor.execute("SELECT `id` FROM `singers` WHERE `singer_id` = ?", (singer_id,))
+        existing = self._cursor.execute("SELECT id FROM singers WHERE singer_id = ?", (singer_id,))
         return bool(len(existing.fetchall()))
 
     def get_singer_id(self, singer_id: int):
         """Receive the singer id from the database"""
-        db_singer_id = self._cursor.execute("SELECT `id` FROM `singers` WHERE `singer_id` = ?", (singer_id,))
+        db_singer_id = self._cursor.execute("SELECT id FROM singers WHERE singer_id = ?", (singer_id,))
         return db_singer_id.fetchall()[0]
+
+    def get_singer_singername(self, _id: int):
+        """Receive the telegram username from the database"""
+        db_singername = self._cursor.execute("SELECT singer_name FROM singers WHERE id = ?", (_id,))
+        return db_singername.fetchall()[0]
+
+    def get_singer_fullname(self, _id: int):
+        """Receive the singer name and lastname from the database"""
+        db_fullname = self._cursor.execute("SELECT first_name || ' ' || last_name AS fullname "
+                                           "FROM singers WHERE id = ?", (_id,))
+        return db_fullname.fetchall()[0]
+
+    def get_singer_voices(self, _id: int):
+        """Receive the singer voices from the database"""
+        db_voices = self._cursor.execute("SELECT GROUP_CONCAT(voice, ', ') FROM voices "
+                                         "INNER JOIN singer_voice ON singer_voice.voice_id = voices.id "
+                                         "WHERE singer_voice.singer_id = ?", (_id,))
+        return db_voices.fetchall()[0]
+
+    def get_singer_suits(self, _id: int):
+        """Receive the singer suits from the database"""
+        db_suits = self._cursor.execute("SELECT GROUP_CONCAT(suit, ', ') FROM suits "
+                                        "INNER JOIN singer_suit ON singer_suit.suit_id = suits.id "
+                                        "WHERE singer_suit.singer_id = ?", (_id,))
+        return db_suits.fetchall()[0]
+
+    """TODO: Replace below code to above"""
 
     def count_singers(self):
         """Count all singers from database"""
@@ -43,6 +70,11 @@ class BotDB:
                                             "JOIN voices ON voices.id = singer_voice.voice_id "
                                             "WHERE singers.singer_id = ?", (singer_id,))
         return db_singer_id.fetchall()
+
+    def get_voice_list(self):
+        """Return all available voices from database."""
+        voices = self._cursor.execute("SELECT voice FROM voices")
+        return voices.fetchall()
 
     def search_singers_by_voice(self, voice: str):
         """ """
