@@ -10,7 +10,7 @@ BotDB = BotDB("sunny_bot.db")
 
 @bot.callback_query_handler(func=None, singer_config=search_callback.filter(type="voice"))
 def search_by_voice(call: CallbackQuery):
-    bot.send_message(call.from_user.id, chose_voice_text)
+    bot.send_message(call.message.chat.id, chose_voice_text)
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=voice_choice)
 
 
@@ -26,8 +26,8 @@ def bass_voice(call: CallbackQuery):
     singers = BotDB.search_singers_by_voice(voices_dict[call.data])
     print(singers)
     if not singers:
-        bot.send_message(call.from_user.id, no_singers_text, reply_markup=search_choice)
+        bot.send_message(call.message.chat.id, no_singers_text, reply_markup=search_choice)
     else:
         msg = f"Вы выбрали {voices_dict[call.data]}"
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
-        bot.send_message(call.from_user.id, msg, reply_markup=naming_buttons(singers))
+        bot.send_message(call.message.chat.id, msg, reply_markup=naming_buttons(singers))
