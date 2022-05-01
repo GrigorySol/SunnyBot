@@ -1,8 +1,7 @@
 from datetime import datetime
 from loader import bot
 from db import BotDB
-from telebot.types import Message, CallbackQuery, InlineQuery, \
-    InlineQueryResultArticle, InputTextMessageContent
+from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from keyboards.inline.choice_buttons import callback_buttons, new_singer_markup, search_choice
 from misc.bot_speech import greetings, random_answer
 from misc.bot_dictionary import *
@@ -45,7 +44,6 @@ def show_voice(message: Message):
 def show_all_singers(call: CallbackQuery):
     """Displays callback buttons with all singers"""
     singers = BotDB.show_singers()
-    print(singers)
     call_data = "search:singer"
     data = []
     for singer in singers:

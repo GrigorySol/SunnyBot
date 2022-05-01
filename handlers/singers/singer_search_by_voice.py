@@ -11,7 +11,7 @@ voices = [voice[0] for voice in BotDB.get_voice_list()]
 
 @bot.callback_query_handler(func=None, singer_config=search_callback.filter(type="voice"))
 def search_by_voice(call: CallbackQuery):
-    """Display available voices. TODO: FIX dictionary"""
+    """Display available voices."""
     bot.send_message(call.message.chat.id, chose_voice_text, reply_markup=callback_buttons(voices))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
