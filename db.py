@@ -46,14 +46,19 @@ class BotDB:
         db_voices = self._cursor.execute("SELECT GROUP_CONCAT(voice, ', ') FROM voices "
                                          "INNER JOIN singer_voice ON singer_voice.voice_id = voices.id "
                                          "WHERE singer_voice.singer_id = ?", (_id,))
-        return db_voices.fetchall()[0]
+        return db_voices.fetchall()[0][0]
 
     def get_singer_suits(self, _id: int):
         """Receive the singer suits from the database"""
         db_suits = self._cursor.execute("SELECT GROUP_CONCAT(suit, ', ') FROM suits "
                                         "INNER JOIN singer_suit ON singer_suit.suit_id = suits.id "
                                         "WHERE singer_suit.singer_id = ?", (_id,))
-        return db_suits.fetchall()[0]
+        return db_suits.fetchall()[0][0]
+
+    def get_all_suits(self):
+        """Receive all suits from the database"""
+        db_suits = self._cursor.execute("SELECT suit, image FROM suits ")
+        return db_suits.fetchall()
 
     def get_all_singers(self):
         """Return (name lastname, id) of the all singers from database"""
