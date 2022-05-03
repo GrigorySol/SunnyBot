@@ -23,6 +23,13 @@ class BotDB:
         db_singer_id = self._cursor.execute("SELECT id FROM singers WHERE singer_id = ?", (singer_id,))
         return db_singer_id.fetchall()[0][0]
 
+    def is_admin(self, singer_id: int):
+        """Check if the singer is admin of the bot"""
+        db_admin = self._cursor.execute("SELECT * FROM admins "
+                                        "JOIN singers ON singers.id = admins.singer_id "
+                                        "WHERE singers.singer_id = ?", (singer_id,))
+        return bool(len(db_admin.fetchall()))
+
     def get_singer_singername(self, _id: int):
         """Receive the telegram username from the database"""
         db_singername = self._cursor.execute("SELECT singer_name FROM singers WHERE id = ?", (_id,))
@@ -53,6 +60,12 @@ class BotDB:
         db_singers = self._cursor.execute("SELECT first_name || ' ' || last_name AS fullname, id "
                                           "FROM singers")
         return db_singers.fetchall()
+
+    def get_all_admins(self):
+        """Return singer_id for each admin from database"""
+        db_admin = self._cursor.execute("SELECT singers.singer_id FROM singers "
+                                        "JOIN admins ON admins.singer_id = singers.id ")
+        return db_admin.fetchall()[0]
 
     def get_voice_list(self):
         """Return all available voices from database."""
@@ -115,11 +128,6 @@ class BotDB:
         """Add new singer into the database"""
         self._cursor.execute("INSERT INTO `admins` (`db_singer_id`) VALUES (?)", (db_singer_id,))
         return self._connect.commit()
-
-    def is_admin(self, db_singer_id: int):
-        """Check if the singer is admin of the bot"""
-        admin = self._cursor.execute("SELECT `id` FROM `admins` WHERE `db_singer_id` = ?", (db_singer_id,))
-        return bool(len(admin.fetchall()))
 
     def close(self):
         """Disconnect from the database"""

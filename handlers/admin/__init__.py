@@ -1,0 +1,6 @@
+from .admin_actions import bot
+from .singer_search_by_voice import bot
+from .singer_info import bot
+from .command_rules import bot
+
+__all__ = ["bot"]

@@ -1,4 +1,4 @@
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from typing import List
 
 # Regular buttons
@@ -18,13 +18,19 @@ add_singer = InlineKeyboardButton("Зарегистрироваться", callba
 new_singer_markup.add(add_singer)
 new_singer_markup.add(close_btn)
 
-# singer search choice buttons
+# Singer search choice buttons
 search_choice = InlineKeyboardMarkup(row_width=2)
 search_by_name = InlineKeyboardButton("По имени", switch_inline_query_current_chat="бас")
 search_by_voice = InlineKeyboardButton("По голосу", callback_data="search:voice")
 show_all_btn = InlineKeyboardButton("Посмотреть всех", callback_data="show_all")
 search_choice.add(search_by_name, search_by_voice, show_all_btn)
 search_choice.add(close_btn)
+
+# Reply with joke
+joke_markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+yes_btn = KeyboardButton("Да!")
+of_course_btn = KeyboardButton("Конечно!")
+joke_markup.add(yes_btn, of_course_btn)
 
 
 def callback_buttons(data: List, row=2):
