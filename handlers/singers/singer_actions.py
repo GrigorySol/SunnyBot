@@ -3,6 +3,7 @@ from random import randint
 from loader import bot
 import db
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
+from keyboards.inline.callback_datas import suit_callback
 from keyboards.inline.choice_buttons import new_singer_markup, joke_markup, callback_buttons
 from misc.bot_speech import greetings
 from misc.bot_dictionary import *
@@ -37,55 +38,61 @@ def show_suits(message: Message):
     """Display singer suits and buttons to add or remove"""
     sid = db.get_singer_id(message.from_user.id)
     suits = db.get_singer_suits(sid)
-    print(suits)
     call_config = "suit"
     data = []
+
     for text in edit_buttons:
         data.append((text, f"{call_config}:{text}:{sid}"))
+
     if not suits:
         data.pop()
-        msg = f"{no_suit_text}\n{edit_suit_text}"
+        msg = f"{no_suit_text} {edit_suit_text}"
+
+    elif len(db.get_all_suits()) == len(suits):
+        data.pop(0)
+        suit_names = []
+        for _, name, photo in suits:
+            suit_names.append(name)
+            bot.send_photo(message.chat.id, photo, caption=name)
+            bot.send_message(message.chat.id, "_____________________________")
+
+        msg = f"Вы носите {', '.join(suit_names)}.\n{too_many_suits}\n{edit_suit_text}"
+
     else:
-        msg = f"Вы носите {suits}.\n{edit_suit_text}"
-    print(data)
+        suit_names = []
+        for _, name, photo in suits:
+            suit_names.append(name)
+            bot.send_photo(message.chat.id, photo, caption=name)
+            bot.send_message(message.chat.id, "_____________________________")
+
+        msg = f"Вы носите {', '.join(suit_names)}.\n{edit_suit_text}"
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
 
 
-@bot.callback_query_handler(func=lambda c: 'suit:' in c.data)
+@bot.callback_query_handler(func=None, singer_config=suit_callback.filter())
 def display_suits_to_add_or_remove(call: CallbackQuery):
     """Display suits to add or remove"""
     _, action, sid = call.data.split(":")
-    suits = db.get_all_suits()
     sid = int(sid)
     call_config, msg = action_definition(action)
     data = []
 
-    bot.send_message(call.message.chat.id, "_____________________________")
-    for name, photo in suits:
-        data.append((name, f"{call_config}:{name}:{sid}"))
-        bot.send_photo(call.message.chat.id, photo, caption=name)
+    if action == "Удалить":
+        suits = db.get_singer_suits(sid)
+        for suit_id, name, _ in suits:
+            data.append((name, f"{call_config}:suit:{sid}:{suit_id}"))
+    else:
+        suits = db.get_all_suits()
         bot.send_message(call.message.chat.id, "_____________________________")
-    print(suits)
+        for suit_id, name, photo in suits:
+            available = db.get_singer_suits(sid)
+            if (suit_id, name, photo) in available:
+                continue
+            data.append((name, f"{call_config}:suit:{sid}:{suit_id}"))
+            bot.send_photo(call.message.chat.id, photo, caption=name)
+            bot.send_message(call.message.chat.id, "_____________________________")
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
     bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
-
-
-@bot.callback_query_handler(func=lambda c: 'add:' in c.data)
-def add_action(call: CallbackQuery):
-    """Add something to database"""
-    _, item, sid = call.data.split(":")
-    msg = "Ничего не произошло!."
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
-    bot.send_message(call.message.chat.id, msg)
-
-
-@bot.callback_query_handler(func=lambda c: 'remove:' in c.data)
-def add_action(call: CallbackQuery):
-    """Add something to database"""
-    _, item, sid = call.data.split(":")
-    msg = "Ничего не произошло! А пока можно написать 'скучно'."
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
-    bot.send_message(call.message.chat.id, msg)
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')
@@ -132,10 +139,10 @@ def action_definition(action: str):
     """Define what choice made by singer"""
     if action == "Удалить":
         call_config = "remove"
-        msg = "Что желаете удалить?"
+        msg = "Что удалить?"
     else:  # "Добавить"
         call_config = "add"
-        msg = "Что желаете дбавить?"
+        msg = "Что дбавить?"
     return call_config, msg
 
 

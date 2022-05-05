@@ -81,10 +81,10 @@ def get_singer_suits(_id: int):
     with sqlite3.connect("sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT GROUP_CONCAT(suit, ', ') FROM suits "
+        cursor.execute("SELECT id, suit, image FROM suits "
                        "INNER JOIN singer_suit ON singer_suit.suit_id = suits.id "
                        "WHERE singer_suit.singer_id = ?", (_id,))
-        return cursor.fetchone()[0]
+        return cursor.fetchall()
 
 
 def get_all_suits():
@@ -92,7 +92,7 @@ def get_all_suits():
     with sqlite3.connect("sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT suit, image FROM suits ")
+        cursor.execute("SELECT * FROM suits ")
         return cursor.fetchall()
 
 
@@ -172,7 +172,7 @@ def add_singer(singer_id: int, singer_name: str, first_name=None, last_name=None
 
 
 def add_suit(_id: int, suit_id: int):
-    """Add suit for a singer into database"""
+    """Add suit for the singer into database"""
     with sqlite3.connect("sunny_bot.db") as db:
         cursor = db.cursor()
 
@@ -185,9 +185,15 @@ def add_suit(_id: int, suit_id: int):
             print(f"Suit №{suit_id} added")
 
 
-
-
 # UPDATE
 
 
 # DELETE
+
+def delete_suit(_id: int, suit_id: int):
+    """Remove suit of the singer from database"""
+    with sqlite3.connect("sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("DELETE FROM singer_suit "
+                       "WHERE singer_id = ? and suit_id = ?", (_id, suit_id))
