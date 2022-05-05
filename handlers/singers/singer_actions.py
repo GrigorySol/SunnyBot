@@ -3,8 +3,9 @@ from random import randint
 from loader import bot
 import db
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
-from keyboards.inline.callback_datas import suit_callback
-from keyboards.inline.choice_buttons import new_singer_markup, joke_markup, callback_buttons
+from keyboards.inline.callback_datas import suit_edit_callback
+from keyboards.inline.choice_buttons import new_singer_markup, joke_markup
+from misc.edit_functions import display_suits, edit_suits
 from misc.bot_speech import greetings
 from misc.bot_dictionary import *
 
@@ -12,6 +13,7 @@ from misc.bot_dictionary import *
 @bot.message_handler(is_new_singer=True)
 def singer_not_registered(message: Message):
     """Interact with a new user and offer to register"""
+
     singer_id = message.from_user.id
     singer_time = datetime.utcfromtimestamp(message.date).hour
     if message.from_user.username == "Alex_3owls":
@@ -25,85 +27,41 @@ def singer_not_registered(message: Message):
 @bot.message_handler(commands=["voice"])
 def show_voice(message: Message):
     """Display singer voices"""
+
     singer_id = db.get_singer_id(message.from_user.id)
     voices = db.get_singer_voices(singer_id)
     if not voices:
         bot.send_message(message.chat.id, no_voice_text)
     else:
-        bot.send_message(message.chat.id, f"Вы поёте в {voices}.")
+        text = ", ".join(voice for _, voice in voices)
+        bot.send_message(message.chat.id, f"Вы поёте в {text}.")
 
 
 @bot.message_handler(commands=["suits"])
 def show_suits(message: Message):
     """Display singer suits and buttons to add or remove"""
+
     sid = db.get_singer_id(message.from_user.id)
-    suits = db.get_singer_suits(sid)
-    call_config = "suit"
-    data = []
-
-    for text in edit_buttons:
-        data.append((text, f"{call_config}:{text}:{sid}"))
-
-    if not suits:
-        data.pop()
-        msg = f"{no_suit_text} {edit_suit_text}"
-
-    elif len(db.get_all_suits()) == len(suits):
-        data.pop(0)
-        suit_names = []
-        for _, name, photo in suits:
-            suit_names.append(name)
-            bot.send_photo(message.chat.id, photo, caption=name)
-            bot.send_message(message.chat.id, "_____________________________")
-
-        msg = f"Вы носите {', '.join(suit_names)}.\n{too_many_suits}\n{edit_suit_text}"
-
-    else:
-        suit_names = []
-        for _, name, photo in suits:
-            suit_names.append(name)
-            bot.send_photo(message.chat.id, photo, caption=name)
-            bot.send_message(message.chat.id, "_____________________________")
-
-        msg = f"Вы носите {', '.join(suit_names)}.\n{edit_suit_text}"
-    bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
+    display_suits(message, sid)
 
 
-@bot.callback_query_handler(func=None, singer_config=suit_callback.filter())
-def display_suits_to_add_or_remove(call: CallbackQuery):
-    """Display suits to add or remove"""
-    _, action, sid = call.data.split(":")
-    sid = int(sid)
-    call_config, msg = action_definition(action)
-    data = []
-
-    if action == "Удалить":
-        suits = db.get_singer_suits(sid)
-        for suit_id, name, _ in suits:
-            data.append((name, f"{call_config}:suit:{sid}:{suit_id}"))
-    else:
-        suits = db.get_all_suits()
-        bot.send_message(call.message.chat.id, "_____________________________")
-        for suit_id, name, photo in suits:
-            available = db.get_singer_suits(sid)
-            if (suit_id, name, photo) in available:
-                continue
-            data.append((name, f"{call_config}:suit:{sid}:{suit_id}"))
-            bot.send_photo(call.message.chat.id, photo, caption=name)
-            bot.send_message(call.message.chat.id, "_____________________________")
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
-    bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+@bot.callback_query_handler(func=None, singer_config=suit_edit_callback.filter())
+def edit_suits_buttons(call: CallbackQuery):
+    """Display buttons to add or remove suit"""
+    edit_suits(call)
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')
 def close_btn(call: CallbackQuery):
     """Remove a block of the buttons"""
+
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
 @bot.message_handler(func=lambda m: "скучно" in m.text.lower())
 def back_btn(message: Message):
     """Send a random joke into the chat"""
+
     bot.register_next_step_handler(message, joking)
     bot.send_message(message.chat.id, do_you_wanna_my_joke,
                      reply_to_message_id=message.id, reply_markup=joke_markup)
@@ -120,7 +78,7 @@ def back_btn(call: CallbackQuery):
 
 
 def check_commands(message: Message):
-    if message.text[0] == "/":
+    if (message.text[0] == "/") or (message.text[0] == "|"):
         return
     return message
 
@@ -128,22 +86,12 @@ def check_commands(message: Message):
 @bot.message_handler(func=check_commands)
 def nothing_to_say(message: Message):
     """Random answer on unrecognised message"""
+
     text = {randomizer(random_answer_text)}
     bot.forward_message(434767263, message.chat.id, message.id)
     print(message.text)
     print(text)
     bot.send_message(message.chat.id, text)
-
-
-def action_definition(action: str):
-    """Define what choice made by singer"""
-    if action == "Удалить":
-        call_config = "remove"
-        msg = "Что удалить?"
-    else:  # "Добавить"
-        call_config = "add"
-        msg = "Что дбавить?"
-    return call_config, msg
 
 
 def randomizer(items):

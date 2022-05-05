@@ -3,18 +3,18 @@ from telebot.types import CallbackQuery
 from keyboards.inline.callback_datas import search_callback, voice_callback
 from misc.bot_dictionary import chose_voice_text, no_singers_text
 from keyboards.inline.choice_buttons import callback_buttons, search_choice
-from db import get_voice_list, search_singers_by_voice
+from db import get_all_voices, search_singers_by_voice
 
 
 @bot.callback_query_handler(func=None, singer_config=search_callback.filter(type="voice"))
 def search_by_voice(call: CallbackQuery):
     """Display available voices."""
     print("here")
-    voices = get_voice_list()
+    voices = get_all_voices()
     call_config = "voice"
     data = []
-    for voice in voices:
-        data.append((voice[0], f"{call_config}:{voice[0]}"))
+    for _, voice in voices:
+        data.append((voice, f"{call_config}:{voice}"))
     bot.send_message(call.message.chat.id, chose_voice_text, reply_markup=callback_buttons(data, row=3))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 

@@ -33,6 +33,13 @@ of_course_btn = KeyboardButton("Конечно!")
 joke_markup.add(yes_btn, of_course_btn)
 
 
+def query_button(text, call_data):
+    query_markup = InlineKeyboardMarkup()
+    query_btn = InlineKeyboardButton(text, callback_data=call_data)
+    query_markup.add(query_btn)
+    return query_markup
+
+
 def callback_buttons(data: List, row=2):
     """
     Create group of the buttons.
@@ -44,6 +51,7 @@ def callback_buttons(data: List, row=2):
         btn = InlineKeyboardButton(text[0], callback_data=text[1])
         buttons.append(btn)
     markup.add(*buttons)
+    markup.add(close_btn)
     return markup
 
 
