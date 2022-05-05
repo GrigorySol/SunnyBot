@@ -1,13 +1,11 @@
 from datetime import datetime
 from random import randint
 from loader import bot
-from db import BotDB
+import db
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.inline.choice_buttons import new_singer_markup, joke_markup, callback_buttons
 from misc.bot_speech import greetings
 from misc.bot_dictionary import *
-
-BotDB = BotDB("sunny_bot.db")
 
 
 @bot.message_handler(is_new_singer=True)
@@ -26,8 +24,8 @@ def singer_not_registered(message: Message):
 @bot.message_handler(commands=["voice"])
 def show_voice(message: Message):
     """Display singer voices"""
-    singer_id = BotDB.get_singer_id(message.from_user.id)
-    voices = BotDB.get_singer_voices(singer_id)
+    singer_id = db.get_singer_id(message.from_user.id)
+    voices = db.get_singer_voices(singer_id)
     if not voices:
         bot.send_message(message.chat.id, no_voice_text)
     else:
@@ -37,8 +35,8 @@ def show_voice(message: Message):
 @bot.message_handler(commands=["suits"])
 def show_suits(message: Message):
     """Display singer suits and buttons to add or remove"""
-    sid = BotDB.get_singer_id(message.from_user.id)
-    suits = BotDB.get_singer_suits(sid)
+    sid = db.get_singer_id(message.from_user.id)
+    suits = db.get_singer_suits(sid)
     print(suits)
     call_config = "suit"
     data = []
@@ -57,7 +55,7 @@ def show_suits(message: Message):
 def display_suits_to_add_or_remove(call: CallbackQuery):
     """Display suits to add or remove"""
     _, action, sid = call.data.split(":")
-    suits = BotDB.get_all_suits()
+    suits = db.get_all_suits()
     sid = int(sid)
     call_config, msg = action_definition(action)
     data = []

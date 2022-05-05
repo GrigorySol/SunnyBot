@@ -2,9 +2,7 @@ from loader import bot
 from telebot.types import Message, CallbackQuery
 from keyboards.inline.callback_datas import register_callback
 from misc.bot_dictionary import *
-from db import BotDB
-
-BotDB = BotDB("sunny_bot.db")
+from db import add_singer
 
 
 class SingerRegister:
@@ -32,7 +30,7 @@ def singer_name_step(message: Message):
         singer.singer_id = message.from_user.id
         singer.singername = message.from_user.username
         bot.send_message(message.chat.id, thanks_for_register)
-        BotDB.add_singer(singer.singer_id, singer.singername, name, lastname)
+        add_singer(singer.singer_id, singer.singername, name, lastname)
         print(f"New singer {name} {lastname} registered")
     elif name.isdigit():
         msg = bot.send_message(message.chat.id, name_is_digit)
@@ -57,5 +55,5 @@ def singer_lastname_step(message: Message):
     else:
         singer.lastname = lastname
         bot.send_message(message.chat.id, thanks_for_register)
-        BotDB.add_singer(singer.singer_id, singer.singername, singer.name, singer.lastname)
+        add_singer(singer.singer_id, singer.singername, singer.name, singer.lastname)
         print(f"New singer {singer.name} {singer.lastname} registered")

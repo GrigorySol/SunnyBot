@@ -1,18 +1,16 @@
 from loader import bot
-from db import BotDB
 from telebot.types import CallbackQuery
 from keyboards.inline.callback_datas import singer_callback, info_callback
 from keyboards.inline.choice_buttons import singer_info_buttons, callback_buttons
 from misc.bot_dictionary import what_to_do, info_button_names, edit_buttons, no_suit_text, edit_suit_text
-
-BotDB = BotDB("sunny_bot.db")
+import db
 
 
 @bot.callback_query_handler(func=None, singer_config=singer_callback.filter())
 def display_singer_info(call: CallbackQuery):
     """Display info buttons"""
     sid = int(call.data.split(":")[1])
-    singername = BotDB.get_singer_telegram_name(sid)
+    singername = db.get_singer_telegram_name(sid)
     print(call.data)
     reply_markup = singer_info_buttons(singername, sid, info_button_names)
     if call.message:
@@ -28,14 +26,14 @@ def singer_menu(call: CallbackQuery):
     print(call.data)
 
     if name == info_button_names[0]:            # Голос
-        voices = BotDB.get_singer_voices(sid)
+        voices = db.get_singer_voices(sid)
         print(voices)
         if bool(voices):
             bot.send_message(call.from_user.id, voices)
         else:
             bot.send_message(call.from_user.id, "Здесь ничего нет")
     elif name == info_button_names[1]:          # Костюмы
-        suits = BotDB.get_singer_suits(sid)
+        suits = db.get_singer_suits(sid)
         call_config = "suit"
         data = []
         for text in edit_buttons:

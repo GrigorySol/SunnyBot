@@ -1,9 +1,7 @@
 from loader import bot
 from telebot.types import BotCommand, BotCommandScopeChat
 from misc.bot_commands import admin_commands, singer_commands
-from db import BotDB
-
-BotDB = BotDB("sunny_bot.db")
+from db import get_all_admins
 
 # bot.delete_my_commands(BotCommandScopeChat(1326627887))
 
@@ -24,11 +22,11 @@ def admin_command_rules():
     for s_command in s_commands:
         commands.append(s_command)
 
-    admins = BotDB.get_all_admins()
+    admins = get_all_admins()
     admin_chats = []
     for admin in admins:
-        print(admin)
-        chat = BotCommandScopeChat(admin)
+        print(admin[0])
+        chat = BotCommandScopeChat(admin[0])
         admin_chats.append(chat)
 
     for admin_chat in admin_chats:

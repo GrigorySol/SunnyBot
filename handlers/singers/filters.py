@@ -1,9 +1,7 @@
 from telebot.callback_data import CallbackDataFilter
 from telebot.custom_filters import SimpleCustomFilter, AdvancedCustomFilter
 from telebot.types import Message, CallbackQuery
-from db import BotDB
-
-BotDB = BotDB('sunny_bot.db')
+from db import singer_exists
 
 
 class NewSingerFilter(SimpleCustomFilter):
@@ -13,7 +11,7 @@ class NewSingerFilter(SimpleCustomFilter):
 
     def check(self, message: Message):
         singer_id = message.from_user.id
-        exists = BotDB.singer_exists(singer_id)
+        exists = singer_exists(singer_id)
         return not exists
 
 

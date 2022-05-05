@@ -1,18 +1,16 @@
 from loader import bot
-from db import BotDB
 from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from keyboards.inline.choice_buttons import callback_buttons, search_choice
-from misc.bot_dictionary import *
-
-BotDB = BotDB("sunny_bot.db")
+from misc.bot_dictionary import show_singers_text, you_shell_not_pass, show_all_singers_text
+import db
 
 
 @bot.message_handler(commands=["singers"])
 def show_singers_search(message: Message):
     """Display callback buttons with search options"""
-    is_admin = BotDB.is_admin(message.from_user.id)
+    is_admin = db.is_admin(message.from_user.id)
     if is_admin:
-        amount = BotDB.count_singers()
+        amount = db.count_singers()
         bot.send_message(message.chat.id,
                          f"В хоре {amount} певунов.\n{show_singers_text}",
                          reply_markup=search_choice)
@@ -29,7 +27,7 @@ def nothing_to_say(message: Message):
 @bot.callback_query_handler(func=lambda c: c.data == "show_all")
 def show_all_singers(call: CallbackQuery):
     """Displays callback buttons with all singers"""
-    singers = BotDB.get_all_singers()
+    singers = db.get_all_singers()
     call_config = "singer"
     data = []
     for singer in singers:
@@ -42,7 +40,7 @@ def show_all_singers(call: CallbackQuery):
 @bot.inline_handler(func=lambda query: len(query.query))
 def singer_query(query: InlineQuery):
     """Inline User Search"""
-    singers = BotDB.get_all_singers()
+    singers = db.get_all_singers()
     call_config = "singer"
     data = []
     for i, singer in enumerate(singers):
