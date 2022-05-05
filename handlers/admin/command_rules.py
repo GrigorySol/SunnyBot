@@ -5,6 +5,8 @@ from db import BotDB
 
 BotDB = BotDB("sunny_bot.db")
 
+# bot.delete_my_commands(BotCommandScopeChat(1326627887))
+
 s_commands = []
 for s_command in singer_commands:
     bot_s_command = BotCommand(s_command, singer_commands[s_command])
@@ -18,6 +20,9 @@ def admin_command_rules():
     for command in admin_commands:
         bot_command = BotCommand(command, admin_commands[command])
         commands.append(bot_command)
+
+    for s_command in s_commands:
+        commands.append(s_command)
 
     admins = BotDB.get_all_admins()
     admin_chats = []
@@ -33,4 +38,4 @@ def admin_command_rules():
         )
 
 
-# admin_command_rules()
+admin_command_rules()

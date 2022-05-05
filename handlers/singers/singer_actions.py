@@ -28,14 +28,13 @@ def show_voice(message: Message):
     """Display singer voices"""
     singer_id = BotDB.get_singer_id(message.from_user.id)
     voices = BotDB.get_singer_voices(singer_id)
-    print(voices)
     if not voices:
         bot.send_message(message.chat.id, no_voice_text)
     else:
         bot.send_message(message.chat.id, f"Вы поёте в {voices}.")
 
 
-@bot.message_handler(commands=["suit"])
+@bot.message_handler(commands=["suits"])
 def show_suits(message: Message):
     """Display singer suits and buttons to add or remove"""
     sid = BotDB.get_singer_id(message.from_user.id)
@@ -97,7 +96,7 @@ def close_btn(call: CallbackQuery):
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
-@bot.message_handler(func=lambda m: (m.text == 'скучно') or (m.text == 'Скучно'))
+@bot.message_handler(func=lambda m: "скучно" in m.text.lower())
 def back_btn(message: Message):
     """Send a random joke into the chat"""
     bot.register_next_step_handler(message, joking)
@@ -148,12 +147,6 @@ def randomizer(items):
     return items[i]
 
 
-@bot.message_handler(commands=["add"])
-def nothing_to_say(message: Message):
-    bot.send_sticker(message.chat.id,
-                     "CAACAgIAAxkBAAETnWpicItgGPH0dCO0X4bH2qcWNQIHUgAC6hYAAq5s6EltZQABkuvO0TUkBA")
-
-
 @bot.message_handler(commands=["songs"])
 def nothing_to_say(message: Message):
     bot.send_sticker(message.chat.id,
@@ -178,7 +171,9 @@ def nothing_to_say(message: Message):
                    "CQACAgIAAxkBAAETnYJicIzUt04joDIy7_uLOkUpHENW3wACKBoAAhFE4UpblvEevwxe_yQE")
 
 
+"""
 @bot.callback_query_handler(func=None)
 def remove_btn(call: CallbackQuery):
     # Close unused buttons
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+"""

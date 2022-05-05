@@ -20,6 +20,12 @@ def show_singers_search(message: Message):
         bot.send_message(message.chat.id, you_shell_not_pass)
 
 
+@bot.message_handler(commands=["add"])
+def nothing_to_say(message: Message):
+    bot.send_sticker(message.chat.id,
+                     "CAACAgIAAxkBAAETnWpicItgGPH0dCO0X4bH2qcWNQIHUgAC6hYAAq5s6EltZQABkuvO0TUkBA")
+
+
 @bot.callback_query_handler(func=lambda c: c.data == "show_all")
 def show_all_singers(call: CallbackQuery):
     """Displays callback buttons with all singers"""

@@ -11,6 +11,7 @@ BotDB = BotDB("sunny_bot.db")
 @bot.callback_query_handler(func=None, singer_config=search_callback.filter(type="voice"))
 def search_by_voice(call: CallbackQuery):
     """Display available voices."""
+    print("here")
     voices = BotDB.get_voice_list()
     call_config = "voice"
     data = []

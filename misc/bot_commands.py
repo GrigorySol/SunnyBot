@@ -8,5 +8,5 @@ singer_commands = {
     "rehearsal": "Репетиции",
     "concerts": "Концерты",
     "voice": "Голос",
-    "suit": "Костюмы"
+    "suits": "Костюмы"
 }

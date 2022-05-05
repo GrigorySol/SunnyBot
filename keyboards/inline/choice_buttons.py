@@ -20,7 +20,7 @@ new_singer_markup.add(close_btn)
 
 # Singer search choice buttons
 search_choice = InlineKeyboardMarkup(row_width=2)
-search_by_name = InlineKeyboardButton("По имени", switch_inline_query_current_chat="бас")
+search_by_name = InlineKeyboardButton("По имени", switch_inline_query_current_chat="а")
 search_by_voice = InlineKeyboardButton("По голосу", callback_data="search:voice")
 show_all_btn = InlineKeyboardButton("Посмотреть всех", callback_data="show_all")
 search_choice.add(search_by_name, search_by_voice, show_all_btn)
