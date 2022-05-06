@@ -1,9 +1,9 @@
 from loader import bot
 from telebot.types import CallbackQuery
 from keyboards.inline.callback_datas import search_callback, voice_callback
-from misc.bot_dictionary import chose_voice_text, no_singers_text
-from keyboards.inline.choice_buttons import callback_buttons, search_choice
-from db import get_all_voices, search_singers_by_voice
+from misc.messages.singer_dictionary import chose_voice_text, no_singers_text
+from keyboards.inline.choice_buttons import callback_buttons, search_choice_markup
+from database_control.db_singer import get_all_voices, search_singers_by_voice
 
 
 @bot.callback_query_handler(func=None, singer_config=search_callback.filter(type="voice"))
@@ -25,7 +25,7 @@ def show_voice(call: CallbackQuery):
     voice = call.data.split(":")[1]
     singers = search_singers_by_voice(voice)
     if not singers:
-        bot.send_message(call.message.chat.id, no_singers_text, reply_markup=search_choice)
+        bot.send_message(call.message.chat.id, no_singers_text, reply_markup=search_choice_markup)
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
     else:
         msg = f"Вы выбрали {voice}"

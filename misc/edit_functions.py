@@ -1,23 +1,23 @@
 from loader import bot
-import db
+from database_control import db_singer
 from keyboards.inline.choice_buttons import callback_buttons
-from misc.bot_dictionary import edit_buttons, edit_text,\
+from misc.messages.singer_dictionary import edit_buttons_text, edit_text,\
     no_suit_text, too_many_suits, no_voice_text, too_many_voices
 
 
 def display_suits(message, sid):
-    suits = db.get_singer_suits(sid)
+    suits = db_singer.get_singer_suits(sid)
     call_config = "suit"
     data = []
 
-    for text in edit_buttons:
+    for text in edit_buttons_text:
         data.append((text, f"{call_config}:{text}:{sid}"))
 
     if not suits:
         data.pop()
         msg = f"{no_suit_text} {edit_text}"
 
-    elif len(db.get_all_suits()) == len(suits):
+    elif len(db_singer.get_all_suits()) == len(suits):
         data.pop(0)
         suit_names = []
 
@@ -40,18 +40,18 @@ def display_suits(message, sid):
 
 
 def display_voices(message, sid):
-    voices = db.get_singer_voices(sid)
+    voices = db_singer.get_singer_voices(sid)
     call_config = "voice"
     data = []
 
-    for text in edit_buttons:
+    for text in edit_buttons_text:
         data.append((text, f"{call_config}:{text}:{sid}"))
 
     if not voices:
         data.pop()
         msg = f"{no_voice_text} {edit_text}"
 
-    elif len(db.get_all_suits()) == len(voices):
+    elif len(db_singer.get_all_suits()) == len(voices):
         data.pop(0)
         voice_names = []
         for _, name in voices:
@@ -85,15 +85,15 @@ def edit_suits(call):
     data = []
 
     if action == "Удалить":
-        suits = db.get_singer_suits(sid)
+        suits = db_singer.get_singer_suits(sid)
         for suit_id, name, _ in suits:
             data.append((name, f"{call_config}:suit:{sid}:{suit_id}"))
 
     else:
-        suits = db.get_all_suits()
+        suits = db_singer.get_all_suits()
         bot.send_message(call.message.chat.id, "_____________________________")
         for suit_id, name, photo in suits:
-            available = db.get_singer_suits(sid)
+            available = db_singer.get_singer_suits(sid)
             if (suit_id, name, photo) in available:
                 continue
             data.append((name, f"{call_config}:suit:{sid}:{suit_id}"))
@@ -111,14 +111,14 @@ def edit_voices(call):
     data = []
 
     if action == "Удалить":
-        voices = db.get_singer_voices(sid)
+        voices = db_singer.get_singer_voices(sid)
         for voice_id, name in voices:
             data.append((name, f"{call_config}:voice:{sid}:{voice_id}"))
 
     else:
-        voices = db.get_all_voices()
+        voices = db_singer.get_all_voices()
         for voice_id, name in voices:
-            available = db.get_singer_voices(sid)
+            available = db_singer.get_singer_voices(sid)
             if (voice_id, name) in available:
                 continue
             data.append((name, f"{call_config}:voice:{sid}:{voice_id}"))

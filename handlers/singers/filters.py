@@ -1,7 +1,7 @@
 from telebot.callback_data import CallbackDataFilter
 from telebot.custom_filters import SimpleCustomFilter, AdvancedCustomFilter
 from telebot.types import Message, CallbackQuery
-from db import singer_exists
+from database_control.db_singer import singer_exists
 
 
 class NewSingerFilter(SimpleCustomFilter):
@@ -20,3 +20,20 @@ class SingerConfigFilter(AdvancedCustomFilter):
 
     def check(self, call: CallbackQuery, singer: CallbackDataFilter):
         return singer.check(query=call)
+
+
+class CalendarCallbackFilter(AdvancedCustomFilter):
+    key = 'calendar_config'
+
+    def check(self, call: CallbackQuery, config: CallbackDataFilter):
+        return config.check(query=call)
+
+
+class CalendarZoomCallbackFilter(AdvancedCustomFilter):
+    key = 'calendar_zoom_config'
+
+    def check(self, call: CallbackQuery, config: CallbackDataFilter):
+        return config.check(query=call)
+
+
+

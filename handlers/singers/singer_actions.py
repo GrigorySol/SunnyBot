@@ -1,13 +1,15 @@
 from datetime import datetime
 from random import randint
 from loader import bot
-import db
+from database_control import db_singer
+from database_control.db_event import search_event_by_id, search_location_by_id
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
-from keyboards.inline.callback_datas import suit_edit_callback
+from keyboards.inline.callback_datas import suit_edit_callback, event_callback
 from keyboards.inline.choice_buttons import new_singer_markup, joke_markup
 from misc.edit_functions import display_suits, edit_suits
 from misc.bot_speech import greetings
-from misc.bot_dictionary import *
+from misc.messages.singer_dictionary import *
+from misc.messages.joke_dictionary import *
 
 
 @bot.message_handler(is_new_singer=True)
@@ -28,8 +30,8 @@ def singer_not_registered(message: Message):
 def show_voice(message: Message):
     """Display singer voices"""
 
-    singer_id = db.get_singer_id(message.from_user.id)
-    voices = db.get_singer_voices(singer_id)
+    singer_id = db_singer.get_singer_id(message.from_user.id)
+    voices = db_singer.get_singer_voices(singer_id)
     if not voices:
         bot.send_message(message.chat.id, no_voice_text)
     else:
@@ -40,8 +42,7 @@ def show_voice(message: Message):
 @bot.message_handler(commands=["suits"])
 def show_suits(message: Message):
     """Display singer suits and buttons to add or remove"""
-
-    sid = db.get_singer_id(message.from_user.id)
+    sid = db_singer.get_singer_id(message.from_user.id)
     display_suits(message, sid)
 
 
@@ -51,10 +52,26 @@ def edit_suits_buttons(call: CallbackQuery):
     edit_suits(call)
 
 
+@bot.callback_query_handler(func=None, calendar_config=event_callback.filter())
+def save_event(call: CallbackQuery):
+    """Display info about the chosen event"""
+
+    _, eid = call.data.split(":")
+    print(search_event_by_id(eid))
+    _, event_id, event_name, date, time, location_id, comment = search_event_by_id(eid)
+    print(search_location_by_id(location_id))
+    _, location_name, url = search_location_by_id(location_id)
+    location = f"{location_name}\n\n{url}"
+    bot.send_message(call.message.chat.id, location)
+    msg = f"{event_name}\n{date} {time}\n"
+    if comment:
+        msg += comment
+    bot.send_message(call.message.chat.id, msg)
+
+
 @bot.callback_query_handler(func=lambda c: c.data == 'close')
 def close_btn(call: CallbackQuery):
     """Remove a block of the buttons"""
-
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
@@ -63,12 +80,12 @@ def back_btn(message: Message):
     """Send a random joke into the chat"""
 
     bot.register_next_step_handler(message, joking)
-    bot.send_message(message.chat.id, do_you_wanna_my_joke,
+    bot.send_message(message.chat.id, do_you_wanna_my_joke_text,
                      reply_to_message_id=message.id, reply_markup=joke_markup)
 
 
 def joking(message: Message):
-    msg = randomizer(random_jokes)
+    msg = randomizer(random_jokes_text)
     bot.send_message(message.chat.id, msg, reply_markup=ReplyKeyboardRemove())
 
 
@@ -77,8 +94,17 @@ def back_btn(call: CallbackQuery):
     pass
 
 
+@bot.message_handler(content_types=["audio"])
+def handle_files(message: Message):
+    """Print and send in message audio file_id"""
+
+    audio_file_id = message.audio.file_id
+    print(audio_file_id)
+    bot.send_message(message.chat.id, audio_file_id)
+
+
 def check_commands(message: Message):
-    if (message.text[0] == "/") or (message.text[0] == "|"):
+    if (message.text[0] == "/") or message.via_bot:
         return
     return message
 
@@ -102,8 +128,8 @@ def randomizer(items):
 
 @bot.message_handler(commands=["songs"])
 def nothing_to_say(message: Message):
-    bot.send_sticker(message.chat.id,
-                     "CAACAgIAAxkBAAETnXdicIwl2s99ubWEC2ceCBR8Mk0k8QAC6hYAAgMlCEk0f7XAYR1wmiQE")
+    bot.send_audio(message.chat.id,
+                   "CQACAgIAAxkBAAIN-WJ075CgPoBkAuWjMVlTovjAYDa9AAJ6EgAC94eoS6EbqMZfgPQyJAQ")  # mp3
 
 
 @bot.message_handler(commands=["events"])

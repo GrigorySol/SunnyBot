@@ -1,5 +1,15 @@
 from telebot.callback_data import CallbackData
 
+
+calendar_data = CallbackData("event_id", "year", "month", "day", prefix="calendar_data")
+calendar_factory = CallbackData("event_id", "year", "month", prefix="calendar_factory")
+calendar_zoom = CallbackData("event_id", "year", prefix="calendar_zoom")
+
+event_callback = CallbackData("eid", prefix="event")
+repeat_callback = CallbackData("eid", prefix="repeat")
+
+location_callback = CallbackData("type", prefix="location")
+
 register_callback = CallbackData(prefix="registration")
 search_callback = CallbackData("type", prefix="search")
 singer_callback = CallbackData("s_id", prefix="singer")

@@ -1,8 +1,9 @@
 from loader import bot
-import db
+from database_control import db_singer
 from telebot.types import CallbackQuery
 from keyboards.inline.callback_datas import add_callback, remove_callback
-from misc.bot_dictionary import add_wrong, remove_wrong, suit_added, suit_removed, voice_added, voice_removed
+from misc.messages.singer_dictionary import add_wrong_text, remove_wrong_text, suit_added_text,\
+    suit_removed_text, voice_added_text, voice_removed_text
 
 
 @bot.callback_query_handler(func=None, singer_config=add_callback.filter())
@@ -11,15 +12,15 @@ def add_action(call: CallbackQuery):
     _, item, sid, item_id = call.data.split(":")
     print(f"{item}, {sid}, {item_id}, {call.data}")
 
-    msg = add_wrong
+    msg = add_wrong_text
 
     if item == "suit":
-        db.add_suit(sid, item_id)
-        msg = suit_added
+        db_singer.add_suit(sid, item_id)
+        msg = suit_added_text
 
     elif item == "voice":
-        db.add_voice(sid, item_id)
-        msg = voice_added
+        db_singer.add_voice(sid, item_id)
+        msg = voice_added_text
 
     elif item == "song":
         pass
@@ -43,15 +44,15 @@ def remove_action(call: CallbackQuery):
     _, item, sid, item_id = call.data.split(":")
     print(f"{item}, {sid}, {item_id}, {call.data}")
 
-    msg = remove_wrong
+    msg = remove_wrong_text
 
     if item == "suit":
-        db.delete_suit(sid, item_id)
-        msg = suit_removed
+        db_singer.delete_suit(sid, item_id)
+        msg = suit_removed_text
 
     elif item == "voice":
-        db.delete_voice(sid, item_id)
-        msg = voice_removed
+        db_singer.delete_voice(sid, item_id)
+        msg = voice_removed_text
 
     elif item == "song":
         pass

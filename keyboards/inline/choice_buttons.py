@@ -19,18 +19,29 @@ new_singer_markup.add(add_singer)
 new_singer_markup.add(close_btn)
 
 # Singer search choice buttons
-search_choice = InlineKeyboardMarkup(row_width=2)
+search_choice_markup = InlineKeyboardMarkup(row_width=2)
 search_by_name = InlineKeyboardButton("По имени", switch_inline_query_current_chat="а")
 search_by_voice = InlineKeyboardButton("По голосу", callback_data="search:voice")
 show_all_btn = InlineKeyboardButton("Посмотреть всех", callback_data="show_all")
-search_choice.add(search_by_name, search_by_voice, show_all_btn)
-search_choice.add(close_btn)
+search_choice_markup.add(search_by_voice, show_all_btn)
+search_choice_markup.add(close_btn)
 
 # Reply with joke
 joke_markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 yes_btn = KeyboardButton("Да!")
 of_course_btn = KeyboardButton("Конечно!")
 joke_markup.add(yes_btn, of_course_btn)
+
+# Chose old or new location buttons
+chose_location_markup = InlineKeyboardMarkup(row_width=2)
+chose_old = InlineKeyboardButton("Выбрать", callback_data="location:db")
+get_url = InlineKeyboardButton("Добавить", callback_data="location:url")
+chose_location_markup.add(chose_old, get_url)
+
+# Repeat or not buttons
+repeat_markup = InlineKeyboardMarkup(row_width=2)
+repeat_button = InlineKeyboardButton("Повторить", callback_data="repeat")
+repeat_markup.add(close_btn, repeat_button)
 
 
 def query_button(text, call_data):

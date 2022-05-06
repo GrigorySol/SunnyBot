@@ -10,4 +10,4 @@ bot = TeleBot(BOT_TOKEN)
 
 bot.add_custom_filter(filters.SingerConfigFilter())
 bot.add_custom_filter(filters.NewSingerFilter())
-
+bot.add_custom_filter(filters.CalendarCallbackFilter())
