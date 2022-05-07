@@ -5,7 +5,7 @@ from database_control import db_singer
 from database_control.db_event import search_event_by_id, search_location_by_id
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.inline.callback_datas import suit_edit_callback, event_callback
-from keyboards.inline.choice_buttons import new_singer_markup, joke_markup
+from keyboards.inline.choice_buttons import new_singer_markup, joke_markup, change_buttons
 from misc.edit_functions import display_suits, edit_suits
 from misc.bot_speech import greetings
 from misc.messages.singer_dictionary import *
@@ -87,6 +87,14 @@ def show_event(call: CallbackQuery):
     if comment:
         msg += comment
     bot.send_message(call.message.chat.id, msg)
+
+    # Admin can change the record about the event
+    singer_id = call.from_user.id
+    name = "event"
+
+    if db_singer.is_admin(singer_id):
+        print(f"in show_event new buttons")
+        bot.send_message(singer_id, edit_text, reply_markup=change_buttons(name, eid))
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')

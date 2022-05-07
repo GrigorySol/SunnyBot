@@ -13,7 +13,7 @@ def display_singer_info(call: CallbackQuery):
     """Display info buttons"""
     sid = int(call.data.split(":")[1])
     singername = db_singer.get_singer_telegram_name(sid)
-    print(call.data)
+    print(f"display_singer_info {call.data}")
     reply_markup = singer_info_buttons(singername, sid, info_button_names_text)
     if call.message:
         bot.edit_message_reply_markup(call.from_user.id, call.message.id, reply_markup=None)
@@ -26,7 +26,7 @@ def singer_menu(call: CallbackQuery):
 
     _, name, sid = call.data.split(":")
     sid = int(sid)
-    print(call.data)
+    print(f"singer_menu {call.data}")
 
     if name == info_button_names_text[0]:            # Голос
         display_voices(call.message, sid)
@@ -47,7 +47,7 @@ def singer_menu(call: CallbackQuery):
         bot.send_message(call.from_user.id, msg)
 
     else:
-        print(call.data)
+        print(f"singer_menu again {call.data}")
 
 
 @bot.callback_query_handler(func=None, singer_config=edit_voice_callback.filter())

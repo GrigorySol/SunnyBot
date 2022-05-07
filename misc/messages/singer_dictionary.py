@@ -10,7 +10,7 @@ cancel_btn_text = "Очечень жаль."
 back_btn_text = "Возвращаемся в главное меню."
 nothing_to_say_text = "Список команд можно посмотреть в меню в левом нижнем углу чата."
 do_you_wanna_my_joke_text = "Рассказать анекдот?"
-too_many_suits = "У вас есть все костюмы."
+too_many_suits = "В хоре больше нет костюмов."
 too_many_voices = "Куда уж больше голосов???"
 
 # singer_registration

@@ -27,13 +27,13 @@ def get_singer_id(singer_id: int):
         return cursor.fetchone()[0]
 
 
-def is_admin(_id: int):
+def is_admin(singer_id: int):
     """Check if the singer is admin of the bot."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         cursor.execute("SELECT * FROM admins JOIN singers ON singers.id = admins.singer_id "
-                       "WHERE singers.singer_id = ?", (_id,))
+                       "WHERE singers.singer_id = ?", (singer_id,))
     return bool(cursor.fetchone())
 
 

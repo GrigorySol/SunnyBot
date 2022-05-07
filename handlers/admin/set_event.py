@@ -17,6 +17,7 @@ class EventData:
         self.datetime = None
         self.is_in_progress = False
         self.eid = None
+        self.period = None
 
 
 class LocationData:
@@ -46,9 +47,8 @@ def calendar_command_handler(message: Message):
     data = []
     for i, event in enumerate(events_to_add_text_tuple):
         if not i:
-            break
+            continue
         data.append((event, f"{call_config}:{i}"))
-    print(data)
     bot.send_message(message.chat.id, song_or_event_text, reply_markup=callback_buttons(data))
 
 
@@ -167,12 +167,14 @@ def save_new_location_and_event(message: Message):
 @bot.callback_query_handler(func=None, calendar_config=repeat_callback.filter())
 def show_repeat_period_buttons(call: CallbackQuery):
     """Show buttons to chose repeat period"""
+
     print(f"show_repeat_event_buttons {call.data}")
     _, eid = call.data.split(":")
-    call_data = "period"
+    call_config = "period"
     data = []
     for i, period in enumerate(event_repeat_text_tuple):
-        data.append((period, f"{call_data}:{eid}:{i}"))
+        data.append((period, f"{call_config}:{eid}:{i}"))
+
     bot.send_message(call.message.chat.id, chose_location_text, reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
@@ -180,10 +182,23 @@ def show_repeat_period_buttons(call: CallbackQuery):
 @bot.callback_query_handler(func=None, calendar_config=period_callback.filter())
 def number_of_repeats(call: CallbackQuery):
     """Ask to enter the number """
+
     print(f"number_of_repeats {call.data}")
     _, eid, period = call.data.split(":")
-    # TODO: Create routing to apply № of repeats of event every 'period'
+    # Save data to use in the next function set_event_repeating
+    event_data.eid = eid
+    event_data.period = period
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+    msg_data = bot.send_message(call.message.chat.id, event_repeat_times_text)
+    bot.register_next_step_handler(msg_data, set_event_repeating)
+
+
+def set_event_repeating(message: Message):
+    """Repeat event № times with defined period"""
+
+    # TODO: Create routing to apply № of repeats of event every 'period'
+    print(message.text)     # repeating times
+    print(f"Use THIS {event_data.eid}, {event_data.period}")
 
 
 @bot.callback_query_handler(func=None, calendar_config=location_callback.filter(type="db"))

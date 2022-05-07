@@ -46,6 +46,13 @@ def repeat_buttons(eid):
     return repeat_markup
 
 
+def change_buttons(name, _id):
+    change_markup = InlineKeyboardMarkup(row_width=2)
+    change_button = InlineKeyboardButton("Изменить", callback_data=f"change:{name}:{_id}")
+    change_markup.add(close_btn, change_button)
+    return change_markup
+
+
 def query_button(text, call_data):
     query_markup = InlineKeyboardMarkup()
     query_btn = InlineKeyboardButton(text, callback_data=call_data)

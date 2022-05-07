@@ -8,9 +8,11 @@ calendar_zoom = CallbackData("event_id", "year", prefix="calendar_zoom")
 
 event_callback = CallbackData("eid", prefix="event")
 repeat_callback = CallbackData("eid", prefix="repeat")
-period_callback = CallbackData("eid", prefix="period")
+period_callback = CallbackData("eid", "repeat_id", prefix="period")
 
 add_new_callback = CallbackData("type", prefix="add_new")
+change_callback = CallbackData("type", "id", prefix="change")
+selected_callback = CallbackData("type", "id", "selected_id", prefix="selected")
 
 location_callback = CallbackData("type", prefix="location")
 

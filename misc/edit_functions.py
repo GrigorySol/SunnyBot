@@ -7,6 +7,7 @@ from misc.messages.singer_dictionary import edit_buttons_text, edit_text,\
 
 def display_suits(message, sid):
     suits = db_singer.get_singer_suits(sid)
+    singer_name = db_singer.get_singer_fullname(sid)
     call_config = "suit"
     data = []
 
@@ -18,6 +19,8 @@ def display_suits(message, sid):
         msg = f"{no_suit_text} {edit_text}"
 
     elif len(db_singer.get_all_suits()) == len(suits):
+        print(db_singer.get_all_suits())
+        print(suits)
         data.pop(0)
         suit_names = []
 
@@ -26,7 +29,11 @@ def display_suits(message, sid):
             bot.send_photo(message.chat.id, photo, caption=name)
             bot.send_message(message.chat.id, "_____________________________")
 
-        msg = f"Костюмы: {', '.join(suit_names)}.\n{too_many_suits}\n{edit_text}"
+        if db_singer.is_admin(message.from_user.id):
+            msg = f"{singer_name} может взять на концерт "
+        else:
+            msg = f"Ваши костюмы: "
+        msg += f"{', '.join(suit_names)}.\n{too_many_suits}\n{edit_text}"
 
     else:
         suit_names = []
@@ -35,13 +42,19 @@ def display_suits(message, sid):
             bot.send_photo(message.chat.id, photo, caption=name)
             bot.send_message(message.chat.id, "_____________________________")
 
-        msg = f"Костюмы: {', '.join(suit_names)}.\n{edit_text}"
+        if db_singer.is_admin(message.from_user.id):
+            msg = f"{singer_name} может взять на концерт "
+        else:
+            msg = f"Ваши костюмы: "
+        msg += f"{', '.join(suit_names)}.\n{edit_text}"
+
     print(f"display_suits {data}")
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
 
 
 def display_voices(message, sid):
     voices = db_singer.get_singer_voices(sid)
+    singer_name = db_singer.get_singer_fullname(sid)
     call_config = "voice"
     data = []
 
@@ -52,18 +65,19 @@ def display_voices(message, sid):
         data.pop()
         msg = f"{no_voice_text} {edit_text}"
 
-    elif len(db_singer.get_all_suits()) == len(voices):
+    elif len(db_singer.get_all_voices()) == len(voices):
         data.pop(0)
         voice_names = []
         for _, name in voices:
             voice_names.append(name)
-        msg = f"Голос: {', '.join(voice_names)}.\n{too_many_voices}\n{edit_text}"
+        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{too_many_voices}\n{edit_text}"
 
     else:
         voice_names = []
         for _, name in voices:
             voice_names.append(name)
-        msg = f"Голос: {', '.join(voice_names)}.\n{edit_text}"
+        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{edit_text}"
+
     print(f"display_voices {data}")
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
 
