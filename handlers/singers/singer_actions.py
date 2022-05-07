@@ -52,18 +52,38 @@ def edit_suits_buttons(call: CallbackQuery):
     edit_suits(call)
 
 
+@bot.message_handler(commands=["events"])
+def nothing_to_say(message: Message):
+    bot.send_sticker(message.chat.id,
+                     "CAACAgIAAxkBAAETnXxicIxNf0TYCRSrmzD9SD-iTjSr1QAClBQAAsBCeEsVRtvoCLXI0iQE")
+
+
+@bot.message_handler(commands=["rehearsal"])
+def nothing_to_say(message: Message):
+    bot.send_sticker(message.chat.id,
+                     "CAACAgIAAxkBAAETnX5icIyDshGmTfhQFatW5TJnbJkjkQACtBoAApsZwUq8_BZS0faNxyQE")
+
+
+@bot.message_handler(commands=["concerts"])
+def nothing_to_say(message: Message):
+    bot.send_audio(message.chat.id,
+                   "CQACAgIAAxkBAAETnYJicIzUt04joDIy7_uLOkUpHENW3wACKBoAAhFE4UpblvEevwxe_yQE")
+
+
 @bot.callback_query_handler(func=None, calendar_config=event_callback.filter())
-def save_event(call: CallbackQuery):
+def show_event(call: CallbackQuery):
     """Display info about the chosen event"""
 
     _, eid = call.data.split(":")
-    print(search_event_by_id(eid))
-    _, event_id, event_name, date, time, location_id, comment = search_event_by_id(eid)
-    print(search_location_by_id(location_id))
+    _, event_id, event_name, date_time, location_id, comment = search_event_by_id(eid)
+    print(location_id)
     _, location_name, url = search_location_by_id(location_id)
+
     location = f"{location_name}\n\n{url}"
     bot.send_message(call.message.chat.id, location)
-    msg = f"{event_name}\n{date} {time}\n"
+    date, time = date_time.split(" ")
+
+    msg = f"{event_name}\n{date} в {time[0:5]}\n"
     if comment:
         msg += comment
     bot.send_message(call.message.chat.id, msg)
@@ -130,24 +150,6 @@ def randomizer(items):
 def nothing_to_say(message: Message):
     bot.send_audio(message.chat.id,
                    "CQACAgIAAxkBAAIN-WJ075CgPoBkAuWjMVlTovjAYDa9AAJ6EgAC94eoS6EbqMZfgPQyJAQ")  # mp3
-
-
-@bot.message_handler(commands=["events"])
-def nothing_to_say(message: Message):
-    bot.send_sticker(message.chat.id,
-                     "CAACAgIAAxkBAAETnXxicIxNf0TYCRSrmzD9SD-iTjSr1QAClBQAAsBCeEsVRtvoCLXI0iQE")
-
-
-@bot.message_handler(commands=["rehearsal"])
-def nothing_to_say(message: Message):
-    bot.send_sticker(message.chat.id,
-                     "CAACAgIAAxkBAAETnX5icIyDshGmTfhQFatW5TJnbJkjkQACtBoAApsZwUq8_BZS0faNxyQE")
-
-
-@bot.message_handler(commands=["concerts"])
-def nothing_to_say(message: Message):
-    bot.send_audio(message.chat.id,
-                   "CQACAgIAAxkBAAETnYJicIzUt04joDIy7_uLOkUpHENW3wACKBoAAhFE4UpblvEevwxe_yQE")
 
 
 """

@@ -10,6 +10,15 @@ def get_all_events():
         return cursor.fetchall()
 
 
+def get_all_events_datetime():
+    """Return datetime of the all events from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT datetime FROM events")
+        return cursor.fetchall()
+
+
 def search_event_by_id(_id):
     """Return id, event_id, event_name, datetime, location_id, comment from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -28,13 +37,13 @@ def search_events_by_event_id(event_id):
         return cursor.fetchall()
 
 
-def search_event_by_datetime(datetime):
+def search_event_by_date(date):
     """Return (id, event_id, event_name, datetime, location_id, comment) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events WHERE datetime = ?", (datetime,))
-        return cursor.fetchone()
+        cursor.execute("SELECT * FROM events WHERE datetime LIKE ?", (date,))
+        return cursor.fetchall()
 
 
 def get_all_locations():
@@ -52,7 +61,7 @@ def search_location_by_id(_id):
         cursor = db.cursor()
 
         cursor.execute("SELECT * FROM locations WHERE id = ?", (_id,))
-        return bool(cursor.fetchone())
+        return cursor.fetchone()
 
 
 def location_url_exists(url):

@@ -38,10 +38,12 @@ chose_old = InlineKeyboardButton("Выбрать", callback_data="location:db")
 get_url = InlineKeyboardButton("Добавить", callback_data="location:url")
 chose_location_markup.add(chose_old, get_url)
 
-# Repeat or not buttons
-repeat_markup = InlineKeyboardMarkup(row_width=2)
-repeat_button = InlineKeyboardButton("Повторить", callback_data="repeat")
-repeat_markup.add(close_btn, repeat_button)
+
+def repeat_buttons(eid):
+    repeat_markup = InlineKeyboardMarkup(row_width=2)
+    repeat_button = InlineKeyboardButton("Повторить", callback_data=f"repeat:{eid}")
+    repeat_markup.add(close_btn, repeat_button)
+    return repeat_markup
 
 
 def query_button(text, call_data):

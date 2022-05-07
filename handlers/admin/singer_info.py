@@ -1,6 +1,6 @@
 from loader import bot
 from telebot.types import CallbackQuery
-from keyboards.inline.callback_datas import singer_callback, info_callback, voice_edit_callback
+from keyboards.inline.callback_datas import show_singer_callback, info_callback, edit_voice_callback
 from keyboards.inline.choice_buttons import singer_info_buttons
 from misc.messages.singer_dictionary import what_to_do_text, info_button_names_text
 from misc.edit_functions import display_suits, display_voices
@@ -8,7 +8,7 @@ from misc.edit_functions import edit_voices
 from database_control import db_singer
 
 
-@bot.callback_query_handler(func=None, singer_config=singer_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=show_singer_callback.filter())
 def display_singer_info(call: CallbackQuery):
     """Display info buttons"""
     sid = int(call.data.split(":")[1])
@@ -50,7 +50,7 @@ def singer_menu(call: CallbackQuery):
         print(call.data)
 
 
-@bot.callback_query_handler(func=None, singer_config=voice_edit_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=edit_voice_callback.filter())
 def edit_voice_buttons(call: CallbackQuery):
     """Display buttons to add or remove voice"""
     edit_voices(call)

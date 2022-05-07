@@ -5,6 +5,7 @@ Fork from the pyTelegramBotAPI github example repo
 import calendar
 from datetime import date, timedelta
 
+from database_control.db_event import get_all_events_datetime
 from keyboards.inline.callback_datas import calendar_factory, calendar_zoom
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from misc.messages.event_dictionary import next_button_text, prev_button_text, zoom_out_text
@@ -24,6 +25,14 @@ def generate_calendar_days(year: int, month: int, event_id=0):
     """
 
     keyboard = InlineKeyboardMarkup(row_width=7)
+
+    event_datetime = get_all_events_datetime()
+    event_days = []
+    for day_time in event_datetime:
+        day = day_time[0].split(" ")[0]
+        if day not in event_days:
+            event_days.append(day)
+
     today = date.today()
     text_month = ""
 
@@ -53,8 +62,11 @@ def generate_calendar_days(year: int, month: int, event_id=0):
         week_buttons = []
         for day in week:
             day_name = ' '
-            if day == today.day and today.year == year and today.month == month:
+            current_day = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
+            if current_day == str(today):
                 day_name = '☀️'
+            elif current_day in event_days:
+                day_name = '🎸'
             elif day != 0:
                 day_name = str(day)
             week_buttons.append(

@@ -36,6 +36,7 @@ def display_suits(message, sid):
             bot.send_message(message.chat.id, "_____________________________")
 
         msg = f"Костюмы: {', '.join(suit_names)}.\n{edit_text}"
+    print(f"display_suits {data}")
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
 
 
@@ -63,7 +64,7 @@ def display_voices(message, sid):
         for _, name in voices:
             voice_names.append(name)
         msg = f"Голос: {', '.join(voice_names)}.\n{edit_text}"
-    print(data)
+    print(f"display_voices {data}")
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
 
 
@@ -71,15 +72,16 @@ def action_definition(action: str):
     """Define what choice made by singer"""
 
     if action == "Удалить":
-        call_config = "remove"
+        call_config = "singer_remove"
         msg = "Что удалить?"
     else:  # "Добавить"
-        call_config = "add"
+        call_config = "singer_add"
         msg = "Что добавить?"
     return call_config, msg
 
 
 def edit_suits(call):
+    print(f"edit_suits {call.data}")
     _, action, sid = call.data.split(":")
     call_config, msg = action_definition(action)
     data = []
@@ -105,7 +107,7 @@ def edit_suits(call):
 
 
 def edit_voices(call):
-    print(call.data)
+    print(f"edit_voice {call.data}")
     _, action, sid = call.data.split(":")
     call_config, msg = action_definition(action)
     data = []
