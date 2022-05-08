@@ -39,20 +39,6 @@ def calendar_command_handler(message: Message):
                      reply_markup=generate_calendar_days(now.year, now.month, int(event_id)))
 
 
-@bot.message_handler(commands=['add'])
-def calendar_command_handler(message: Message):
-    """Show buttons to chose song or events"""
-
-    print(f"calendar_command_handler")
-    call_config = "add_new"
-    data = []
-    for i, event in enumerate(events_to_add_text_tuple):
-        if not i:
-            continue
-        data.append((event, f"{call_config}:{i}"))
-    bot.send_message(message.chat.id, song_or_event_text, reply_markup=callback_buttons(data))
-
-
 @bot.callback_query_handler(func=None, calendar_config=calendar_data.filter())
 def calendar_datetime_handler(call: CallbackQuery):
     """Show events if the event_id is 0 or continue to add an event"""

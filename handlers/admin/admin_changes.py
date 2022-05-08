@@ -5,7 +5,6 @@ from keyboards.inline.callback_datas import change_callback, selected_callback
 from misc.messages.event_dictionary import select_option_to_change
 from misc.messages.changes_dictionary import *
 from misc.messages.singer_dictionary import NOTHING
-from database_control import db_singer
 
 
 @bot.callback_query_handler(func=None, calendar_config=change_callback.filter())

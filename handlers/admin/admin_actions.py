@@ -1,12 +1,14 @@
 from loader import bot
 from datetime import date
 from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
-from keyboards.inline.choice_buttons import callback_buttons, search_choice_markup, query_button
+from keyboards.inline.choice_buttons import callback_buttons, search_choice_markup, query_button, change_buttons
 from keyboards.inline.calendar_buttons import generate_calendar_days
 from keyboards.inline.callback_datas import add_new_callback
+from misc.messages.changes_dictionary import song_options_to_edit_text_tuple
 from misc.messages.singer_dictionary import show_singers_text, you_shell_not_pass_text, show_all_singers_text, NOTHING
-from misc.messages.event_dictionary import set_event_date_text
-from database_control import db_singer
+from misc.messages.event_dictionary import set_event_date_text, events_to_add_text_tuple, song_or_event_text
+from misc.messages.song_dictionary import enter_the_song_name_text, now_add_or_edit_text
+from database_control import db_singer, db_songs
 
 
 @bot.message_handler(commands=["singers"])
@@ -21,11 +23,18 @@ def show_singers_search(message: Message):
         bot.send_message(message.chat.id, you_shell_not_pass_text)
 
 
-"""
-@bot.message_handler(commands=["add"])
-def add_command(message: Message):
-    bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAETnWpicItgGPH0dCO0X4bH2qcWNQIHUgAC6hYAAq5s6EltZQABkuvO0TUkBA")
-"""
+@bot.message_handler(commands=['add'])
+def calendar_command_handler(message: Message):
+    """Show buttons to chose song or events"""
+
+    print(f"calendar_command_handler")
+    call_config = "add_new"
+    data = []
+    for i, event in enumerate(events_to_add_text_tuple):
+        if not i:
+            continue
+        data.append((event, f"{call_config}:{i}"))
+    bot.send_message(message.chat.id, song_or_event_text, reply_markup=callback_buttons(data))
 
 
 @bot.callback_query_handler(func=lambda c: c.data == "show_all")
@@ -66,14 +75,28 @@ def location_query(query: InlineQuery):
 @bot.callback_query_handler(func=None, calendar_config=add_new_callback.filter())
 def song_or_event(call: CallbackQuery):
     """Get id from data and call a song or an event creation"""
+
     print(f"song_or_event {call.data}")
     _, _id = call.data.split(":")
     if _id == "4":
-        print(f"ADD NEW SONG routing")
-        # TODO: Create logic
-        bot.send_message(call.message.chat.id, NOTHING)
+        msg = bot.send_message(call.message.chat.id, enter_the_song_name_text)
+        bot.register_next_step_handler(msg, add_song_name)
     else:
         """Show calendar buttons"""
         now = date.today()
         bot.send_message(call.message.chat.id, set_event_date_text,
                          reply_markup=generate_calendar_days(now.year, now.month, int(_id)))
+
+
+def add_song_name(message: Message):
+    """"""
+
+    song_id = db_songs.add_song(message.text)
+    options = song_options_to_edit_text_tuple
+    call_config = "edit_song"
+    data = []
+
+    for i, option in enumerate(options):
+        data.append((option, f"{call_config}:{song_id}:{i}"))
+
+    bot.send_message(message.chat.id, now_add_or_edit_text, reply_markup=callback_buttons(data))

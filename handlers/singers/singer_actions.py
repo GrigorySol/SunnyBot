@@ -1,7 +1,7 @@
 from datetime import datetime
 from random import randint
 from loader import bot
-from database_control import db_singer
+from database_control import db_singer, db_songs
 from database_control.db_event import search_event_by_id, search_location_by_id
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.inline.callback_datas import suit_edit_callback, event_callback
@@ -50,6 +50,20 @@ def show_suits(message: Message):
 def edit_suits_buttons(call: CallbackQuery):
     """Display buttons to add or remove suit"""
     edit_suits(call)
+
+
+@bot.message_handler(commands=["songs"])
+def nothing_to_say(message: Message):
+    bot.send_audio(message.chat.id,
+                   "CQACAgIAAxkBAAIN-WJ075CgPoBkAuWjMVlTovjAYDa9AAJ6EgAC94eoS6EbqMZfgPQyJAQ")  # mp3
+    song_id = db_songs.get_all_songs()[0][0]
+
+    # Admin can change the record about the event
+    singer_id = message.from_user.id
+    name = "songs"
+
+    if db_singer.is_admin(singer_id):
+        bot.send_message(singer_id, edit_text, reply_markup=change_buttons(name, song_id))
 
 
 @bot.message_handler(commands=["events"])
@@ -150,12 +164,6 @@ def randomizer(items):
     """Takes items and returns a random item"""
     i = randint(0, len(items) - 1)
     return items[i]
-
-
-@bot.message_handler(commands=["songs"])
-def nothing_to_say(message: Message):
-    bot.send_audio(message.chat.id,
-                   "CQACAgIAAxkBAAIN-WJ075CgPoBkAuWjMVlTovjAYDa9AAJ6EgAC94eoS6EbqMZfgPQyJAQ")  # mp3
 
 
 """
