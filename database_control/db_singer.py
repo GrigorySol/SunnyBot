@@ -72,7 +72,7 @@ def get_singer_voices(_id: int):
 
         cursor.execute("SELECT id, voice FROM voices "
                        "INNER JOIN singer_voice ON singer_voice.voice_id = voices.id "
-                       "WHERE singer_voice.singer_id = ?", (_id,))
+                       "WHERE singer_voice.singer_id = ? ORDER BY singer_voice.voice_id", (_id,))
         return cursor.fetchall()
 
 
@@ -111,7 +111,7 @@ def get_all_singers():
         cursor = db.cursor()
 
         cursor.execute("SELECT first_name || ' ' || last_name AS fullname, id "
-                       "FROM singers")
+                       "FROM singers ORDER BY first_name")
         return cursor.fetchall()
 
 
@@ -142,7 +142,7 @@ def search_singer_voice(singer_id: int):
         cursor.execute("SELECT GROUP_CONCAT(voices.voice, ', ') FROM singers "
                        "JOIN singer_voice ON singer_voice.singer_id = singers.id "
                        "JOIN voices ON voices.id = singer_voice.voice_id "
-                       "WHERE singers.singer_id = ?", (singer_id,))
+                       "WHERE singers.singer_id = ? ORDER BY singer_voice.voice_id", (singer_id,))
         return cursor.fetchall()
 
 

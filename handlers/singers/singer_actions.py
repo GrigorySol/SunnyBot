@@ -76,7 +76,6 @@ def show_event(call: CallbackQuery):
 
     _, eid = call.data.split(":")
     _, event_id, event_name, date_time, location_id, comment = search_event_by_id(eid)
-    print(location_id)
     _, location_name, url = search_location_by_id(location_id)
 
     location = f"{location_name}\n\n{url}"
@@ -93,7 +92,6 @@ def show_event(call: CallbackQuery):
     name = "event"
 
     if db_singer.is_admin(singer_id):
-        print(f"in show_event new buttons")
         bot.send_message(singer_id, edit_text, reply_markup=change_buttons(name, eid))
 
 

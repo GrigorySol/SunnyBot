@@ -6,17 +6,44 @@ def get_all_events():
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events")
+        cursor.execute("SELECT * FROM events ORDER BY datetime")
         return cursor.fetchall()
 
 
-def get_all_events_datetime():
-    """Return datetime of the all events from the database."""
+def get_event_name(_id):
+    """Return event_name from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT datetime FROM events")
-        return cursor.fetchall()
+        cursor.execute("SELECT event_name FROM events WHERE id = ?", (_id,))
+        return cursor.fetchone()[0]
+
+
+def get_event_datetime(_id):
+    """Return datetime from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT datetime FROM events WHERE id = ?", (_id,))
+        return cursor.fetchone()[0]
+
+
+def get_event_location_id(_id):
+    """Return location_id from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT location_id FROM events WHERE id = ?", (_id,))
+        return cursor.fetchone()[0]
+
+
+def get_event_comment(_id):
+    """Return event_name from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT comment FROM events WHERE id = ?", (_id,))
+        return cursor.fetchone()[0]
 
 
 def search_event_by_id(_id):
@@ -42,7 +69,7 @@ def search_event_by_date(date):
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events WHERE datetime LIKE ?", (date,))
+        cursor.execute("SELECT * FROM events WHERE datetime LIKE ? ORDER BY datetime", (date,))
         return cursor.fetchall()
 
 

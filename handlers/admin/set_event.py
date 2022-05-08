@@ -6,6 +6,7 @@ from keyboards.inline.callback_datas import calendar_zoom, calendar_factory, \
     calendar_data, location_callback, repeat_callback, period_callback
 from keyboards.inline.calendar_buttons import generate_calendar_days, generate_calendar_months, EMTPY_FIELD
 from keyboards.inline.choice_buttons import chose_location_markup, callback_buttons, repeat_buttons
+from misc.messages.singer_dictionary import NOTHING
 from misc.messages.event_dictionary import *
 
 
@@ -59,7 +60,6 @@ def calendar_datetime_handler(call: CallbackQuery):
     _, event_id, year, month, day = call.data.split(":")
     if event_id == "0":
         # Show all events for this day
-        print(f"date -> received_date changed here - calendar_datetime_handler")
         received_date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}%"
         events = db_event.search_event_by_date(received_date)
         call_config = "event"
@@ -69,7 +69,8 @@ def calendar_datetime_handler(call: CallbackQuery):
             bot.send_message(call.message.chat.id, no_event_text)
             return
         for event in events:
-            data.append((event[2], f"{call_config}:{event[0]}"))
+            event_time = event[3].split(" ")[1][0:5]
+            data.append((f"{event[2]} {event_time}", f"{call_config}:{event[0]}"))
 
         text = f"{current_events_text} {day} {chosen_months_text_tuple[int(month) - 1]} {year} года:"
         bot.send_message(call.message.chat.id, text, reply_markup=callback_buttons(data))
@@ -78,6 +79,7 @@ def calendar_datetime_handler(call: CallbackQuery):
         # Continue to add an event
         event_data.is_in_progress = True
         event_data.event_id = int(event_id)
+        event_data.event_name = events_to_add_text_tuple[event_data.event_id]
         event_data.date = (int(year), int(month), int(day))
         msg = f"Вы выбрали {events_to_add_text_tuple[event_data.event_id]} на {day} " \
               f"{chosen_months_text_tuple[int(month) - 1]} {year} года.\n{set_event_time_text}"
@@ -98,6 +100,12 @@ def add_time_for_event(message: Message):
             hours, minutes = time.split(" ")
         event_data.datetime = datetime(event_data.date[0], event_data.date[1], event_data.date[2],
                                        int(hours), int(minutes))
+
+        if db_event.search_event_by_date(event_data.datetime):
+            print("Time exists")
+            msg_data = bot.send_message(message.chat.id, event_time_exists_text)
+            bot.register_next_step_handler(msg_data, add_time_for_event)
+            return
 
         if event_data.event_id == 1:
             msg_data = bot.send_message(message.chat.id,
@@ -135,7 +143,7 @@ def save_location_url(message: Message):
     for url in text:
         if "http" in url:
             if db_event.location_url_exists(url):
-                bot.send_message(message.chat.id, location_url_exists)
+                bot.send_message(message.chat.id, location_url_exists, reply_markup=chose_location_markup)
             else:
                 location_data.url = url
                 msg_data = bot.send_message(message.chat.id, enter_location_name_text)
@@ -156,10 +164,10 @@ def save_new_location_and_event(message: Message):
         location_id = db_event.add_location(message.text, location_data.url)
         event_data.eid = db_event.add_event(event_data.event_id, event_data.event_name,
                                             event_data.datetime, location_id)
-
-        bot.send_message(message.chat.id, new_location_text)
-
-        bot.send_message(message.chat.id, new_event_text, reply_markup=repeat_buttons(event_data.eid))
+        bot.send_message(message.chat.id, f"{new_location_text}{location_data.location_name}")
+        msg = f"{new_event_text}{event_data.event_name}\n{want_repeat_text}"
+        print(f"save_new_location_and_event {event_data.event_id}, {event_data.event_name}, {event_data.datetime}")
+        bot.send_message(message.chat.id, msg, reply_markup=repeat_buttons(event_data.eid))
         bot.edit_message_reply_markup(message.chat.id, message.id, reply_markup=None)
         event_data.is_in_progress = False
 
@@ -175,13 +183,13 @@ def show_repeat_period_buttons(call: CallbackQuery):
     for i, period in enumerate(event_repeat_text_tuple):
         data.append((period, f"{call_config}:{eid}:{i}"))
 
-    bot.send_message(call.message.chat.id, chose_location_text, reply_markup=callback_buttons(data))
+    bot.send_message(call.message.chat.id, chose_period_text, reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
 @bot.callback_query_handler(func=None, calendar_config=period_callback.filter())
 def number_of_repeats(call: CallbackQuery):
-    """Ask to enter the number """
+    """Ask to enter the number"""
 
     print(f"number_of_repeats {call.data}")
     _, eid, period = call.data.split(":")
@@ -189,7 +197,7 @@ def number_of_repeats(call: CallbackQuery):
     event_data.eid = eid
     event_data.period = period
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
-    msg_data = bot.send_message(call.message.chat.id, event_repeat_times_text)
+    msg_data = bot.send_message(call.message.chat.id, set_repeat_times_text)
     bot.register_next_step_handler(msg_data, set_event_repeating)
 
 
@@ -199,6 +207,7 @@ def set_event_repeating(message: Message):
     # TODO: Create routing to apply № of repeats of event every 'period'
     print(message.text)     # repeating times
     print(f"Use THIS {event_data.eid}, {event_data.period}")
+    bot.send_message(message.chat.id, NOTHING)
 
 
 @bot.callback_query_handler(func=None, calendar_config=location_callback.filter(type="db"))
@@ -211,18 +220,18 @@ def chose_location(call: CallbackQuery):
     for location_id, location_name, url in locations:
         data.append((location_name, f"{call_data}:{location_id}"))
     bot.send_message(call.message.chat.id, chose_location_text, reply_markup=callback_buttons(data))
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
 @bot.callback_query_handler(func=None, calendar_config=location_callback.filter())
 def save_event(call: CallbackQuery):
-    """Get Location from the button and call save_event"""
+    """Get location from the callback data and save the event"""
 
     _, location_id = call.data.split(":")
     event_data.eid = db_event.add_event(event_data.event_id, event_data.event_name,
                                         event_data.datetime, location_id)
 
-    bot.send_message(call.message.chat.id, new_event_text, reply_markup=repeat_buttons(event_data.eid))
+    msg = f"{new_event_text}{event_data.event_name}\n{want_repeat_text}"
+    bot.send_message(call.message.chat.id, msg, reply_markup=repeat_buttons(event_data.eid))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
     event_data.is_in_progress = False
 

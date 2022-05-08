@@ -4,6 +4,7 @@ from keyboards.inline.choice_buttons import callback_buttons
 from keyboards.inline.callback_datas import change_callback, selected_callback
 from misc.messages.event_dictionary import select_option_to_change
 from misc.messages.changes_dictionary import *
+from misc.messages.singer_dictionary import NOTHING
 from database_control import db_singer
 
 
@@ -46,5 +47,4 @@ def change_selected_option(call: CallbackQuery):
     else:
         if option_id == "5":
             bot.send_message(call.message.chat.id, bot_cant_change_maning)
-        options = song_options_to_edit_text_tuple
-
+    bot.send_message(call.message.chat.id, NOTHING)

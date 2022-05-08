@@ -37,6 +37,7 @@ chose_location_markup = InlineKeyboardMarkup(row_width=2)
 chose_old = InlineKeyboardButton("Выбрать", callback_data="location:db")
 get_url = InlineKeyboardButton("Добавить", callback_data="location:url")
 chose_location_markup.add(chose_old, get_url)
+chose_location_markup.add(close_btn)
 
 
 def repeat_buttons(eid):
