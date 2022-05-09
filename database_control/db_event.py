@@ -56,11 +56,13 @@ def search_event_by_id(_id):
 
 
 def search_events_by_event_id(event_id):
-    """Return (id, event_id, event_name, datetime, location_id, comment) from the database."""
+    """Return (id, location_name, datetime) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events WHERE event_id = ?", (event_id,))
+        cursor.execute("SELECT events.id, location_name, events.datetime FROM events "
+                       "JOIN locations ON locations.id = events.location_id "
+                       "WHERE event_id = ? ORDER BY datetime", (event_id,))
         return cursor.fetchall()
 
 

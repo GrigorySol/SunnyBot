@@ -10,6 +10,27 @@ def get_all_songs():
         return cursor.fetchall()
 
 
+def get_songs_in_work():
+    """Return songs (id, song_name, comment) from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT id, song_name, comment FROM songs "
+                       "JOIN current_songs ON current_songs.song_id = songs.id ")
+        return cursor.fetchall()
+
+
+def get_songs_by_event_id(event_id):
+    """Return songs (id, song_name, comment) from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT id, song_name, comment FROM songs "
+                       "JOIN events_songs ON events_songs.song_id = songs.id "
+                       "WHERE events_songs.event_id =?", (event_id,))
+        return cursor.fetchall()
+
+
 def song_exists(song_name):
     """Check if the song_name exists in the database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:

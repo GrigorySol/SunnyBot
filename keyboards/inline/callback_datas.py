@@ -14,6 +14,8 @@ add_new_callback = CallbackData("type", prefix="add_new")
 change_callback = CallbackData("type", "id", prefix="change")
 selected_callback = CallbackData("type", "id", "selected_id", prefix="selected")
 
+song_filter_callback = CallbackData("filter_id", prefix="song_filter")
+concert_filter_callback = CallbackData("filter_id", prefix="concert_filter")
 song_info_callback = CallbackData("song_id", prefix="song_info")
 edit_song_callback = CallbackData("song_id", "option_id", prefix="edit_song")
 edit_song_material_callback = CallbackData("song_id", "option_id", "edit_id", prefix="edit_song_material")

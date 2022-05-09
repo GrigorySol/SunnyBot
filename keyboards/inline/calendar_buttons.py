@@ -8,12 +8,9 @@ from datetime import date, timedelta
 from database_control.db_event import search_event_by_date
 from keyboards.inline.callback_datas import calendar_factory, calendar_zoom
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from misc.messages.event_dictionary import next_button_text, prev_button_text, zoom_out_text
+from misc.messages.event_dictionary import next_button_text, prev_button_text, zoom_out_text, WEEK_DAYS, MONTHS
 
 EMTPY_FIELD = 'calendar_button'
-WEEK_DAYS = ("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
-MONTHS = ((1, "Январь"), (2, "Февраль"), (3, "Март"), (4, "Апрель"), (5, "Май"), (6, "Июнь"),
-          (7, "Июль"), (8, "Август"), (9, "Сентябрь"), (10, "Октябрь"), (11, "Ноябрь"), (12, "Декабрь"))
 
 CLOSE_BTN = InlineKeyboardButton("Закрыть", callback_data="close")
 
@@ -36,8 +33,8 @@ def generate_calendar_days(year: int, month: int, event_id=0):
     today = date.today()
     text_month = ""
 
-    for i, m in MONTHS:
-        if i == month:
+    for i, m in enumerate(MONTHS):
+        if (i+1) == month:
             text_month = m
             break
 
@@ -119,9 +116,9 @@ def generate_calendar_months(year: int, event_id=0):
     keyboard.add(*[
         InlineKeyboardButton(
             text=month,
-            callback_data=calendar_factory.new(event_id=event_id, year=year, month=month_number)
+            callback_data=calendar_factory.new(event_id=event_id, year=year, month=month_number+1)
         )
-        for month_number, month in MONTHS
+        for month_number, month in enumerate(MONTHS)
     ])
 
     # Create previous, next and close buttons
