@@ -10,6 +10,15 @@ def get_all_songs():
         return cursor.fetchall()
 
 
+def song_exists(song_name):
+    """Check if the song_name exists in the database"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT id FROM songs WHERE song_name = ?", (song_name,))
+        return bool(cursor.fetchone()[0])
+
+
 def get_sound_by_song_id(song_id):
     """Return (id, song_id, voice_id, file_id) for each SOUND for the song from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:

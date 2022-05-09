@@ -1,36 +1,35 @@
 # SunnyBot
-It's a Telegram Bot for the Sunny Side Singers choir
+### It's a Telegram Bot for the Sunny Side Singers choir
 
 My first project, that larger than 500 lines.
 
-This bot uses pyTelegramBotAPI
+This bot uses [pyTelegramBotAPI](https://github.com/eternnoir/pyTelegramBotAPI)
 
-Supported commands:
-
-/singers (only for admin)
+### /singers (only for admin)
 Search singers inline, by voice or all available in the database. Shows buttons with names that leads to the next options:
-Write private meessage
-Edit voices
-Edit suits
-Show attendance (in progress)
-Edit comment (in progress)
-Delete (in progress)
-Close inline buttons
+- Write private message
+- Edit voices
+- Edit suits
+- Show attendance (in progress)
+- Edit comment (in progress)
+- Delete (in progress)
+- Close inline buttons
 
-/add (only for admin)
+### /add (only for admin)
 Allows to add next options:
-Events
-Concerts
-Rehearsal
-Song
+- Events
+- Concerts
+- Rehearsal
+- Song
 
-/songs (in progreess)
+### /songs
+Displays all songs (work in progress). Admin can edit name and add sheets and sounds.
 
-/calendar
+### /calendar
 Displays calendar with marked Events/Concerts/Reheearsals. Allows to see all events for selected day. Admin has buttons to edit.
 
-/voice
+### /voice
 Send message with voice info.
 
-/suits
+### /suits
 Send a message and photos with the costumes singer owns. Prompts the user to add/remove a costume.

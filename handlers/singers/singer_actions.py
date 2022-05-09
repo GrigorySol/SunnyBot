@@ -1,11 +1,13 @@
 from datetime import datetime
 from random import randint
+
+from handlers.admin.admin_songs import edit_song_menu
 from loader import bot
 from database_control import db_singer, db_songs
 from database_control.db_event import search_event_by_id, search_location_by_id
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
-from keyboards.inline.callback_datas import suit_edit_callback, event_callback
-from keyboards.inline.choice_buttons import new_singer_markup, joke_markup, change_buttons
+from keyboards.inline.callback_datas import suit_edit_callback, event_callback, song_info_callback
+from keyboards.inline.choice_buttons import new_singer_markup, joke_markup, change_buttons, callback_buttons
 from misc.edit_functions import display_suits, edit_suits
 from misc.bot_speech import greetings
 from misc.messages.singer_dictionary import *
@@ -53,17 +55,24 @@ def edit_suits_buttons(call: CallbackQuery):
 
 
 @bot.message_handler(commands=["songs"])
-def nothing_to_say(message: Message):
-    bot.send_audio(message.chat.id,
-                   "CQACAgIAAxkBAAIN-WJ075CgPoBkAuWjMVlTovjAYDa9AAJ6EgAC94eoS6EbqMZfgPQyJAQ")  # mp3
-    song_id = db_songs.get_all_songs()[0][0]
+def show_songs(message: Message):
+    """Display buttons with all song names. TODO: all/in work/by concert"""
 
-    # Admin can change the record about the event
-    singer_id = message.from_user.id
-    name = "songs"
+    songs = db_songs.get_all_songs()
+    call_config = "song_info"
+    data = []
+    for song_id, song_name, _ in songs:
+        data.append((song_name, f"{call_config}:{song_id}"))
 
-    if db_singer.is_admin(singer_id):
-        bot.send_message(singer_id, edit_text, reply_markup=change_buttons(name, song_id))
+    bot.send_message(message.chat.id, edit_text, reply_markup=callback_buttons(data, row=3))
+
+
+@bot.callback_query_handler(func=None, calendar_config=song_info_callback.filter())
+def show_song_info(call: CallbackQuery):
+    """Show song info and allow admin to edit"""
+
+    _, song_id = call.data.split(":")
+    edit_song_menu(call.message, song_id, what_to_do_text)
 
 
 @bot.message_handler(commands=["events"])
@@ -134,13 +143,14 @@ def back_btn(call: CallbackQuery):
     pass
 
 
-@bot.message_handler(content_types=["audio"])
-def handle_files(message: Message):
-    """Print and send in message audio file_id"""
-
-    audio_file_id = message.audio.file_id
-    print(audio_file_id)
-    bot.send_message(message.chat.id, audio_file_id)
+# @bot.message_handler(content_types=["audio"])
+# def handle_files(message: Message):
+#     """Print and send in message audio file_id"""
+#
+#     audio_file_id = message.audio.file_id
+#     print(message)
+#     print(audio_file_id)
+#     bot.send_message(message.chat.id, audio_file_id)
 
 
 def check_commands(message: Message):
