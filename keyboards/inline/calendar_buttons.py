@@ -60,10 +60,16 @@ def generate_calendar_days(year: int, month: int, event_id=0):
         for day in week:
             day_name = ' '
             current_day = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
+            event = search_event_by_date(f"{current_day}%")
             if current_day == str(today):
                 day_name = '☀️'
-            elif day and search_event_by_date(f"{current_day}%"):
-                day_name = '🎸'
+            elif day and event:
+                if event[-1][1] == 1:
+                    day_name = '💃'
+                elif event[-1][1] == 2:
+                    day_name = '🎪'      # 🏛 🪗 👨‍🦽  📝
+                else:
+                    day_name = '🔔'
             elif day:
                 day_name = str(day)
             week_buttons.append(

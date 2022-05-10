@@ -1,19 +1,19 @@
 from datetime import datetime
 from random import randint
 
-from handlers.admin.admin_songs import edit_song_menu
 from loader import bot
 from database_control import db_singer, db_songs
 from database_control.db_event import search_event_by_id, search_location_by_id, search_events_by_event_id
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
-from keyboards.inline.callback_datas import suit_edit_callback, event_callback,\
-    song_info_callback, song_filter_callback, concert_filter_callback
-from keyboards.inline.choice_buttons import new_singer_markup, accept_markup, change_buttons, callback_buttons
+from keyboards.inline.callback_datas import suit_edit_callback,\
+    event_callback, song_filter_callback, concert_filter_callback
+from keyboards.inline.choice_buttons import new_singer_markup, accept_markup,\
+    change_buttons, callback_buttons, add_concert_songs_buttons
 from misc.edit_functions import display_suits, edit_suits
 from misc.bot_speech import greetings
 from misc.messages.event_dictionary import chosen_months_text_tuple
 from misc.messages.changes_dictionary import need_something_text
-from misc.messages.song_dictionary import which_song_text
+from misc.messages.song_dictionary import which_song_text, no_songs_text, wanna_add_text
 from misc.messages import singer_dictionary as sin_d
 from misc.messages.joke_dictionary import *
 
@@ -112,10 +112,20 @@ def edit_suits_buttons(call: CallbackQuery):
     songs = db_songs.get_songs_by_event_id(event_id)
     call_config = "song_info"
 
-    for song_id, song_name, _ in songs:
-        data.append((song_name, f"{call_config}:{song_id}"))
+    if songs:
+        for song_id, song_name, _ in songs:
+            data.append((song_name, f"{call_config}:{song_id}"))
 
-    bot.send_message(call.message.chat.id, which_song_text, reply_markup=callback_buttons(data))
+        bot.send_message(call.message.chat.id, which_song_text, reply_markup=callback_buttons(data))
+
+    else:
+        bot.send_message(call.message.chat.id, no_songs_text)
+
+    # Admin can change the record about the event
+    singer_id = call.from_user.id
+
+    if db_singer.is_admin(singer_id):
+        bot.send_message(call.message.chat.id, wanna_add_text, reply_markup=add_concert_songs_buttons(event_id))
 
 
 @bot.message_handler(commands=["events"])
@@ -147,8 +157,20 @@ def show_event(call: CallbackQuery):
     location = f"{location_name}\n\n{url}"
     bot.send_message(call.message.chat.id, location)
     date, time = date_time.split(" ")
+    _, month, day = date.split("-")
+    event_date = f"{int(day)} {chosen_months_text_tuple[int(month)-1]}"
 
-    msg = f"{event_name}\n{date} в {time[0:5]}\n"
+    msg = f"{event_name} {event_date} в {time[0:5]}\n"
+
+    if event_id == 2:
+        songs = db_songs.get_songs_by_event_id(eid)
+        msg += "\nПрограмма:\n"
+        if songs:
+            for _, song, _ in songs:
+                msg += f"{song}\n"
+        else:
+            msg += "На данный момент отсутствует\n"
+
     if comment:
         msg += comment
     bot.send_message(call.message.chat.id, msg)

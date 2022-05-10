@@ -3,22 +3,61 @@ from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDoc
 from keyboards.inline.choice_buttons import callback_buttons
 from keyboards.inline.callback_datas import edit_song_callback, edit_song_material_callback, song_info_callback
 from misc.messages import changes_dictionary as ch_d
-from misc.messages.singer_dictionary import NOTHING, CANCELED, edit_text, you_shell_not_pass_text
+from misc.messages.singer_dictionary import CANCELED, edit_text
 from misc.messages import song_dictionary as song_d
 from database_control import db_songs, db_singer
 
 
 @bot.callback_query_handler(func=None, calendar_config=song_info_callback.filter())
 def show_song_info(call: CallbackQuery):
-    """Show song info and allow admin to edit"""
+    """Show song info and allow admin to edit. TODO: Refactoring"""
+
+    print(f"show_song_info {print(call.data)}")
+    song_id = int(call.data.split(":")[1])
+    sheets = db_songs.get_sheets_by_song_id(song_id)
+    sounds = db_songs.get_sounds_by_song_id(song_id)
+    media_sheets = []
+    media_sounds = []
 
     is_admin = db_singer.is_admin(call.message.chat.id)
-    if not is_admin:
-        bot.send_message(call.message.chat.id, you_shell_not_pass_text)
-        return
+    if is_admin:
+        if sheets:
+            for _, _, _, sheet_id in sheets:
+                media_sheets.append(InputMediaDocument(sheet_id))
+            bot.send_media_group(call.message.chat.id, media_sheets)
+        else:
+            bot.send_message(call.message.chat.id, song_d.no_sheets_text)
 
-    _, song_id = call.data.split(":")
-    edit_song_menu(call.message, song_id, edit_text)
+        if sounds:
+            for _, _, _, sound_id in sounds:
+                media_sounds.append(InputMediaAudio(sound_id))
+            bot.send_media_group(call.message.chat.id, media_sounds)
+        else:
+            bot.send_message(call.message.chat.id, song_d.no_sounds_text)
+
+        edit_song_menu(call.message, song_id, edit_text)
+
+    else:
+        singer_id = db_singer.get_singer_id(call.message.chat.id)
+        singer_voices = db_singer.get_singer_voices(singer_id)
+
+        if sheets:
+            for singer_voice_id, _ in singer_voices:
+                for _, _, sheet_voice_id, sheet_id in sheets:
+                    if not sheet_voice_id or singer_voice_id == sheet_voice_id:
+                        media_sheets.append(InputMediaDocument(sheet_id))
+            bot.send_media_group(call.message.chat.id, media_sheets)
+        else:
+            bot.send_message(call.message.chat.id, song_d.no_sheets_text)
+
+        if sounds:
+            for singer_voice_id, _ in singer_voices:
+                for _, _, sound_voice_id, sound_id in sheets:
+                    if not sound_voice_id or singer_voice_id == sound_voice_id:
+                        media_sounds.append(InputMediaAudio(sound_id))
+            bot.send_media_group(call.message.chat.id, media_sounds)
+        else:
+            bot.send_message(call.message.chat.id, song_d.no_sounds_text)
 
 
 @bot.callback_query_handler(func=None, calendar_config=edit_song_callback.filter())
@@ -53,7 +92,7 @@ def edit_song_options(call: CallbackQuery):
 
         else:
             data.pop()
-            msg = song_d.not_net_text
+            msg = f"{song_d.no_sheets_text}\n{song_d.wanna_add_text}"
 
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
 
@@ -77,7 +116,7 @@ def edit_song_options(call: CallbackQuery):
 
         else:
             data.pop()
-            msg = song_d.not_sound_text
+            msg = song_d.not_sound_add_text
 
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
 

@@ -36,7 +36,7 @@ def get_songs_by_event_id(event_id):
 
         cursor.execute("SELECT id, song_name, comment FROM songs "
                        "JOIN events_songs ON events_songs.song_id = songs.id "
-                       "WHERE events_songs.event_id =?", (event_id,))
+                       "WHERE events_songs.event_id = ? ORDER BY song_name", (event_id,))
         return cursor.fetchall()
 
 
