@@ -125,6 +125,7 @@ def add_new_location(call: CallbackQuery):
 
 def save_location_url(message: Message):
     """Save URL for a new location. Ask a name for the Location."""
+
     text = message.text.split("\n")
     for url in text:
         if "http" in url:
@@ -241,4 +242,4 @@ def calendar_zoom_out_handler(call: CallbackQuery):
 @bot.callback_query_handler(func=lambda call: call.data == EMTPY_FIELD)
 def callback_empty_field_handler(call: CallbackQuery):
     """Do nothing for the empty buttons"""
-    bot.answer_callback_query(call.id)
+    return

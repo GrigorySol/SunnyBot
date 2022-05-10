@@ -10,6 +10,15 @@ def get_all_songs():
         return cursor.fetchall()
 
 
+def get_song_name(_id):
+    """Return the song_name from the database"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT song_name FROM songs WHERE id = ?", (_id,))
+        return cursor.fetchone()[0]
+
+
 def get_songs_in_work():
     """Return songs (id, song_name, comment) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -31,16 +40,25 @@ def get_songs_by_event_id(event_id):
         return cursor.fetchall()
 
 
-def song_exists(song_name):
+def song_exists(_id):
+    """Check if the song exists in the database"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT song_name FROM songs WHERE id = ?", (_id,))
+        return bool(cursor.fetchone())
+
+
+def song_name_exists(song_name):
     """Check if the song_name exists in the database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         cursor.execute("SELECT id FROM songs WHERE song_name = ?", (song_name,))
-        return bool(cursor.fetchone()[0])
+        return bool(cursor.fetchone())
 
 
-def get_sound_by_song_id(song_id):
+def get_sounds_by_song_id(song_id):
     """Return (id, song_id, voice_id, file_id) for each SOUND for the song from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -54,7 +72,7 @@ def get_sheets_by_song_id(song_id):
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM sounds WHERE song_id = ?", (song_id,))
+        cursor.execute("SELECT * FROM sheets WHERE song_id = ?", (song_id,))
         return cursor.fetchall()
 
 
@@ -72,7 +90,7 @@ def get_sheets_by_voice_id(voice_id):
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM sounds WHERE voice_id = ?", (voice_id,))
+        cursor.execute("SELECT * FROM sheets WHERE voice_id = ?", (voice_id,))
         return cursor.fetchall()
 
 
@@ -181,8 +199,8 @@ def delete_song_by_id(_id):
             return False
 
 
-def delete_sound_by_song_id(song_id):
-    """DELETE sound by song_id from the database."""
+def delete_sounds_by_song_id(song_id):
+    """DELETE all sounds by song_id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
         try:
@@ -195,11 +213,11 @@ def delete_sound_by_song_id(song_id):
 
 
 def delete_sheets_by_song_id(song_id):
-    """DELETE sound by song_id from the database."""
+    """DELETE all sheets by song_id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
         try:
-            cursor.execute("DELETE FROM sounds WHERE song_id = ?", (song_id,))
+            cursor.execute("DELETE FROM sheets WHERE song_id = ?", (song_id,))
             return True
 
         except sqlite3.Error as err:

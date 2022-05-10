@@ -31,3 +31,5 @@ suit_edit_callback = CallbackData("action", "suit_id", prefix="suit")
 info_callback = CallbackData("name", "singer_id", prefix="info")
 singer_add_callback = CallbackData("type", "singer_id", "item_id", prefix="singer_add")
 singer_remove_callback = CallbackData("type", "singer_id", "item_id", prefix="singer_remove")
+
+delete_confirmation_callback = CallbackData("type", "item_name", "item_id", "action_id", prefix="delete_confirmation")

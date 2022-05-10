@@ -5,7 +5,7 @@ from keyboards.inline.choice_buttons import callback_buttons, search_choice_mark
 from keyboards.inline.calendar_buttons import generate_calendar_days
 from keyboards.inline.callback_datas import add_new_callback
 from handlers.admin.admin_songs import edit_song_menu
-from misc.messages.singer_dictionary import show_singers_text, you_shell_not_pass_text, show_all_singers_text
+from misc.messages.singer_dictionary import show_singers_text, you_shell_not_pass_text, show_all_singers_text, CANCELED
 from misc.messages.event_dictionary import set_event_date_text, events_to_add_text_tuple, song_or_event_text
 from misc.messages.song_dictionary import enter_the_song_name_text, now_add_or_edit_text, song_name_exists_text
 from database_control import db_singer, db_songs
@@ -51,8 +51,10 @@ def show_all_singers(call: CallbackQuery):
     singers = db_singer.get_all_singers()
     call_config = "show_singer"
     data = []
+
     for singer in singers:
         data.append((singer[0], f"{call_config}:{singer[1]}"))
+
     bot.send_message(call.message.chat.id, show_all_singers_text, reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
@@ -64,20 +66,22 @@ def location_query(query: InlineQuery):
     singers = db_singer.get_all_singers()
     call_config = "show_singer"
     data = []
+
     for i, singer in enumerate(singers):
         if query.query.lower().strip() in singer[0].lower():
             voices = ", ".join([voice for _, voice in db_singer.get_singer_voices(singer[1])])
             suits = ", ".join([suit for _, suit, _ in db_singer.get_singer_suits(singer[1])])
             if voices and suits:
-                content = InputTextMessageContent(f"| Голос: {voices}\n| Костюмы: {suits}")
+                content = InputTextMessageContent(f"Голос: {voices}\nКостюмы: {suits}")
             elif voices:
-                content = InputTextMessageContent(f"| Голос: {voices}")
+                content = InputTextMessageContent(f"Голос: {voices}")
             elif suits:
-                content = InputTextMessageContent(f"| Костюмы: {suits}")
+                content = InputTextMessageContent(f"Костюмы: {suits}")
             else:
-                content = InputTextMessageContent(f"| У этого певуна ещё нет ни голоса, ни костюмов.")
+                content = InputTextMessageContent(f"У этого певуна ещё нет ни голоса, ни костюмов.")
             btn = query_button(singer[0], f"{call_config}:{singer[1]}")
             data.append(InlineQueryResultArticle(i, singer[0], content, reply_markup=btn))
+
     bot.answer_inline_query(query.id, data)
 
 
@@ -90,6 +94,7 @@ def song_or_event(call: CallbackQuery):
     if _id == "4":
         msg = bot.send_message(call.message.chat.id, enter_the_song_name_text)
         bot.register_next_step_handler(msg, add_song_name)
+
     else:
         """Show calendar buttons"""
         now = date.today()
@@ -100,9 +105,13 @@ def song_or_event(call: CallbackQuery):
 def add_song_name(message: Message):
     """Save the song name to the database and call buttons to edit the song name/sounds/sheets"""
 
-    if db_songs.song_exists(message.text):
+    if "/" in message.text:
+        bot.send_message(message.chat.id, CANCELED)
+
+    elif db_songs.song_name_exists(message.text):
         msg = bot.send_message(message.chat.id, song_name_exists_text)
         bot.register_next_step_handler(msg, add_song_name)
 
-    song_id = db_songs.add_song(message.text)
-    edit_song_menu(message, song_id, now_add_or_edit_text)
+    else:
+        song_id = db_songs.add_song(message.text)
+        edit_song_menu(message, song_id, now_add_or_edit_text)

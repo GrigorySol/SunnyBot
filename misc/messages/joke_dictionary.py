@@ -1,4 +1,21 @@
-random_jokes_text = (
+random_delete_sticker_id_tuple = (
+    "CAACAgIAAxkBAAET3TFielLLC-xjt4t8w12Gju8HUNrC-gACpgAD9wLID6sM5POpKsZYJAQ",
+
+)
+
+random_success_sticker_id_tuple = (
+    "CAACAgIAAxkBAAET3gliemorcfVIcioHwaD787mGKSLpIAACcAAD9wLIDyQpDCtech2jJAQ",
+    "CAACAgIAAxkBAAET3gtiempRMHW2RjOaopGf4b5xz5ifNAACTQADJHFiGj9If4Mjut6dJAQ"
+)
+
+random_error_sticker_id_tuple = (
+    "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ",
+    "CAACAgIAAxkBAAET3fpieml3-TDEGpdlTzSdFEuCb6Kh1gACGwADa-18CrkXEinIu91YJAQ",
+    "CAACAgIAAxkBAAET3fxiemmo-e6TZtAfXdYSFl3tARdlkwACFgADa-18CgcoBnIvq3DlJAQ",
+    "CAACAgIAAxkBAAET3gdiemoXNSaiea2-_OgjpEOktprcXwACfQAD9wLIDy7JuwrdyyJJJAQ"
+)
+
+random_jokes_text_tuple = (
     "Песня - это когда слова положили на музыку. Современная песня "
     "- это когда положили и на музыку, и на слова.",
 
@@ -23,7 +40,7 @@ random_jokes_text = (
     "и прочитал: «Скрипки — слева, виолончели — справа»."
 )
 
-random_answer_text = (
+random_answer_text_tuple = (
     "Всё будет хорошо.",
     "Ты заходи, если что.",
     "Нот нет.",

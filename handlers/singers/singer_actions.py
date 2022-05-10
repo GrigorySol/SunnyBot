@@ -11,7 +11,7 @@ from keyboards.inline.callback_datas import suit_edit_callback, event_callback,\
 from keyboards.inline.choice_buttons import new_singer_markup, joke_markup, change_buttons, callback_buttons
 from misc.edit_functions import display_suits, edit_suits
 from misc.bot_speech import greetings
-from misc.messages.event_dictionary import MONTHS_CASE
+from misc.messages.event_dictionary import chosen_months_text_tuple
 from misc.messages.singer_dictionary import *
 from misc.messages.joke_dictionary import *
 
@@ -62,7 +62,7 @@ def show_songs(message: Message):
 
     call_config = "song_filter"
     data = []
-    for filter_id, text in enumerate(song_filter_text):
+    for filter_id, text in enumerate(song_filter_text_tuple):
         data.append((text, f"{call_config}:{filter_id}"))
 
     bot.send_message(message.chat.id, chose_filter_text, reply_markup=callback_buttons(data, row=3))
@@ -95,7 +95,7 @@ def edit_suits_buttons(call: CallbackQuery):
         for concert_id, concert_name, date_time in concerts:
             concert_date = date_time.split(" ")[0]
             _, month, day = concert_date.split("-")
-            name = f"{concert_name} {int(day)} {MONTHS_CASE[int(month)-1]}"
+            name = f"{concert_name} {int(day)} {chosen_months_text_tuple[int(month)-1]}"
             data.append((name, f"{call_config}:{concert_id}"))
 
     bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
@@ -183,7 +183,7 @@ def back_btn(message: Message):
 
 
 def joking(message: Message):
-    msg = randomizer(random_jokes_text)
+    msg = randomizer(random_jokes_text_tuple)
     bot.send_message(message.chat.id, msg, reply_markup=ReplyKeyboardRemove())
 
 
@@ -212,7 +212,7 @@ def check_commands(message: Message):
 def nothing_to_say(message: Message):
     """Random answer on unrecognised message"""
 
-    text = {randomizer(random_answer_text)}
+    text = {randomizer(random_answer_text_tuple)}
     bot.forward_message(434767263, message.chat.id, message.id)
     print(message.text)
     print(text)

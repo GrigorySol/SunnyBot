@@ -2,8 +2,8 @@ from loader import bot
 from telebot.types import InputMediaPhoto
 from database_control import db_singer
 from keyboards.inline.choice_buttons import callback_buttons
-from misc.messages.singer_dictionary import edit_buttons_text, edit_text,\
-    no_suit_text, no_voice_text, too_many_voices
+from misc.messages.singer_dictionary import edit_text, no_suit_text, no_voice_text, too_many_voices
+from misc.messages.changes_dictionary import edit_buttons_text_tuple
 
 
 def display_suits(message, sid):
@@ -24,7 +24,7 @@ def display_suits(message, sid):
         suit_data.append(InputMediaPhoto(photo, name))
 
     # add/remove/close buttons
-    for text in edit_buttons_text:
+    for text in edit_buttons_text_tuple:
         data.append((text, f"{call_config}:{text}:{sid}"))
 
     if not suits:
@@ -53,7 +53,7 @@ def display_voices(message, sid):
     call_config = "voice"
     data = []
 
-    for text in edit_buttons_text:
+    for text in edit_buttons_text_tuple:
         data.append((text, f"{call_config}:{text}:{sid}"))
 
     if not voices:
