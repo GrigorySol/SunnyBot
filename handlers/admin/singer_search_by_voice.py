@@ -1,7 +1,7 @@
 from loader import bot
 from telebot.types import CallbackQuery
 from keyboards.inline.callback_datas import search_callback, voice_callback
-from misc.messages.singer_dictionary import chose_voice_text, no_singers_text
+from misc.messages.singer_dictionary import choose_voice_text, no_singers_text
 from keyboards.inline.choice_buttons import callback_buttons, search_choice_markup
 from database_control.db_singer import get_all_voices, search_singers_by_voice
 
@@ -15,7 +15,7 @@ def search_by_voice(call: CallbackQuery):
     data = []
     for _, voice in voices:
         data.append((voice, f"{call_config}:{voice}"))
-    bot.send_message(call.message.chat.id, chose_voice_text, reply_markup=callback_buttons(data, row=3))
+    bot.send_message(call.message.chat.id, choose_voice_text, reply_markup=callback_buttons(data, row=3))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 

@@ -1,11 +1,25 @@
 from loader import bot
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
 from keyboards.inline.choice_buttons import callback_buttons
-from keyboards.inline.callback_datas import edit_song_callback, edit_song_material_callback
+from keyboards.inline.callback_datas import edit_song_callback, edit_song_material_callback, song_info_callback
 from misc.messages import changes_dictionary as ch_d
-from misc.messages.singer_dictionary import NOTHING, CANCELED
+from misc.messages.singer_dictionary import NOTHING, CANCELED, edit_text, you_shell_not_pass_text
 from misc.messages import song_dictionary as song_d
-from database_control import db_songs
+from database_control import db_songs, db_singer
+
+
+@bot.callback_query_handler(func=None, calendar_config=song_info_callback.filter())
+def show_song_info(call: CallbackQuery):
+    """Show song info and allow admin to edit"""
+
+    print(call.message)
+    is_admin = db_singer.is_admin(call.message.chat.id)
+    if not is_admin:
+        bot.send_message(call.message.chat.id, you_shell_not_pass_text)
+        return
+
+    _, song_id = call.data.split(":")
+    edit_song_menu(call.message, song_id, edit_text)
 
 
 @bot.callback_query_handler(func=None, calendar_config=edit_song_callback.filter())
@@ -84,7 +98,7 @@ def edit_song_options(call: CallbackQuery):
         msg = f"{ch_d.delete_confirmation_text} {item_name}?"
 
         for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
-            data.append((answer, f"{call_config}:{item_type}:{item_name}:{song_id}:{i}"))
+            data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))
 
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
@@ -137,7 +151,7 @@ def edit_song_materials(call: CallbackQuery):
             msg = f"{ch_d.delete_confirmation_text} {ch_d.all_sounds_text} {item_name}?"
 
         for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
-            data.append((answer, f"{call_config}:{item_type}:{item_name}:{song_id}:{i}"))
+            data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))
 
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
 

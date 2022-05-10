@@ -23,7 +23,7 @@ search_choice_markup = InlineKeyboardMarkup(row_width=2)
 search_by_name = InlineKeyboardButton("По имени", switch_inline_query_current_chat="а")
 search_by_voice = InlineKeyboardButton("По голосу", callback_data="search:voice")
 show_all_btn = InlineKeyboardButton("Посмотреть всех", callback_data="show_all")
-search_choice_markup.add(search_by_voice, show_all_btn)
+search_choice_markup.add(search_by_name, search_by_voice, show_all_btn)
 search_choice_markup.add(close_btn)
 
 # Reply with joke
@@ -32,12 +32,12 @@ yes_btn = KeyboardButton("Да!")
 of_course_btn = KeyboardButton("Конечно!")
 joke_markup.add(yes_btn, of_course_btn)
 
-# Chose old or new location buttons
-chose_location_markup = InlineKeyboardMarkup(row_width=2)
-chose_old = InlineKeyboardButton("Выбрать", callback_data="location:db")
+# choose old or new location buttons
+choose_location_markup = InlineKeyboardMarkup(row_width=2)
+choose_old = InlineKeyboardButton("Выбрать", callback_data="location:db")
 get_url = InlineKeyboardButton("Добавить", callback_data="location:url")
-chose_location_markup.add(chose_old, get_url)
-chose_location_markup.add(close_btn)
+choose_location_markup.add(choose_old, get_url)
+choose_location_markup.add(close_btn)
 
 
 def repeat_buttons(eid):

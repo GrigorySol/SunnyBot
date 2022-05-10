@@ -23,10 +23,10 @@ enter_your_lastname_text = "Пожалуйста, напишите Вашу фа
 lastname_is_digit_text = "Цифры не подходят.\nПожалуйста, напишите Вашу фамилию буквами (хотя бы одной)."
 
 # singer_info
-chose_voice_text = "Выберите голосище:"
+choose_voice_text = "Выберите голосище:"
 song_filter_text_tuple = ("Все", "В работе", "По концертам")
-chose_filter_text = "Выберите фильтр песен или посмотрите весь репертуар:"
-chose_concert_text = "Выберите концерт:"
+choose_filter_text = "Выберите фильтр песен или посмотрите весь репертуар:"
+choose_concert_text = "Выберите концерт:"
 what_to_do_text = "Что хотите сделать?"
 show_all_singers_text = "Любуйтесь"
 you_shell_not_pass_text = "Ти сюда нэ ходы, ти туда ходы, а то пэсня в башка пападёт, совсэм глупий станэшь!.. э?"
@@ -38,6 +38,8 @@ suit_added_text = "Прекрасный выбор!"
 suit_removed_text = "Костюм удалён, но это поправимо!"
 voice_added_text = "Голос добавлен!"
 voice_removed_text = "Голос удалён, а жаль."
+
+singer_not_exists_text = "Больше не певун."
 
 NOTHING = "На данный момент все операторы заняты."
 

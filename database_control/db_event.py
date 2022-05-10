@@ -80,7 +80,7 @@ def get_all_locations():
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM locations")
+        cursor.execute("SELECT * FROM locations ORDER BY location_name")
         return cursor.fetchall()
 
 
@@ -139,3 +139,27 @@ def add_location(location_name, url):
 
 # DELETE
 
+def delete_event_by_id(_id):
+    """DELETE event by id from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+        try:
+            cursor.execute("DELETE FROM events WHERE id = ?", (_id,))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
+
+def delete_location_by_id(_id):
+    """DELETE location by id from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+        try:
+            cursor.execute("DELETE FROM location WHERE id = ?", (_id,))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False

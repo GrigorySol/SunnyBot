@@ -12,24 +12,30 @@ Search singers inline, by voice or all available in the database. Shows buttons 
 - Edit suits
 - Show attendance (in progress)
 - Edit comment (in progress)
-- Delete (in progress)
+- Delete
 - Close inline buttons
 
 ### /add (only for admin)
 Allows to add next options:
-- Events
-- Concerts
+- Event
+- Concert
 - Rehearsal
 - Song
 
+### /locations (only for admin)
+Allows to manage locations (in progress).
+
 ### /songs
-Displays all songs (work in progress). Admin can edit name and add sheets and sounds.
+Displays all songs. Admin can edit name and add sheets and sounds. Available options:
+- All
+- In Work
+- By Concert
 
 ### /calendar
-Displays calendar with marked Events/Concerts/Reheearsals. Allows to see all events for selected day. Admin has buttons to edit.
+Displays calendar with marked Events/Concerts/Rehearsals. Allows to see all events for selected day. Admin has buttons to edit.
 
 ### /voice
 Send message with voice info.
 
 ### /suits
-Send a message and photos with the costumes singer owns. Prompts the user to add/remove a costume.
+Send a message and photos with suits a singer owns. Prompts the user to add/remove a costume.

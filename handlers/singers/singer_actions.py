@@ -12,7 +12,9 @@ from keyboards.inline.choice_buttons import new_singer_markup, joke_markup, chan
 from misc.edit_functions import display_suits, edit_suits
 from misc.bot_speech import greetings
 from misc.messages.event_dictionary import chosen_months_text_tuple
-from misc.messages.singer_dictionary import *
+from misc.messages.changes_dictionary import need_something
+from misc.messages.song_dictionary import which_song_text
+from misc.messages import singer_dictionary as sin_d
 from misc.messages.joke_dictionary import *
 
 
@@ -26,7 +28,7 @@ def singer_not_registered(message: Message):
         text = f"{greetings(singer_time)}, Сашенька\n"
     else:
         text = f"{greetings(singer_time)}\n"
-    text += not_registered_text
+    text += sin_d.not_registered_text
     bot.send_message(singer_id, text, reply_markup=new_singer_markup)
 
 
@@ -37,7 +39,7 @@ def show_voice(message: Message):
     singer_id = db_singer.get_singer_id(message.from_user.id)
     voices = db_singer.get_singer_voices(singer_id)
     if not voices:
-        bot.send_message(message.chat.id, no_voice_text)
+        bot.send_message(message.chat.id, sin_d.no_voice_text)
     else:
         text = ", ".join(voice for _, voice in voices)
         bot.send_message(message.chat.id, f"Вы поёте в {text}.")
@@ -62,10 +64,10 @@ def show_songs(message: Message):
 
     call_config = "song_filter"
     data = []
-    for filter_id, text in enumerate(song_filter_text_tuple):
+    for filter_id, text in enumerate(sin_d.song_filter_text_tuple):
         data.append((text, f"{call_config}:{filter_id}"))
 
-    bot.send_message(message.chat.id, chose_filter_text, reply_markup=callback_buttons(data, row=3))
+    bot.send_message(message.chat.id, sin_d.choose_filter_text, reply_markup=callback_buttons(data, row=3))
 
 
 @bot.callback_query_handler(func=None, singer_config=song_filter_callback.filter())
@@ -76,7 +78,7 @@ def edit_suits_buttons(call: CallbackQuery):
     data = []
 
     call_config = "song_info"
-    msg = edit_text
+    msg = which_song_text
 
     if filter_id == "0":
         songs = db_songs.get_all_songs()
@@ -91,7 +93,7 @@ def edit_suits_buttons(call: CallbackQuery):
     else:
         concerts = search_events_by_event_id(2)
         call_config = "concert_filter"
-        msg = chose_concert_text
+        msg = sin_d.choose_concert_text
         for concert_id, concert_name, date_time in concerts:
             concert_date = date_time.split(" ")[0]
             _, month, day = concert_date.split("-")
@@ -113,15 +115,7 @@ def edit_suits_buttons(call: CallbackQuery):
     for song_id, song_name, _ in songs:
         data.append((song_name, f"{call_config}:{song_id}"))
 
-    bot.send_message(call.message.chat.id, edit_text, reply_markup=callback_buttons(data))
-
-
-@bot.callback_query_handler(func=None, calendar_config=song_info_callback.filter())
-def show_song_info(call: CallbackQuery):
-    """Show song info and allow admin to edit"""
-
-    _, song_id = call.data.split(":")
-    edit_song_menu(call.message, song_id, what_to_do_text)
+    bot.send_message(call.message.chat.id, which_song_text, reply_markup=callback_buttons(data))
 
 
 @bot.message_handler(commands=["events"])
@@ -164,7 +158,7 @@ def show_event(call: CallbackQuery):
     name = "event"
 
     if db_singer.is_admin(singer_id):
-        bot.send_message(singer_id, edit_text, reply_markup=change_buttons(name, eid))
+        bot.send_message(singer_id, need_something, reply_markup=change_buttons(name, eid))
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')
@@ -178,7 +172,7 @@ def back_btn(message: Message):
     """Send a random joke into the chat"""
 
     bot.register_next_step_handler(message, joking)
-    bot.send_message(message.chat.id, do_you_wanna_my_joke_text,
+    bot.send_message(message.chat.id, sin_d.do_you_wanna_my_joke_text,
                      reply_to_message_id=message.id, reply_markup=joke_markup)
 
 

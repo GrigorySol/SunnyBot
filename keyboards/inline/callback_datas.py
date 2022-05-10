@@ -12,7 +12,8 @@ period_callback = CallbackData("eid", "repeat_id", prefix="period")
 
 add_new_callback = CallbackData("type", prefix="add_new")
 change_callback = CallbackData("type", "id", prefix="change")
-selected_callback = CallbackData("type", "id", "selected_id", prefix="selected")
+selected_event_callback = CallbackData("option_id", "event_id", prefix="selected_event")
+selected_location_callback = CallbackData("option_id", "location_id", prefix="selected_location")
 
 song_filter_callback = CallbackData("filter_id", prefix="song_filter")
 concert_filter_callback = CallbackData("filter_id", prefix="concert_filter")
@@ -21,6 +22,7 @@ edit_song_callback = CallbackData("song_id", "option_id", prefix="edit_song")
 edit_song_material_callback = CallbackData("song_id", "option_id", "edit_id", prefix="edit_song_material")
 
 location_callback = CallbackData("type", prefix="location")
+edit_location_callback = CallbackData("location_id", prefix="edit_location")
 
 register_callback = CallbackData(prefix="registration")
 search_callback = CallbackData("type", prefix="search")
@@ -32,4 +34,4 @@ info_callback = CallbackData("name", "singer_id", prefix="info")
 singer_add_callback = CallbackData("type", "singer_id", "item_id", prefix="singer_add")
 singer_remove_callback = CallbackData("type", "singer_id", "item_id", prefix="singer_remove")
 
-delete_confirmation_callback = CallbackData("type", "item_name", "item_id", "action_id", prefix="delete_confirmation")
+delete_confirmation_callback = CallbackData("type", "item_id", "action_id", prefix="delete_confirmation")

@@ -5,15 +5,17 @@ from keyboards.inline.choice_buttons import callback_buttons, search_choice_mark
 from keyboards.inline.calendar_buttons import generate_calendar_days
 from keyboards.inline.callback_datas import add_new_callback
 from handlers.admin.admin_songs import edit_song_menu
-from misc.messages.singer_dictionary import show_singers_text, you_shell_not_pass_text, show_all_singers_text, CANCELED
-from misc.messages.event_dictionary import set_event_date_text, events_to_add_text_tuple, song_or_event_text
+from misc.messages.singer_dictionary import show_singers_text, you_shell_not_pass_text,\
+    show_all_singers_text, CANCELED
+from misc.messages.event_dictionary import set_event_date_text, events_to_add_text_tuple,\
+    song_or_event_text, choose_location_text
 from misc.messages.song_dictionary import enter_the_song_name_text, now_add_or_edit_text, song_name_exists_text
-from database_control import db_singer, db_songs
+from database_control import db_singer, db_songs, db_event
 
 
 @bot.message_handler(commands=["singers"])
 def show_singers_search(message: Message):
-    """Display callback buttons with search options"""
+    """Display callback buttons with search singer options"""
 
     is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
@@ -27,7 +29,7 @@ def show_singers_search(message: Message):
 
 @bot.message_handler(commands=['add'])
 def add_menu_handler(message: Message):
-    """Show buttons to chose song or events"""
+    """Show buttons to choose song or events"""
 
     print(f"calendar_command_handler")
     is_admin = db_singer.is_admin(message.from_user.id)
@@ -42,6 +44,27 @@ def add_menu_handler(message: Message):
             continue
         data.append((event, f"{call_config}:{i}"))
     bot.send_message(message.chat.id, song_or_event_text, reply_markup=callback_buttons(data))
+
+
+@bot.message_handler(commands=['locations'])
+def delete_menu_handler(message: Message):
+    """Show location buttons for editing"""
+
+    print(f"calendar_command_handler")
+    is_admin = db_singer.is_admin(message.chat.id)
+    if not is_admin:
+        bot.send_message(message.chat.id, you_shell_not_pass_text)
+        return
+
+    locations = db_event.get_all_locations()
+    call_config = "change"
+    name = "location"
+    data = []
+
+    for location_id, location_name, _ in locations:
+        data.append((location_name, f"{call_config}:{name}:{location_id}"))
+
+    bot.send_message(message.chat.id, choose_location_text, reply_markup=callback_buttons(data))
 
 
 @bot.callback_query_handler(func=lambda c: c.data == "show_all")

@@ -5,7 +5,7 @@ from telebot.types import Message, CallbackQuery
 from keyboards.inline.callback_datas import calendar_zoom, calendar_factory, \
     calendar_data, location_callback, repeat_callback, period_callback
 from keyboards.inline.calendar_buttons import generate_calendar_days, generate_calendar_months, EMTPY_FIELD
-from keyboards.inline.choice_buttons import chose_location_markup, callback_buttons, repeat_buttons
+from keyboards.inline.choice_buttons import choose_location_markup, callback_buttons, repeat_buttons
 from misc.messages.singer_dictionary import NOTHING
 from misc.messages.event_dictionary import *
 
@@ -98,7 +98,7 @@ def add_time_for_event(message: Message):
                                         f"{set_event_name_text}{events_to_add_text_tuple[event_data.event_id]}:")
             bot.register_next_step_handler(msg_data, set_name_for_event)
         else:
-            bot.send_message(message.chat.id, chose_event_location_text, reply_markup=chose_location_markup)
+            bot.send_message(message.chat.id, choose_event_location_text, reply_markup=choose_location_markup)
 
     except ValueError:
         msg_data = bot.send_message(message.chat.id, wrong_event_time_text)
@@ -113,7 +113,7 @@ def add_time_for_event(message: Message):
 def set_name_for_event(message: Message):
     """Get event name from the input and ask to set the place"""
     event_data.event_name = message.text
-    bot.send_message(message.chat.id, chose_event_location_text, reply_markup=chose_location_markup)
+    bot.send_message(message.chat.id, choose_event_location_text, reply_markup=choose_location_markup)
 
 
 @bot.callback_query_handler(func=None, calendar_config=location_callback.filter(type="url"))
@@ -130,7 +130,7 @@ def save_location_url(message: Message):
     for url in text:
         if "http" in url:
             if db_event.location_url_exists(url):
-                bot.send_message(message.chat.id, location_url_exists, reply_markup=chose_location_markup)
+                bot.send_message(message.chat.id, location_url_exists, reply_markup=choose_location_markup)
             else:
                 location_data.url = url
                 msg_data = bot.send_message(message.chat.id, enter_location_name_text)
@@ -161,7 +161,7 @@ def save_new_location_and_event(message: Message):
 
 @bot.callback_query_handler(func=None, calendar_config=repeat_callback.filter())
 def show_repeat_period_buttons(call: CallbackQuery):
-    """Show buttons to chose repeat period"""
+    """Show buttons to choose repeat period"""
 
     print(f"show_repeat_event_buttons {call.data}")
     _, eid = call.data.split(":")
@@ -170,7 +170,7 @@ def show_repeat_period_buttons(call: CallbackQuery):
     for i, period in enumerate(event_repeat_text_tuple):
         data.append((period, f"{call_config}:{eid}:{i}"))
 
-    bot.send_message(call.message.chat.id, chose_period_text, reply_markup=callback_buttons(data))
+    bot.send_message(call.message.chat.id, choose_period_text, reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
@@ -198,7 +198,7 @@ def set_event_repeating(message: Message):
 
 
 @bot.callback_query_handler(func=None, calendar_config=location_callback.filter(type="db"))
-def chose_location(call: CallbackQuery):
+def choose_location(call: CallbackQuery):
     """Show the location buttons"""
 
     locations = db_event.get_all_locations()
@@ -206,7 +206,7 @@ def chose_location(call: CallbackQuery):
     data = []
     for location_id, location_name, url in locations:
         data.append((location_name, f"{call_data}:{location_id}"))
-    bot.send_message(call.message.chat.id, chose_location_text, reply_markup=callback_buttons(data))
+    bot.send_message(call.message.chat.id, choose_location_text, reply_markup=callback_buttons(data))
 
 
 @bot.callback_query_handler(func=None, calendar_config=location_callback.filter())

@@ -10,11 +10,20 @@ Receive singer attendance.
 # SELECT
 
 def singer_exists(singer_id: int) -> bool:
-    """Return False if the singer is not in the database."""
+    """Return True if the singer_id is in the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         cursor.execute("SELECT id FROM singers WHERE singer_id = ?", (singer_id,))
+        return bool(cursor.fetchone())
+
+
+def singer_exists_by_id(_id: int) -> bool:
+    """Return True if id is in the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT singer_id FROM singers WHERE id = ?", (_id,))
         return bool(cursor.fetchone())
 
 
@@ -147,7 +156,7 @@ def search_singer_voice(singer_id: int):
 
 
 def search_singers_by_voice(voice: str):
-    """Return (firstname lastname, id) of the singers of the chosen voice from database"""
+    """Return (firstname lastname, id) of the singers of the choosen voice from database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
@@ -200,6 +209,19 @@ def add_voice(_id: int, voice_id: int):
 
 
 # DELETE
+
+def delete_singer_by_id(_id):
+    """DELETE singer by id from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+        try:
+            cursor.execute("DELETE FROM singers WHERE id = ?", (_id,))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
 
 def delete_suit(_id: int, suit_id: int):
     """Remove suit of the singer from database"""
