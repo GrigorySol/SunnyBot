@@ -134,32 +134,43 @@ def add_location(location_name, url):
         return cursor.fetchone()[0]
 
 
+def add_song_to_concert(concert_id: int, song_id: int):
+    """Add song to the events_songs."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM events_songs WHERE event_id = ? and song_id = ?", (concert_id, song_id))
+        if cursor.fetchall():
+            return False
+
+        cursor.execute("INSERT INTO events_songs VALUES (?, ?)", (concert_id, song_id))
+        return True
+
+
 # UPDATE
 
 
 # DELETE
 
-def delete_event_by_id(_id):
+def delete_event_by_id(_id: int):
     """DELETE event by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
-        try:
-            cursor.execute("DELETE FROM events WHERE id = ?", (_id,))
-            return True
 
-        except sqlite3.Error as err:
-            print(err)
-            return False
+        cursor.execute("DELETE FROM events WHERE id = ?", (_id,))
 
 
-def delete_location_by_id(_id):
+def delete_location_by_id(_id: int):
     """DELETE location by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
-        try:
-            cursor.execute("DELETE FROM location WHERE id = ?", (_id,))
-            return True
 
-        except sqlite3.Error as err:
-            print(err)
-            return False
+        cursor.execute("DELETE FROM location WHERE id = ?", (_id,))
+
+
+def delete_song_from_concert(concert_id: int, song_id: int):
+    """DELETE songs from events_songs."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("DELETE FROM events_songs WHERE concert_id = ? and song_id = ?", (concert_id, song_id))

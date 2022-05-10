@@ -27,10 +27,10 @@ search_choice_markup.add(search_by_name, search_by_voice, show_all_btn)
 search_choice_markup.add(close_btn)
 
 # Reply with joke
-joke_markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+accept_markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 yes_btn = KeyboardButton("Да!")
 of_course_btn = KeyboardButton("Конечно!")
-joke_markup.add(yes_btn, of_course_btn)
+accept_markup.add(yes_btn, of_course_btn, close_btn)
 
 # choose old or new location buttons
 choose_location_markup = InlineKeyboardMarkup(row_width=2)
@@ -40,17 +40,27 @@ choose_location_markup.add(choose_old, get_url)
 choose_location_markup.add(close_btn)
 
 
+def add_concert_songs_buttons(concert_id):
+    concert_markup = InlineKeyboardMarkup(row_width=1)
+    add_songs_button = InlineKeyboardButton("Добавить песни в программу", callback_data=f"change_songs:{concert_id}:0")
+    concert_markup.add(add_songs_button)
+    concert_markup.add(close_btn)
+    return concert_markup
+
+
 def repeat_buttons(eid):
-    repeat_markup = InlineKeyboardMarkup(row_width=2)
+    repeat_markup = InlineKeyboardMarkup(row_width=1)
     repeat_button = InlineKeyboardButton("Повторить", callback_data=f"repeat:{eid}")
-    repeat_markup.add(close_btn, repeat_button)
+    repeat_markup.add(repeat_button)
+    repeat_markup.add(close_btn)
     return repeat_markup
 
 
 def change_buttons(name, _id):
-    change_markup = InlineKeyboardMarkup(row_width=2)
+    change_markup = InlineKeyboardMarkup(row_width=1)
     change_button = InlineKeyboardButton("Изменить", callback_data=f"change:{name}:{_id}")
-    change_markup.add(close_btn, change_button)
+    change_markup.add(change_button)
+    change_markup.add(close_btn)
     return change_markup
 
 

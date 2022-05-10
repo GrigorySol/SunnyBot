@@ -12,7 +12,6 @@ from database_control import db_songs, db_singer
 def show_song_info(call: CallbackQuery):
     """Show song info and allow admin to edit"""
 
-    print(call.message)
     is_admin = db_singer.is_admin(call.message.chat.id)
     if not is_admin:
         bot.send_message(call.message.chat.id, you_shell_not_pass_text)
@@ -26,7 +25,6 @@ def show_song_info(call: CallbackQuery):
 def edit_song_options(call: CallbackQuery):
     """Manage song edit options: Name, Sheets, Sound or DELETE"""
 
-    print(f"edit_song_options enter with {call.data}")
     _, song_id, option_id = call.data.split(":")
 
     # change name

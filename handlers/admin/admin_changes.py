@@ -1,21 +1,19 @@
 from loader import bot
 from telebot.types import CallbackQuery
 from keyboards.inline.choice_buttons import callback_buttons
-from keyboards.inline.callback_datas import change_callback, delete_confirmation_callback, \
-    selected_event_callback, selected_location_callback
-from misc.messages import event_dictionary as ev_d
-from misc.messages import changes_dictionary as ch_d
+from keyboards.inline import callback_datas as cd
+from misc.messages import event_dictionary as ev_d, singer_dictionary as sin_d, changes_dictionary as ch_d
 from database_control import db_songs, db_singer, db_event
 
 
-@bot.callback_query_handler(func=None, calendar_config=change_callback.filter())
+@bot.callback_query_handler(func=None, calendar_config=cd.change_callback.filter())
 def display_options_to_change(call: CallbackQuery):
     """Display options to change"""
 
     print(f"We are in display_options_to_change CALL DATA = {call.data}\n")
     _, name, item_id = call.data.split(":")
 
-    if name == "event":  # "Посмотреть", "Мероприятие", "Концерт", "Репетицию", "Песню", "Жизнь"
+    if name == "event":  # "Название", "Дату", "Время", "Место", "Комментарий", "УДАЛИТЬ"
         event = db_event.search_event_by_id(int(item_id))
 
         if not event:
@@ -25,7 +23,12 @@ def display_options_to_change(call: CallbackQuery):
             return
 
         call_config = "selected_event"
-        options = ch_d.event_options_to_edit_text_tuple
+        print(event)
+        if event[1] == 2:
+            options = ch_d.event_options_to_edit_text_tuple.__add__(("Песни", ))
+            print(options)
+        else:
+            options = ch_d.event_options_to_edit_text_tuple
 
     else:  # "location" - "Название", "Ссылку на карту", "Ничего", "УДАЛИТЬ
         location = db_event.search_location_by_id(int(item_id))
@@ -47,12 +50,12 @@ def display_options_to_change(call: CallbackQuery):
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
-@bot.callback_query_handler(func=None, calendar_config=selected_event_callback.filter(option_id="5"))
+@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="5"))
 def delete_event(call: CallbackQuery):
     """DELETE Event"""
 
-    print(f"change_event_option {call.data}")
-    _, option_id, _id = call.data.split(":")
+    print(f"delete_event {call.data}")
+    _, _, _id = call.data.split(":")
 
     item_name = db_event.search_event_by_id(_id)[2]
     call_config = "delete_confirmation"
@@ -67,12 +70,74 @@ def delete_event(call: CallbackQuery):
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
-@bot.callback_query_handler(func=None, calendar_config=selected_location_callback.filter(option_id="3"))
+@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="6"))
+def songs_event(call: CallbackQuery):
+    """Change songs for an Event"""
+
+    print(f"songs_event {call.data}")
+    _, _, _id = call.data.split(":")
+
+    call_config = "change_songs"
+    data = []
+
+    for option_id, option_name in enumerate(ch_d.edit_buttons_text_tuple):
+        data.append((option_name, f"{call_config}:{_id}:{option_id}"))
+
+    bot.send_message(call.message.chat.id, sin_d.what_to_do_text, reply_markup=callback_buttons(data))
+
+
+@bot.callback_query_handler(func=None, calendar_config=cd.change_songs_callback.filter())
+def edit_songs_for_concert(call: CallbackQuery):
+    """List of songs to edit"""
+
+    print(f"edit_songs_for_concert {call.data}")
+    _, concert_id, option_id = call.data.split(":")
+
+    call_config = "concert_songs"
+    data = []
+
+    if option_id == "0":
+        option = "add"
+        songs = db_songs.get_all_songs()
+
+    else:
+        option = "remove"
+        songs = db_songs.get_songs_by_event_id(int(concert_id))
+
+    for song_id, song_name, _ in songs:
+        data.append((song_name, f"{call_config}:{option}:{concert_id}:{song_id}"))
+
+    bot.send_message(call.message.chat.id, ch_d.edit_buttons_text_tuple, reply_markup=callback_buttons(data))
+    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+
+
+@bot.callback_query_handler(func=None, calendar_config=cd.concert_songs_callback.filter())
+def add_or_remove_songs(call: CallbackQuery):
+    """Add or remove songs in concert program"""
+
+    print(f"edit_songs_for_concert {call.data}")
+    _, option, concert_id, song_id = call.data.split(":")
+
+    if option == "add":
+        if db_event.add_song_to_concert(int(concert_id), int(song_id)):
+            song_name = db_songs.get_song_name(int(song_id))
+            bot.send_message(call.message.chat.id, f"{ch_d.song_added_to_concert_text} {song_name}")
+
+        else:
+            bot.send_message(call.message.chat.id, ch_d.song_already_added)
+
+    else:
+        song_name = db_songs.get_song_name(int(song_id))
+        db_event.delete_song_from_concert(int(concert_id), int(song_id))
+        bot.send_message(call.message.chat.id, f"{ch_d.song_removed_from_concert} {song_name}")
+
+
+@bot.callback_query_handler(func=None, calendar_config=cd.selected_location_callback.filter(option_id="3"))
 def delete_location(call: CallbackQuery):
     """DELETE location"""
 
-    print(f"change_location_option {call.data}")
-    _, option_id, _id = call.data.split(":")
+    print(f"delete_location {call.data}")
+    _, _, _id = call.data.split(":")
 
     item_name = db_event.search_location_by_id(_id)[2]
     call_config = "delete_confirmation"
@@ -87,7 +152,7 @@ def delete_location(call: CallbackQuery):
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
-@bot.callback_query_handler(func=None, calendar_config=delete_confirmation_callback.filter())
+@bot.callback_query_handler(func=None, calendar_config=cd.delete_confirmation_callback.filter())
 def delete_item(call: CallbackQuery):
     """DELETE confirmation"""
 

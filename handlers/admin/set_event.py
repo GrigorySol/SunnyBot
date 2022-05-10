@@ -4,8 +4,11 @@ from database_control import db_event
 from telebot.types import Message, CallbackQuery
 from keyboards.inline.callback_datas import calendar_zoom, calendar_factory, \
     calendar_data, location_callback, repeat_callback, period_callback
+
 from keyboards.inline.calendar_buttons import generate_calendar_days, generate_calendar_months, EMTPY_FIELD
-from keyboards.inline.choice_buttons import choose_location_markup, callback_buttons, repeat_buttons
+
+from keyboards.inline.choice_buttons import choose_location_markup, callback_buttons,\
+    repeat_buttons, add_concert_songs_buttons
 from misc.messages.singer_dictionary import NOTHING
 from misc.messages.event_dictionary import *
 
@@ -152,9 +155,15 @@ def save_new_location_and_event(message: Message):
         event_data.eid = db_event.add_event(event_data.event_id, event_data.event_name,
                                             event_data.datetime, location_id)
         bot.send_message(message.chat.id, f"{new_location_text}{location_data.location_name}")
-        msg = f"{new_event_text}{event_data.event_name}\n{want_repeat_text}"
         print(f"save_new_location_and_event {event_data.event_id}, {event_data.event_name}, {event_data.datetime}")
-        bot.send_message(message.chat.id, msg, reply_markup=repeat_buttons(event_data.eid))
+        if event_data.event_id == 2:
+            msg = f"{new_event_text}{event_data.event_name}\n{add_concert_songs_text}"
+            bot.send_message(message.chat.id, msg, reply_markup=add_concert_songs_buttons(event_data.eid))
+
+        else:
+            msg = f"{new_event_text}{event_data.event_name}\n{want_repeat_text}"
+            bot.send_message(message.chat.id, msg, reply_markup=repeat_buttons(event_data.eid))
+
         bot.edit_message_reply_markup(message.chat.id, message.id, reply_markup=None)
         event_data.is_in_progress = False
 
@@ -216,9 +225,13 @@ def save_event(call: CallbackQuery):
     _, location_id = call.data.split(":")
     event_data.eid = db_event.add_event(event_data.event_id, event_data.event_name,
                                         event_data.datetime, location_id)
+    if event_data.event_id == 2:
+        msg = f"{new_event_text}{event_data.event_name}\n{add_concert_songs_text}"
+        bot.send_message(call.message.chat.id, msg, reply_markup=add_concert_songs_buttons(event_data.eid))
 
-    msg = f"{new_event_text}{event_data.event_name}\n{want_repeat_text}"
-    bot.send_message(call.message.chat.id, msg, reply_markup=repeat_buttons(event_data.eid))
+    else:
+        msg = f"{new_event_text}{event_data.event_name}\n{want_repeat_text}"
+        bot.send_message(call.message.chat.id, msg, reply_markup=repeat_buttons(event_data.eid))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
     event_data.is_in_progress = False
 

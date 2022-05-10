@@ -8,11 +8,11 @@ from database_control.db_event import search_event_by_id, search_location_by_id,
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.inline.callback_datas import suit_edit_callback, event_callback,\
     song_info_callback, song_filter_callback, concert_filter_callback
-from keyboards.inline.choice_buttons import new_singer_markup, joke_markup, change_buttons, callback_buttons
+from keyboards.inline.choice_buttons import new_singer_markup, accept_markup, change_buttons, callback_buttons
 from misc.edit_functions import display_suits, edit_suits
 from misc.bot_speech import greetings
 from misc.messages.event_dictionary import chosen_months_text_tuple
-from misc.messages.changes_dictionary import need_something
+from misc.messages.changes_dictionary import need_something_text
 from misc.messages.song_dictionary import which_song_text
 from misc.messages import singer_dictionary as sin_d
 from misc.messages.joke_dictionary import *
@@ -158,7 +158,7 @@ def show_event(call: CallbackQuery):
     name = "event"
 
     if db_singer.is_admin(singer_id):
-        bot.send_message(singer_id, need_something, reply_markup=change_buttons(name, eid))
+        bot.send_message(singer_id, need_something_text, reply_markup=change_buttons(name, eid))
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')
@@ -173,7 +173,7 @@ def back_btn(message: Message):
 
     bot.register_next_step_handler(message, joking)
     bot.send_message(message.chat.id, sin_d.do_you_wanna_my_joke_text,
-                     reply_to_message_id=message.id, reply_markup=joke_markup)
+                     reply_to_message_id=message.id, reply_markup=accept_markup)
 
 
 def joking(message: Message):
