@@ -12,6 +12,15 @@ song_removed_from_concert = "Удалена песня"
 bot_cant_change_your_life_text = "Мне очень жаль, но на этом наши полномочия всё."
 bot_cant_change_maning = "Смысл невозможно провернуть назад..."
 
+select_option_to_change_text = "Что нужно изменить?"
+enter_new_event_name_text = "Напишите новое название мероприятия:"
+event_name_changed_text = "Новое название сохранено."
+enter_new_event_time_text = "Напишите новое время для мероприятия в формате 12 00, 12:00 или 12-00:"
+event_time_busy = "Указанное время занято другим мероприятием."
+event_time_changed_text = "Событие перенесено на указанное время."
+
+ERROR_text = "Произошла ошибка. Повторите попытку или напишите Грише."
+
 delete_confirmation_text = "Точно хотите удалить"
 all_sheets_text = "все ноты для песни"
 all_sounds_text = "все учебки для песни"

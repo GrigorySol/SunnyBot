@@ -10,7 +10,9 @@ from database_control import db_songs, db_singer
 
 @bot.callback_query_handler(func=None, calendar_config=song_info_callback.filter())
 def show_song_info(call: CallbackQuery):
-    """Show song info and allow admin to edit. TODO: Refactoring"""
+    """
+    Show song info and allow admin to edit.
+    """
 
     print(f"show_song_info {print(call.data)}")
     song_id = int(call.data.split(":")[1])
@@ -42,18 +44,24 @@ def show_song_info(call: CallbackQuery):
         singer_voices = db_singer.get_singer_voices(singer_id)
 
         if sheets:
-            for singer_voice_id, _ in singer_voices:
-                for _, _, sheet_voice_id, sheet_id in sheets:
-                    if not sheet_voice_id or singer_voice_id == sheet_voice_id:
+            for _, _, sheet_voice_id, sheet_id in sheets:
+                if not sheet_voice_id:
+                    media_sheets.append(InputMediaDocument(sheet_id))
+                    continue
+                for singer_voice_id, _ in singer_voices:
+                    if singer_voice_id == sheet_voice_id:
                         media_sheets.append(InputMediaDocument(sheet_id))
             bot.send_media_group(call.message.chat.id, media_sheets)
         else:
             bot.send_message(call.message.chat.id, song_d.no_sheets_text)
 
         if sounds:
-            for singer_voice_id, _ in singer_voices:
-                for _, _, sound_voice_id, sound_id in sheets:
-                    if not sound_voice_id or singer_voice_id == sound_voice_id:
+            for _, _, sound_voice_id, sound_id in sounds:
+                if not sound_voice_id:
+                    media_sounds.append(InputMediaAudio(sound_id))
+                    continue
+                for singer_voice_id, _ in singer_voices:
+                    if singer_voice_id == sound_voice_id:
                         media_sounds.append(InputMediaAudio(sound_id))
             bot.send_media_group(call.message.chat.id, media_sounds)
         else:

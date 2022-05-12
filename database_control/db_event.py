@@ -149,6 +149,33 @@ def add_song_to_concert(concert_id: int, song_id: int):
 
 # UPDATE
 
+def edit_event_name(_id, event_name):
+    """Edit event_name by event _id and Return bool to confirm changes"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        try:
+            cursor.execute("UPDATE events SET event_name = ? WHERE id = ?", (event_name, _id))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
+
+def edit_event_datetime(_id, event_datetime):
+    """Edit datetime by event _id and Return bool to confirm changes"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        try:
+            cursor.execute("UPDATE events SET date_time = ? WHERE id = ?", (event_datetime, _id))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
 
 # DELETE
 

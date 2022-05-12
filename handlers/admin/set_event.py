@@ -9,6 +9,7 @@ from keyboards.inline.calendar_buttons import generate_calendar_days, generate_c
 
 from keyboards.inline.choice_buttons import choose_location_markup, callback_buttons,\
     repeat_buttons, add_concert_songs_buttons
+from misc.edit_functions import enter_new_event_time
 from misc.messages.singer_dictionary import NOTHING
 from misc.messages.event_dictionary import *
 
@@ -46,7 +47,8 @@ def calendar_command_handler(message: Message):
 def calendar_datetime_handler(call: CallbackQuery):
     """Show events if the event_id is 0 or continue to add an event"""
 
-    _, event_id, year, month, day = call.data.split(":")
+    print(f"calendar_datetime_handler {call.data}")
+    _, event_id, year, month, day, _id = call.data.split(":")
     if event_id == "0":
         # Show all events for this day
         received_date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}%"
@@ -63,6 +65,12 @@ def calendar_datetime_handler(call: CallbackQuery):
 
         text = f"{current_events_text} {day} {chosen_months_text_tuple[int(month) - 1]} {year} года:"
         bot.send_message(call.message.chat.id, text, reply_markup=callback_buttons(data))
+
+    elif event_id == "4":
+        # Edit event date
+        msg = f"Вы выбрали {events_to_add_text_tuple[event_id]} на {day} " \
+              f"{chosen_months_text_tuple[int(month) - 1]} {year} года.\n{set_event_time_text}"
+        bot.register_next_step_handler(msg, enter_new_event_time, _id, year, month, day)
 
     else:
         # Continue to add an event
@@ -149,9 +157,13 @@ def save_new_location_and_event(message: Message):
     if db_event.location_name_exists(message.text):
         msg_data = bot.send_message(message.chat.id, location_name_exists_text)
         bot.register_next_step_handler(msg_data, save_new_location_and_event)
+        return
     else:
-        location_data.location_name = message.text
         location_id = db_event.add_location(message.text, location_data.url)
+        bot.send_message(message.chat.id, f"{new_location_text}{message.text}")
+
+    if event_data.is_in_progress:
+        location_data.location_name = message.text
         event_data.eid = db_event.add_event(event_data.event_id, event_data.event_name,
                                             event_data.datetime, location_id)
         bot.send_message(message.chat.id, f"{new_location_text}{location_data.location_name}")

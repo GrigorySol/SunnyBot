@@ -1,7 +1,11 @@
+from datetime import datetime, date
+
 from loader import bot
-from telebot.types import CallbackQuery
-from keyboards.inline.choice_buttons import callback_buttons
+from telebot.types import CallbackQuery, Message
+from keyboards.inline.choice_buttons import callback_buttons, choose_location_markup
+from keyboards.inline.calendar_buttons import generate_calendar_days
 from keyboards.inline import callback_datas as cd
+from misc.edit_functions import enter_new_event_time
 from misc.messages import event_dictionary as ev_d, singer_dictionary as sin_d, changes_dictionary as ch_d
 from database_control import db_songs, db_singer, db_event
 
@@ -23,7 +27,6 @@ def display_options_to_change(call: CallbackQuery):
             return
 
         call_config = "selected_event"
-        print(event)
         if event[1] == 2:
             options = ch_d.event_options_to_edit_text_tuple.__add__(("Песни", ))
             print(options)
@@ -46,8 +49,68 @@ def display_options_to_change(call: CallbackQuery):
     for option_id, option in enumerate(options):
         data.append((option, f"{call_config}:{option_id}:{item_id}"))
 
-    bot.send_message(call.message.chat.id, ev_d.select_option_to_change, reply_markup=callback_buttons(data))
+    bot.send_message(call.message.chat.id, ch_d.select_option_to_change_text, reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+
+
+@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="0"))
+def edit_event_name(call: CallbackQuery):
+    """Edit name for an Event"""
+
+    print(f"edit_event_name {call.data}")
+    _, _, _id = call.data.split(":")
+    msg = bot.send_message(call.message.chat.id, ch_d.enter_new_event_name_text)
+    bot.register_next_step_handler(msg, enter_new_event_name, _id)
+
+
+def enter_new_event_name(message: Message, event_id):
+    """Updates the name for an event"""
+
+    if db_event.edit_event_name(event_id, message.text):
+        bot.send_message(message.chat.id, ch_d.event_name_changed_text)
+
+    else:
+        bot.send_message(message.chat.id, ch_d.ERROR_text)
+        msg = f"ERROR in enter_new_event_name\nData: {message.text} {event_id} "
+        bot.send_message(434767263, msg)
+
+
+@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="1"))
+def edit_event_date(call: CallbackQuery):
+    """Edit date for an Event"""
+
+    print(f"edit_event_date {call.data}")
+    _, _, _id = call.data.split(":")
+    now = date.today()
+    event_id = "4"  # edit
+    bot.send_message(call.message.chat.id, ev_d.set_event_date_text,
+                     reply_markup=generate_calendar_days(now.year, now.month, int(event_id), _id))
+
+
+@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="2"))
+def edit_event_time(call: CallbackQuery):
+    """Edit time for an Event"""
+
+    print(f"edit_event_time {call.data}")
+    _, _, _id = call.data.split(":")
+    event_date, _ = db_event.get_event_datetime(_id).split(" ")
+    year, month, day = event_date.split("-")
+    msg = bot.send_message(call.message.chat.id, ch_d.enter_new_event_time_text)
+    bot.register_next_step_handler(msg, enter_new_event_time, _id, year, month, day)
+
+
+@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="3"))
+def edit_event_location(call: CallbackQuery):
+    """Edit location for an Event"""
+    print(f"edit_event_location {call.data}")
+    bot.send_message(call.message.chat.id, ev_d.choose_event_location_text, reply_markup=choose_location_markup)
+
+
+@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="4"))
+def edit_comment_event(call: CallbackQuery):
+    """Edit comment for an Event"""
+    print(f"edit_comment_event {call.data}")
+    bot.send_message(call.message.chat.id, sin_d.NOTHING)
 
 
 @bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="5"))
@@ -71,10 +134,10 @@ def delete_event(call: CallbackQuery):
 
 
 @bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="6"))
-def songs_event(call: CallbackQuery):
-    """Change songs for an Event"""
+def edit_event_songs(call: CallbackQuery):
+    """Edit songs for a concert"""
 
-    print(f"songs_event {call.data}")
+    print(f"edit_event_songs {call.data}")
     _, _, _id = call.data.split(":")
 
     call_config = "change_songs"

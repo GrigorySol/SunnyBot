@@ -15,7 +15,7 @@ EMTPY_FIELD = 'calendar_button'
 CLOSE_BTN = InlineKeyboardButton("Закрыть", callback_data="close")
 
 
-def generate_calendar_days(year: int, month: int, event_id=0):
+def generate_calendar_days(year: int, month: int, event_id=0, _id=None):
     """
     Generates buttons grid with month + year, weeks, days,
     next, previous, zoom out and close buttons
@@ -75,7 +75,7 @@ def generate_calendar_days(year: int, month: int, event_id=0):
             week_buttons.append(
                 InlineKeyboardButton(
                     text=day_name,
-                    callback_data=f"calendar_data:{event_id}:{year}:{month}:{day}"
+                    callback_data=f"calendar_data:{event_id}:{year}:{month}:{day}:{_id}"
                 )
             )
         keyboard.add(*week_buttons)
