@@ -10,45 +10,58 @@ from misc.messages import event_dictionary as ev_d, singer_dictionary as sin_d, 
 from database_control import db_songs, db_singer, db_event
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.change_callback.filter())
-def display_options_to_change(call: CallbackQuery):
-    """Display options to change"""
+@bot.callback_query_handler(func=None, calendar_config=cd.change_callback.filter(type="event"))
+def display_event_options_to_change(call: CallbackQuery):
+    """Display event options to change"""
 
     print(f"We are in display_options_to_change CALL DATA = {call.data}\n")
     _, name, item_id = call.data.split(":")
 
-    if name == "event":  # "Название", "Дату", "Время", "Место", "Комментарий", "УДАЛИТЬ"
-        event = db_event.search_event_by_id(int(item_id))
+    # "Название", "Дату", "Время", "Место", "Комментарий", "УДАЛИТЬ"
+    event = db_event.search_event_by_id(int(item_id))
 
-        if not event:
-            sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
-            bot.send_message(call.message.chat.id, ev_d.event_not_found_text)
-            bot.send_sticker(call.message.chat.id, sticker_id)
-            return
+    if not event:
+        sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
+        bot.send_message(call.message.chat.id, ev_d.event_not_found_text)
+        bot.send_sticker(call.message.chat.id, sticker_id)
+        return
 
-        call_config = "selected_event"
-        if event[1] == 2:
-            options = ch_d.event_options_to_edit_text_tuple.__add__(("Песни", ))
-            print(options)
-        else:
-            options = ch_d.event_options_to_edit_text_tuple
+    call_config = "selected_event"
+    if event[1] == 2:
+        options = ch_d.event_options_to_edit_text_tuple.__add__(("Песни", ))
+        print(options)
+    else:
+        options = ch_d.event_options_to_edit_text_tuple
 
-    else:  # "location" - "Название", "Ссылку на карту", "Ничего", "УДАЛИТЬ
-        location = db_event.search_location_by_id(int(item_id))
+    create_option_buttons(call, call_config, item_id, options)
 
-        if not location:
-            sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
-            bot.send_message(call.message.chat.id, ev_d.event_not_found_text)
-            bot.send_sticker(call.message.chat.id, sticker_id)
-            return
 
-        call_config = "selected_location"
-        options = ch_d.location_options_to_edit_text_tuple
+@bot.callback_query_handler(func=None, calendar_config=cd.change_callback.filter(type="location"))
+def display_location_options_to_change(call: CallbackQuery):
+    """Display location options to change"""
 
+    print(f"We are in display_options_to_change CALL DATA = {call.data}\n")
+    _, name, item_id = call.data.split(":")
+
+    # "location" - "Название", "Ссылку на карту", "Ничего", "УДАЛИТЬ
+    location = db_event.search_location_by_id(int(item_id))
+
+    if not location:
+        sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
+        bot.send_message(call.message.chat.id, ev_d.location_not_found_text)
+        bot.send_sticker(call.message.chat.id, sticker_id)
+        return
+
+    call_config = "selected_location"
+    options = ch_d.location_options_to_edit_text_tuple
+
+    create_option_buttons(call, call_config, item_id, options)
+
+
+def create_option_buttons(call, call_config, item_id, options):
     data = []
     for option_id, option in enumerate(options):
         data.append((option, f"{call_config}:{option_id}:{item_id}"))
-
     bot.send_message(call.message.chat.id, ch_d.select_option_to_change_text, reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
@@ -93,8 +106,7 @@ def edit_event_time(call: CallbackQuery):
 
     print(f"edit_event_time {call.data}")
     _, _, _id = call.data.split(":")
-    event_date, _ = db_event.get_event_datetime(_id).split(" ")
-    year, month, day = event_date.split("-")
+    year, month, day = db_event.get_event_date(_id).split(" ")
     msg = bot.send_message(call.message.chat.id, ch_d.enter_new_event_time_text)
     bot.register_next_step_handler(msg, enter_new_event_time, _id, year, month, day)
 
@@ -120,7 +132,7 @@ def delete_event(call: CallbackQuery):
     print(f"delete_event {call.data}")
     _, _, _id = call.data.split(":")
 
-    item_name = db_event.search_event_by_id(_id)[2]
+    item_name = db_event.get_event_name(_id)
     call_config = "delete_confirmation"
     item_type = "event"
     data = []

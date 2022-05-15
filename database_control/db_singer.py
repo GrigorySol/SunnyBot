@@ -74,11 +74,21 @@ def get_singer_fullname(_id: int):
         return cursor.fetchone()[0]
 
 
+def get_singer_join_date(_id: int):
+    """Return singer's join_date from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT join_date FROM singers WHERE id = ?", (_id,))
+        return cursor.fetchone()[0]
+
+
 def get_singer_voices(_id: int):
     """Return the singer (id, voices) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
+        # language=SQLITE-SQL
         cursor.execute("SELECT id, voice FROM voices "
                        "INNER JOIN singer_voice ON singer_voice.voice_id = voices.id "
                        "WHERE singer_voice.singer_id = ? ORDER BY singer_voice.voice_id", (_id,))
@@ -90,6 +100,7 @@ def get_singer_suits(_id: int):
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
+        # language=SQLITE-SQL
         cursor.execute("SELECT id, suit, image FROM suits "
                        "INNER JOIN singer_suit ON singer_suit.suit_id = suits.id "
                        "WHERE singer_suit.singer_id = ?", (_id,))
@@ -148,6 +159,7 @@ def search_singer_voice(singer_id: int):
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
+        # language=SQLITE-SQL
         cursor.execute("SELECT GROUP_CONCAT(voices.voice, ', ') FROM singers "
                        "JOIN singer_voice ON singer_voice.singer_id = singers.id "
                        "JOIN voices ON voices.id = singer_voice.voice_id "
@@ -160,6 +172,7 @@ def search_singers_by_voice(voice: str):
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
+        # language=SQLITE-SQL
         cursor.execute("SELECT singers.first_name || ' ' || singers.last_name AS fullname, singers.id "
                        "FROM singers "
                        "JOIN singer_voice ON singer_voice.singer_id = singers.id "

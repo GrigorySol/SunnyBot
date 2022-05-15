@@ -137,29 +137,28 @@ def edit_voices(call):
     bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
 
 
-def enter_new_event_time(message: Message, _id, year, month, day):
+def enter_new_event_time(message: Message, _id, date):
     """Update the time for an event"""
 
     try:
         time = message.text
-        if ':' in time:
-            hours, minutes = time.split(":")
+        if ' ' in time:
+            pass
         elif '-' in time:
             hours, minutes = time.split("-")
-        else:
+            time = f"{hours}:{minutes}"
+        elif ' ':
             hours, minutes = time.split(" ")
+            time = f"{hours}:{minutes}"
 
-        date_time = datetime(int(year), int(month), int(day), int(hours), int(minutes))
-
-        print(f"enter_new_event_time {date_time}")
-
-        if db_event.search_event_by_date(date_time):
+        print(f"enter_new_event_time {date} {time}")
+        if db_event.event_datetime_exists(date, time):
             print("Time exists")
             msg_data = bot.send_message(message.chat.id, ch_d.event_time_busy)
             bot.register_next_step_handler(msg_data, enter_new_event_time)
             return
 
-        if db_event.edit_event_datetime(_id, date_time):
+        if db_event.edit_event_datetime(_id, date, time):
             bot.send_message(message.chat.id, ch_d.event_time_changed_text)
 
     except ValueError:

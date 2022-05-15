@@ -1,7 +1,8 @@
 admin_commands = {
     "singers": "Певуны хоровые",
     "add": "Добавить песню, событие...",
-    "locations": "Все локации"
+    "locations": "Все локации",
+    "attendance": "Посещаемость"
 }
 
 singer_commands = {

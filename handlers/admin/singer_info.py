@@ -1,12 +1,14 @@
+from datetime import date
 from loader import bot
 from telebot.types import CallbackQuery
-from keyboards.inline.callback_datas import show_singer_callback, info_callback, edit_voice_callback
+from keyboards.inline.callback_datas import show_singer_callback, info_callback, edit_voice_callback, \
+    attendance_intervals_callback
 from keyboards.inline.choice_buttons import singer_info_buttons, callback_buttons
 from misc.messages.singer_dictionary import what_to_do_text, singer_not_exists_text
 from misc.messages import changes_dictionary as ch_d
 from misc.edit_functions import display_suits, display_voices
 from misc.edit_functions import edit_voices
-from database_control import db_singer
+from database_control import db_singer, db_attendance
 
 
 @bot.callback_query_handler(func=None, singer_config=show_singer_callback.filter())
@@ -42,8 +44,15 @@ def singer_menu(call: CallbackQuery):
         display_suits(call.message, sid)
 
     elif name == ch_d.info_button_names_text_tuple[2]:          # Посещаемость
-        msg = "Посещаемость пока отсутствует."
-        bot.send_message(call.from_user.id, msg)
+        call_config = "attendance_intervals"
+        data = []
+        msg = "Выберите интервал:"
+
+        for i, interval in enumerate(("За месяц", "За год", "За всё время")):
+            data.append((interval, f"{call_config}:{sid}:{i}"))
+
+        bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+        bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
     elif name == ch_d.info_button_names_text_tuple[3]:          # Комментарий
         msg = "Нечего комментировать."
@@ -57,7 +66,7 @@ def singer_menu(call: CallbackQuery):
         msg = f"{ch_d.delete_confirmation_text} {ch_d.all_sounds_text} {item_name}?"
 
         for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
-            data.append((answer, f"{call_config}:{item_type}:{sid}:{i}"))
+            data.append((answer, f"{call_config}:{item_type}:{i}:{sid}"))
 
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
@@ -70,3 +79,27 @@ def singer_menu(call: CallbackQuery):
 def edit_voice_buttons(call: CallbackQuery):
     """Display buttons to add or remove voice"""
     edit_voices(call)
+
+
+@bot.callback_query_handler(func=None, singer_config=attendance_intervals_callback.filter())
+def display_attendance(call: CallbackQuery):
+    """Display attendance for a singer"""
+
+    print(f"display_attendance {call.data}")
+    _, interval, sid = call.data.split(":")
+    end_date = date.today()
+
+    if interval == "0":
+        month = str(end_date.month - 1).zfill(2)
+        day = str(end_date.day).zfill(2)
+        start_date = f"{end_date.year}-{month}-{day}"
+
+    elif interval == "1":
+        month = str(end_date.month).zfill(2)
+        day = str(end_date.day).zfill(2)
+        start_date = f"{end_date.year - 1}-{month}-{day}"
+
+    else:
+        start_date = db_singer.get_singer_join_date(int(sid))
+
+    print(f"{db_attendance.get_attendance_interval_by_singer(int(sid), start_date, end_date.strftime('%Y-%m-%d'))}")

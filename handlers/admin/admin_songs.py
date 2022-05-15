@@ -215,36 +215,33 @@ def add_sheets_or_sounds(message: Message, song_id):
 
     if message.document:        # sheets
         doc_file_id = message.document.file_id
-        voice_id = message.document.file_name[-5]
+        voice_id = voice_detect(message.document.file_name)
         print(f"add_sheets_or_sounds voice id {voice_id} {message.document.file_name}")
 
-        if voice_id.isdigit() and int(voice_id):
-            voice_id = int(voice_id)
-        else:
-            voice_id = None
-
-        print(f"add_sheets_or_sounds {doc_file_id}")
+        print(f"add_sheets_or_sounds file_id {doc_file_id}")
         db_songs.add_sheets(song_id, voice_id, doc_file_id)
         msg = bot.send_message(message.chat.id, song_d.sheets_added_text)
         bot.register_next_step_handler(msg, add_sheets_or_sounds, song_id)
 
     elif message.audio:      # sounds
         audio_file_id = message.audio.file_id
-        voice_id = message.audio.file_name[-5]
+        voice_id = voice_detect(message.audio.file_name)
         print(f"add_sheets_or_sounds for sounds voice id {voice_id} {message.audio.file_name}")
 
-        if voice_id.isdigit() and int(voice_id):
-            voice_id = int(voice_id)
-        else:
-            voice_id = None
-
-        print(f"add_sheets_or_sounds {audio_file_id}")
+        print(f"add_sheets_or_sounds file_id {audio_file_id}")
         db_songs.add_sound(song_id, voice_id, audio_file_id)
         msg = bot.send_message(message.chat.id, song_d.audio_added_text)
         bot.register_next_step_handler(msg, add_sheets_or_sounds, song_id)
 
     else:
         edit_song_menu(message, song_id, song_d.something_else)
+
+
+def voice_detect(file_name):
+    for i, voice in song_d.song_voices_text_tuple:
+        if voice in file_name:
+            yield i + 1
+    return None
 
 
 def edit_song_menu(message, song_id, msg):

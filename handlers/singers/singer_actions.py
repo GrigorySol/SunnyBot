@@ -91,6 +91,7 @@ def edit_suits_buttons(call: CallbackQuery):
             data.append((song_name, f"{call_config}:{song_id}"))
 
     else:
+        print(f"edit_suits_buttons IN PROGRESS {call.data}")
         concerts = search_events_by_event_id(2)
         call_config = "concert_filter"
         msg = sin_d.choose_concert_text
@@ -151,16 +152,15 @@ def show_event(call: CallbackQuery):
     """Display info about the chosen event"""
 
     _, eid = call.data.split(":")
-    _, event_id, event_name, date_time, location_id, comment = search_event_by_id(eid)
+    _, event_id, event_name, event_date, time, location_id, comment = search_event_by_id(eid)
     _, location_name, url = search_location_by_id(location_id)
 
     location = f"{location_name}\n\n{url}"
     bot.send_message(call.message.chat.id, location)
-    date, time = date_time.split(" ")
-    _, month, day = date.split("-")
-    event_date = f"{int(day)} {chosen_months_text_tuple[int(month)-1]}"
+    _, month, day = event_date.split("-")
+    event_date_text = f"{int(day)} {chosen_months_text_tuple[int(month)-1]}"
 
-    msg = f"{event_name} {event_date} в {time[0:5]}\n"
+    msg = f"{event_name} {event_date_text} в {time}\n"
 
     if event_id == 2:
         songs = db_songs.get_songs_by_event_id(eid)

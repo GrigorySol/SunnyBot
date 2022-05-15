@@ -8,7 +8,7 @@ calendar_zoom = CallbackData("event_id", "year", prefix="calendar_zoom")
 
 event_callback = CallbackData("eid", prefix="event")
 repeat_callback = CallbackData("eid", prefix="repeat")
-period_callback = CallbackData("eid", "repeat_id", prefix="period")
+interval_callback = CallbackData("eid", "repeat_id", prefix="interval")
 
 add_new_callback = CallbackData("type", prefix="add_new")
 change_callback = CallbackData("type", "id", prefix="change")
@@ -36,5 +36,8 @@ suit_edit_callback = CallbackData("action", "suit_id", prefix="suit")
 info_callback = CallbackData("name", "singer_id", prefix="info")
 singer_add_callback = CallbackData("type", "singer_id", "item_id", prefix="singer_add")
 singer_remove_callback = CallbackData("type", "singer_id", "item_id", prefix="singer_remove")
+
+attendance_intervals_callback = CallbackData("interval", "s_id", prefix="attendance_intervals")
+show_attendance_callback = CallbackData("e_id", prefix="show_attendance")
 
 delete_confirmation_callback = CallbackData("type", "item_id", "action_id", prefix="delete_confirmation")

@@ -1,13 +1,22 @@
 import sqlite3
 
 
-def get_all_events():
-    """Return all (id, event_id, event_name, datetime, location_id, comment) from the database."""
+# def get_all_events():
+#     """Return all (id, event_id, event_name, date, time, location_id, comment) from the database."""
+#     with sqlite3.connect("database_control/sunny_bot.db") as db:
+#         cursor = db.cursor()
+#
+#         cursor.execute("SELECT * FROM events ORDER BY datetime")
+#         return cursor.fetchall()
+
+
+def get_event_by_id(_id):
+    """Return id, event_id, event_name, date, time, location_id, comment from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events ORDER BY datetime")
-        return cursor.fetchall()
+        cursor.execute("SELECT * FROM events WHERE id = ?", (_id,))
+        return cursor.fetchone()
 
 
 def get_event_name(_id):
@@ -19,35 +28,53 @@ def get_event_name(_id):
         return cursor.fetchone()[0]
 
 
-def get_event_datetime(_id):
-    """Return datetime from the database."""
+# def get_event_datetime(_id):
+#     """Return datetime from the database."""
+#     with sqlite3.connect("database_control/sunny_bot.db") as db:
+#         cursor = db.cursor()
+#
+#         cursor.execute("SELECT date || time AS datetime FROM events WHERE id = ?", (_id,))
+#         return cursor.fetchone()[0]
+
+
+def get_event_date(_id):
+    """Return date from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT datetime FROM events WHERE id = ?", (_id,))
+        cursor.execute("SELECT date FROM events WHERE id = ?", (_id,))
         return cursor.fetchone()[0]
 
 
-def get_event_location_id(_id):
-    """Return location_id from the database."""
-    with sqlite3.connect("database_control/sunny_bot.db") as db:
-        cursor = db.cursor()
+# def get_event_time(_id):
+#     """Return time from the database."""
+#     with sqlite3.connect("database_control/sunny_bot.db") as db:
+#         cursor = db.cursor()
+#
+#         cursor.execute("SELECT time FROM events WHERE id = ?", (_id,))
+#         return cursor.fetchone()[0]
 
-        cursor.execute("SELECT location_id FROM events WHERE id = ?", (_id,))
-        return cursor.fetchone()[0]
+
+# def get_event_location_id(_id):
+#     """Return location_id from the database."""
+#     with sqlite3.connect("database_control/sunny_bot.db") as db:
+#         cursor = db.cursor()
+#
+#         cursor.execute("SELECT location_id FROM events WHERE id = ?", (_id,))
+#         return cursor.fetchone()[0]
 
 
-def get_event_comment(_id):
-    """Return event_name from the database."""
-    with sqlite3.connect("database_control/sunny_bot.db") as db:
-        cursor = db.cursor()
-
-        cursor.execute("SELECT comment FROM events WHERE id = ?", (_id,))
-        return cursor.fetchone()[0]
+# def get_event_comment(_id):
+#     """Return event_name from the database."""
+#     with sqlite3.connect("database_control/sunny_bot.db") as db:
+#         cursor = db.cursor()
+#
+#         cursor.execute("SELECT comment FROM events WHERE id = ?", (_id,))
+#         return cursor.fetchone()[0]
 
 
 def search_event_by_id(_id):
-    """Return id, event_id, event_name, datetime, location_id, comment from the database."""
+    """Return id, event_id, event_name, date, time, location_id, comment from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
@@ -56,23 +83,32 @@ def search_event_by_id(_id):
 
 
 def search_events_by_event_id(event_id):
-    """Return (id, location_name, datetime) from the database."""
+    """Return (id, location_name, date, time) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT events.id, location_name, events.datetime FROM events "
+        cursor.execute("SELECT events.id, location_name, events.date, events.time FROM events "
                        "JOIN locations ON locations.id = events.location_id "
                        "WHERE event_id = ? ORDER BY datetime", (event_id,))
         return cursor.fetchall()
 
 
 def search_event_by_date(date):
-    """Return (id, event_id, event_name, datetime, location_id, comment) from the database."""
+    """Return (id, event_id, event_name, date, time, location_id, comment) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events WHERE datetime LIKE ? ORDER BY datetime", (date,))
+        cursor.execute("SELECT * FROM events WHERE date LIKE ? ORDER BY date", (date,))
         return cursor.fetchall()
+
+
+def event_datetime_exists(date, time) -> bool:
+    """Return True if date and time exists in the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT id FROM events WHERE date = ? AND time = ?", (date, time))
+        return bool(cursor.fetchone())
 
 
 def get_all_locations():
@@ -113,19 +149,19 @@ def location_name_exists(location_name):
 
 # INSERT
 
-def add_event(event_id, event_name, datetime, location_id):
-    """Add new singer into the database"""
+def add_event(event_id, event_name, date, time, location_id):
+    """Add new event into the database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("INSERT INTO events (event_id, event_name, datetime, location_id) VALUES (?, ?, ?, ?)",
-                       (event_id, event_name, datetime, location_id))
-        cursor.execute("SELECT id FROM events WHERE datetime = ?", (datetime,))
+        cursor.execute("INSERT INTO events (event_id, event_name, date, time, location_id) VALUES (?, ?, ?, ?, ?)",
+                       (event_id, event_name, date, time, location_id))
+        cursor.execute("SELECT id FROM events WHERE date = ? AND time = ?", (date, time,))
         return cursor.fetchone()[0]
 
 
 def add_location(location_name, url):
-    """Add suit for the singer into database"""
+    """Add new location into the database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
@@ -163,13 +199,13 @@ def edit_event_name(_id, event_name):
             return False
 
 
-def edit_event_datetime(_id, event_datetime):
-    """Edit datetime by event _id and Return bool to confirm changes"""
+def edit_event_datetime(_id, date, time):
+    """Edit date and time by event _id and Return bool to confirm changes"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         try:
-            cursor.execute("UPDATE events SET date_time = ? WHERE id = ?", (event_datetime, _id))
+            cursor.execute("UPDATE events SET date = ? AND time = ? WHERE id = ?", (date, time, _id))
             return True
 
         except sqlite3.Error as err:

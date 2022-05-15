@@ -58,7 +58,9 @@ def repeat_buttons(eid):
 
 def change_buttons(name, _id):
     change_markup = InlineKeyboardMarkup(row_width=1)
+    attend_button = InlineKeyboardButton("Посещение", callback_data=f"show_attendance:{_id}")
     change_button = InlineKeyboardButton("Изменить", callback_data=f"change:{name}:{_id}")
+    change_markup.add(attend_button)
     change_markup.add(change_button)
     change_markup.add(close_btn)
     return change_markup
@@ -77,23 +79,34 @@ def callback_buttons(data: List, row=2):
     data: [(text, callback_data)]
     """
     markup = InlineKeyboardMarkup(row_width=row)
-    buttons = []
-    for text in data:
-        btn = InlineKeyboardButton(text[0], callback_data=text[1])
+    buttons = [
+        InlineKeyboardButton(text[0], callback_data=text[1])
+        for text in data
+    ]
+    markup.add(*buttons)
+    markup.add(close_btn)
+    return markup
+
+
+def singer_info_buttons(telegram_name, sid, btn_names):
+    print(f"{telegram_name}, {sid}, {btn_names}")
+    markup = InlineKeyboardMarkup(row_width=2)
+    send_msg_btn = InlineKeyboardButton("Написать", url=f"t.me/{telegram_name}")
+    buttons = [send_msg_btn]
+    for name in btn_names:
+        btn = InlineKeyboardButton(name, callback_data=f"info:{name}:{sid}")
         buttons.append(btn)
     markup.add(*buttons)
     markup.add(close_btn)
     return markup
 
 
-def singer_info_buttons(singername, sid, btn_names):
-    print(f"{singername}, {sid}, {btn_names}")
-    markup = InlineKeyboardMarkup(row_width=2)
-    send_msg_btn = InlineKeyboardButton("Написать", url=f"t.me/{singername}")
-    buttons = [send_msg_btn]
-    for name in btn_names:
-        btn = InlineKeyboardButton(name, callback_data=f"info:{name}:{sid}")
-        buttons.append(btn)
+def message_buttons(data: List, row=2):
+    markup = InlineKeyboardMarkup(row_width=row)
+    buttons = [
+        InlineKeyboardButton(f"{fullname} {attendance}", url=f"t.me/{telegram_name}")
+        for fullname, telegram_name, attendance in data
+    ]
     markup.add(*buttons)
     markup.add(close_btn)
     return markup
