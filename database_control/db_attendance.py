@@ -2,12 +2,12 @@ import sqlite3
 
 
 def get_attendance_by_event_id(event_id):
-    """Return all (singer fullname, telegram_name, attend) and attend from the database."""
+    """Return all (singer id, fullname, telegram_name, attend) and attend from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         # language=SQLITE-SQL
-        cursor.execute("SELECT singers.first_name || ' ' || singers.last_name "
+        cursor.execute("SELECT singers.id, singers.first_name || ' ' || singers.last_name "
                        "AS fullname, singers.telegram_name, attendance.attend "
                        "FROM attendance "
                        "JOIN singers ON singers.id = attendance.singer_id "
@@ -52,25 +52,34 @@ def get_all_telegram_singer_id_by_event_id(event_id):
 # INSERT
 
 def create_new_attendance(event_id):
-    """Add all singers and event to the attendance table in the database. TODO: Add singers"""
+    """Add singers  with voices and an event to the attendance table in the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         # language=SQLITE-SQL
-        return
+        cursor.execute("INSERT INTO attendance (event_id, singer_id) "
+                       "SELECT DISTINCT ?, singer_id FROM singer_voice ", (event_id,))
 
 
 # UPDATE
 
 def edit_singer_attendance(event_id, singer_id, attend):
-    """Edit singer attendance for an event in the database"""
+    """Edit singer attendance for an event in the database/"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         # language=SQLITE-SQL
         cursor.execute("UPDATE attendance SET attend = ? "
-                       "WHERE event_id = ? AND singer_id = ?", (event_id, singer_id, attend))
+                       "WHERE attendance.event_id = ? AND attendance.singer_id = "
+                       "(SELECT id FROM singers WHERE singer_id = ?)", (attend, event_id, singer_id))
 
 
 # DELETE
+
+def remove_singer_attendance(event_id, singer_id):
+    """Remove singer attendance check from an event."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("DELETE FROM attendance WHERE event_id = ? AND singer_id = ?", (event_id, singer_id))
 

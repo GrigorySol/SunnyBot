@@ -89,16 +89,17 @@ def search_events_by_event_id(event_id):
 
         cursor.execute("SELECT events.id, location_name, events.date, events.time FROM events "
                        "JOIN locations ON locations.id = events.location_id "
-                       "WHERE event_id = ? ORDER BY datetime", (event_id,))
+                       "WHERE event_id = ? ORDER BY date", (event_id,))
         return cursor.fetchall()
 
 
 def search_event_by_date(date):
-    """Return (id, event_id, event_name, date, time, location_id, comment) from the database."""
+    """Return (id, event_id, event_name, time) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events WHERE date LIKE ? ORDER BY date", (date,))
+        cursor.execute("SELECT id, event_id, event_name, time "
+                       "FROM events WHERE date LIKE ? ORDER BY time", (date,))
         return cursor.fetchall()
 
 

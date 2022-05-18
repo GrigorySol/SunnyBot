@@ -33,32 +33,32 @@ def display_singer_info(call: CallbackQuery):
 def singer_menu(call: CallbackQuery):
     """Display """
 
-    _, name, sid = call.data.split(":")
+    _, option_id, sid = call.data.split(":")
     sid = int(sid)
     print(f"singer_menu {call.data}")
 
-    if name == ch_d.info_button_names_text_tuple[0]:            # Голос
+    if option_id == "0":            # Голос
         display_voices(call.message, sid)
 
-    elif name == ch_d.info_button_names_text_tuple[1]:          # Костюмы
+    elif option_id == "1":          # Костюмы
         display_suits(call.message, sid)
 
-    elif name == ch_d.info_button_names_text_tuple[2]:          # Посещаемость
+    elif option_id == "2":          # Посещаемость
         call_config = "attendance_intervals"
         data = []
         msg = "Выберите интервал:"
 
         for i, interval in enumerate(("За месяц", "За год", "За всё время")):
-            data.append((interval, f"{call_config}:{sid}:{i}"))
+            data.append((interval, f"{call_config}:{i}:{sid}"))
 
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
-    elif name == ch_d.info_button_names_text_tuple[3]:          # Комментарий
+    elif option_id == "3":          # Комментарий
         msg = "Нечего комментировать."
         bot.send_message(call.from_user.id, msg)
 
-    elif name == ch_d.info_button_names_text_tuple[4]:          # УДАЛИТЬ
+    elif option_id == "4":          # УДАЛИТЬ
         call_config = "delete_confirmation"
         item_type = "singer"
         item_name = db_singer.get_singer_fullname(sid)

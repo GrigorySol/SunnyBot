@@ -36,4 +36,4 @@ def admin_command_rules():
         )
 
 
-# admin_command_rules()
+admin_command_rules()

@@ -5,16 +5,16 @@ from loader import bot
 from database_control import db_singer, db_songs
 from database_control.db_event import search_event_by_id, search_location_by_id, search_events_by_event_id
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
-from keyboards.inline.callback_datas import suit_edit_callback,\
-    event_callback, song_filter_callback, concert_filter_callback
+from keyboards.inline.callback_datas import suit_edit_callback, \
+    event_callback, song_filter_callback, concert_filter_callback, buttons_roll_callback
 from keyboards.inline.choice_buttons import new_singer_markup, accept_markup,\
-    change_buttons, callback_buttons, add_concert_songs_buttons
+    change_buttons, callback_buttons, add_concert_songs_buttons, keep_data, message_buttons
 from misc.edit_functions import display_suits, edit_suits
 from misc.bot_speech import greetings
-from misc.messages.event_dictionary import chosen_months_text_tuple
+from misc.messages.event_dictionary import chosen_months_text_tuple, repertoire, repertoire_is_empty_text
 from misc.messages.changes_dictionary import need_something_text
 from misc.messages.song_dictionary import which_song_text, no_songs_text, wanna_add_text
-from misc.messages import singer_dictionary as sin_d
+from misc.messages import singer_dictionary as sin_d, attendance_dictionary as at_d
 from misc.messages.joke_dictionary import *
 
 
@@ -30,6 +30,32 @@ def singer_not_registered(message: Message):
         text = f"{greetings(singer_time)}\n"
     text += sin_d.not_registered_text
     bot.send_message(singer_id, text, reply_markup=new_singer_markup)
+
+
+@bot.callback_query_handler(func=None, singer_config=buttons_roll_callback.filter())
+def rolling_callback_buttons(call: CallbackQuery):
+    """Roll a page with buttons"""
+
+    print(f"buttons_rolling {call.data}")
+    _, direction, btn_type, index, event_id = call.data.split(":")
+    if direction == "previous":
+        keep_data.i -= 1
+    elif direction == "next":
+        keep_data.i += 1
+
+    if btn_type == "call":
+        bot.edit_message_reply_markup(
+            call.message.chat.id,
+            call.message.id,
+            reply_markup=callback_buttons(keep_data.data, keep_data.row, True)
+        )
+    elif btn_type == "url":
+        print(f"url row is {keep_data.row}")
+        bot.edit_message_reply_markup(
+            call.message.chat.id,
+            call.message.id,
+            reply_markup=message_buttons(keep_data.data, event_id, keep_data.row, True)
+        )
 
 
 @bot.message_handler(commands=["voice"])
@@ -95,9 +121,9 @@ def edit_suits_buttons(call: CallbackQuery):
         concerts = search_events_by_event_id(2)
         call_config = "concert_filter"
         msg = sin_d.choose_concert_text
-        for concert_id, concert_name, date_time in concerts:
-            concert_date = date_time.split(" ")[0]
-            _, month, day = concert_date.split("-")
+        for concert_id, concert_name, date, _ in concerts:
+            print(date)
+            _, month, day = date.split("-")
             name = f"{concert_name} {int(day)} {chosen_months_text_tuple[int(month)-1]}"
             data.append((name, f"{call_config}:{concert_id}"))
 
@@ -164,19 +190,28 @@ def show_event(call: CallbackQuery):
 
     if event_id == 2:
         songs = db_songs.get_songs_by_event_id(eid)
-        msg += "\nПрограмма:\n"
+        msg += f"\n{repertoire}:\n"
         if songs:
             for _, song, _ in songs:
                 msg += f"{song}\n"
         else:
-            msg += "На данный момент отсутствует\n"
+            msg += f"{repertoire_is_empty_text}\n"
 
     if comment:
         msg += comment
     bot.send_message(call.message.chat.id, msg)
 
-    # Admin can change the record about the event
     singer_id = call.from_user.id
+
+    # ask singer to set the attendance
+    call_config = "singer_attendance"
+    data = [
+        (text, f"{call_config}:edit:{eid}:{i}")
+        for i, text in enumerate(at_d.set_attendance_text_tuple)
+    ]
+    bot.send_message(singer_id, at_d.select_attendance_text, reply_markup=callback_buttons(data))
+
+    # Admin can change the record about the event
     name = "event"
 
     if db_singer.is_admin(singer_id):

@@ -10,7 +10,7 @@ from misc.messages import event_dictionary as ev_d, singer_dictionary as sin_d, 
 from database_control import db_songs, db_singer, db_event
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.change_callback.filter(type="event"))
+@bot.callback_query_handler(func=None, singer_config=cd.change_callback.filter(type="event"))
 def display_event_options_to_change(call: CallbackQuery):
     """Display event options to change"""
 
@@ -36,7 +36,7 @@ def display_event_options_to_change(call: CallbackQuery):
     create_option_buttons(call, call_config, item_id, options)
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.change_callback.filter(type="location"))
+@bot.callback_query_handler(func=None, singer_config=cd.change_callback.filter(type="location"))
 def display_location_options_to_change(call: CallbackQuery):
     """Display location options to change"""
 
@@ -66,7 +66,7 @@ def create_option_buttons(call, call_config, item_id, options):
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="0"))
+@bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="0"))
 def edit_event_name(call: CallbackQuery):
     """Edit name for an Event"""
 
@@ -88,7 +88,7 @@ def enter_new_event_name(message: Message, event_id):
         bot.send_message(434767263, msg)
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="1"))
+@bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="1"))
 def edit_event_date(call: CallbackQuery):
     """Edit date for an Event"""
 
@@ -100,7 +100,7 @@ def edit_event_date(call: CallbackQuery):
                      reply_markup=generate_calendar_days(now.year, now.month, int(event_id), _id))
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="2"))
+@bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="2"))
 def edit_event_time(call: CallbackQuery):
     """Edit time for an Event"""
 
@@ -111,21 +111,21 @@ def edit_event_time(call: CallbackQuery):
     bot.register_next_step_handler(msg, enter_new_event_time, _id, year, month, day)
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="3"))
+@bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="3"))
 def edit_event_location(call: CallbackQuery):
     """Edit location for an Event"""
     print(f"edit_event_location {call.data}")
     bot.send_message(call.message.chat.id, ev_d.choose_event_location_text, reply_markup=choose_location_markup)
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="4"))
+@bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="4"))
 def edit_comment_event(call: CallbackQuery):
     """Edit comment for an Event"""
     print(f"edit_comment_event {call.data}")
     bot.send_message(call.message.chat.id, sin_d.NOTHING)
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="5"))
+@bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="5"))
 def delete_event(call: CallbackQuery):
     """DELETE Event"""
 
@@ -145,7 +145,7 @@ def delete_event(call: CallbackQuery):
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.selected_event_callback.filter(option_id="6"))
+@bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="6"))
 def edit_event_songs(call: CallbackQuery):
     """Edit songs for a concert"""
 
@@ -161,7 +161,7 @@ def edit_event_songs(call: CallbackQuery):
     bot.send_message(call.message.chat.id, sin_d.what_to_do_text, reply_markup=callback_buttons(data))
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.change_songs_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=cd.change_songs_callback.filter())
 def edit_songs_for_concert(call: CallbackQuery):
     """List of songs to edit"""
 
@@ -182,11 +182,11 @@ def edit_songs_for_concert(call: CallbackQuery):
     for song_id, song_name, _ in songs:
         data.append((song_name, f"{call_config}:{option}:{concert_id}:{song_id}"))
 
-    bot.send_message(call.message.chat.id, ch_d.edit_buttons_text_tuple, reply_markup=callback_buttons(data))
+    bot.send_message(call.message.chat.id, ch_d.edit_buttons_text_tuple[int(option_id)], reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.concert_songs_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=cd.concert_songs_callback.filter())
 def add_or_remove_songs(call: CallbackQuery):
     """Add or remove songs in concert program"""
 
@@ -207,7 +207,7 @@ def add_or_remove_songs(call: CallbackQuery):
         bot.send_message(call.message.chat.id, f"{ch_d.song_removed_from_concert} {song_name}")
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.selected_location_callback.filter(option_id="3"))
+@bot.callback_query_handler(func=None, singer_config=cd.selected_location_callback.filter(option_id="3"))
 def delete_location(call: CallbackQuery):
     """DELETE location"""
 
@@ -227,7 +227,7 @@ def delete_location(call: CallbackQuery):
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
-@bot.callback_query_handler(func=None, calendar_config=cd.delete_confirmation_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=cd.delete_confirmation_callback.filter())
 def delete_item(call: CallbackQuery):
     """DELETE confirmation"""
 

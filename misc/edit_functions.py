@@ -24,8 +24,8 @@ def display_suits(message, sid):
         suit_data.append(InputMediaPhoto(photo, name))
 
     # add/remove/close buttons
-    for text in ch_d.edit_buttons_text_tuple:
-        data.append((text, f"{call_config}:{text}:{sid}"))
+    for i, text in enumerate(ch_d.edit_buttons_text_tuple):
+        data.append((text, f"{call_config}:{i}:{sid}"))
 
     if not suits:
         data.pop()
@@ -53,8 +53,8 @@ def display_voices(message, sid):
     call_config = "voice"
     data = []
 
-    for text in ch_d.edit_buttons_text_tuple:
-        data.append((text, f"{call_config}:{text}:{sid}"))
+    for i, text in enumerate(ch_d.edit_buttons_text_tuple):
+        data.append((text, f"{call_config}:{i}:{sid}"))
 
     if not voices:
         data.pop()
@@ -79,22 +79,22 @@ def display_voices(message, sid):
 def action_definition(action: str):
     """Define what choice made by singer"""
 
-    if action == "Удалить":
-        call_config = "singer_remove"
-        msg = "Что удалить?"
-    else:  # "Добавить"
+    if action == "0":  # "Добавить"
         call_config = "singer_add"
         msg = "Что добавить?"
+    else:   # УДАЛИТЬ
+        call_config = "singer_remove"
+        msg = "Что удалить?"
     return call_config, msg
 
 
 def edit_suits(call):
     print(f"edit_suits {call.data}")
-    _, action, sid = call.data.split(":")
-    call_config, msg = action_definition(action)
+    _, action_id, sid = call.data.split(":")
+    call_config, msg = action_definition(action_id)
     data = []
 
-    if action == "Удалить":
+    if action_id == "1":
         suits = db_singer.get_singer_suits(sid)
         for suit_id, name, _ in suits:
             data.append((name, f"{call_config}:suit:{sid}:{suit_id}"))
@@ -116,11 +116,11 @@ def edit_suits(call):
 
 def edit_voices(call):
     print(f"edit_voice {call.data}")
-    _, action, sid = call.data.split(":")
-    call_config, msg = action_definition(action)
+    _, action_id, sid = call.data.split(":")
+    call_config, msg = action_definition(action_id)
     data = []
 
-    if action == "Удалить":
+    if action_id == "1":
         voices = db_singer.get_singer_voices(sid)
         for voice_id, name in voices:
             data.append((name, f"{call_config}:voice:{sid}:{voice_id}"))

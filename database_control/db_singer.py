@@ -41,6 +41,7 @@ def is_admin(singer_id: int):
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
+        # language=SQLITE-SQL
         cursor.execute("SELECT * FROM admins JOIN singers ON singers.id = admins.singer_id "
                        "WHERE singers.singer_id = ?", (singer_id,))
     return bool(cursor.fetchone())
@@ -69,6 +70,7 @@ def get_singer_fullname(_id: int):
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
+        # language=SQLITE-SQL
         cursor.execute("SELECT first_name || ' ' || last_name AS fullname "
                        "FROM singers WHERE id = ?", (_id,))
         return cursor.fetchone()[0]
@@ -130,6 +132,7 @@ def get_all_singers():
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
+        # language=SQLITE-SQL
         cursor.execute("SELECT first_name || ' ' || last_name AS fullname, id "
                        "FROM singers ORDER BY first_name")
         return cursor.fetchall()
@@ -140,6 +143,7 @@ def get_all_admins():
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
+        # language=SQLITE-SQL
         cursor.execute("SELECT singers.singer_id FROM singers "
                        "JOIN admins ON admins.singer_id = singers.id ")
         return cursor.fetchall()
@@ -186,6 +190,7 @@ def search_singer_by_name(msg: str):
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
+        # language=SQLITE-SQL
         cursor.execute("SELECT telegram_name, first_name, last_name "
                        "FROM singers WHERE first_name LIKE ?", (msg,))
         return cursor.fetchall()
