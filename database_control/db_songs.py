@@ -106,7 +106,7 @@ def add_song(song_name):
         return cursor.fetchone()[0]
 
 
-def add_sound(song_id, voice_id, file_id):
+def add_sound(song_id: int, voice_id: int, file_id):
     """Add SOUND for the song into the database and Return id"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -117,7 +117,7 @@ def add_sound(song_id, voice_id, file_id):
         return cursor.fetchone()[0]
 
 
-def add_sheets(song_id, voice_id, file_id):
+def add_sheets(song_id: int, voice_id: int, file_id):
     """Add SHEETS for the song into the database and Return id"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()

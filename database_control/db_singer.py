@@ -56,6 +56,41 @@ def count_singers():
         return cursor.fetchone()[0]
 
 
+def get_all_singers():
+    """Return (firstname lastname, id) of the all singers from database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT first_name || ' ' || last_name AS fullname, id "
+                       "FROM singers ORDER BY first_name")
+        return cursor.fetchall()
+
+
+def get_all_admins():
+    """Return (singer_id) for each admin from database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT singers.singer_id FROM singers "
+                       "JOIN admins ON admins.singer_id = singers.id ")
+        return cursor.fetchall()
+
+
+def get_singers_id_by_event(event_id):
+    """Return (singer_id) from singers for event_id from database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+        print(event_id)
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT singers.singer_id FROM singers "
+                       "JOIN attendance ON attendance.singer_id = singers.id "
+                       "WHERE attendance.event_id = ?", (event_id,))
+        return cursor.fetchall()
+
+
 def get_singer_telegram_name(_id: int):
     """Return the (telegram username) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -124,28 +159,6 @@ def get_all_voices():
         cursor = db.cursor()
 
         cursor.execute("SELECT * FROM voices ")
-        return cursor.fetchall()
-
-
-def get_all_singers():
-    """Return (firstname lastname, id) of the all singers from database."""
-    with sqlite3.connect("database_control/sunny_bot.db") as db:
-        cursor = db.cursor()
-
-        # language=SQLITE-SQL
-        cursor.execute("SELECT first_name || ' ' || last_name AS fullname, id "
-                       "FROM singers ORDER BY first_name")
-        return cursor.fetchall()
-
-
-def get_all_admins():
-    """Return (singer_id) for each admin from database."""
-    with sqlite3.connect("database_control/sunny_bot.db") as db:
-        cursor = db.cursor()
-
-        # language=SQLITE-SQL
-        cursor.execute("SELECT singers.singer_id FROM singers "
-                       "JOIN admins ON admins.singer_id = singers.id ")
         return cursor.fetchall()
 
 

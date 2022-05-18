@@ -173,10 +173,10 @@ def edit_song_materials(call: CallbackQuery):
 
     def _add():
         msg = bot.send_message(call.message.chat.id, song_d.drop_the_file_text)
-        bot.register_next_step_handler(msg, add_sheets_or_sounds, song_id)
+        bot.register_next_step_handler(msg, add_sheets_or_sounds, int(song_id))
 
     def _delete():
-        item_name = db_songs.get_song_name(song_id)
+        item_name = db_songs.get_song_name(int(song_id))
         if not item_name:
             sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
             bot.send_message(call.message.chat.id, song_d.song_not_found_text)
@@ -238,9 +238,10 @@ def add_sheets_or_sounds(message: Message, song_id):
 
 
 def voice_detect(file_name):
-    for i, voice in song_d.song_voices_text_tuple:
+    for i, voice in enumerate(song_d.song_voices_text_tuple):
         if voice in file_name:
-            yield i + 1
+            print(f"{voice} in {file_name}")
+            return i + 1
     return None
 
 

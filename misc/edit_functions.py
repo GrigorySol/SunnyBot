@@ -1,9 +1,8 @@
-from datetime import datetime
 from loader import bot
 from telebot.types import InputMediaPhoto, Message
 from keyboards.inline.choice_buttons import callback_buttons
 from misc.messages import event_dictionary as ev_d, singer_dictionary as sin_d, changes_dictionary as ch_d
-from database_control import db_songs, db_singer, db_event
+from database_control import db_singer, db_event
 
 
 def display_suits(message, sid):
