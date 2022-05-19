@@ -7,6 +7,7 @@ from keyboards.inline.callback_datas import add_new_callback
 from handlers.admin.admin_songs import edit_song_menu
 from misc.messages.singer_dictionary import show_singers_text, you_shell_not_pass_text,\
     show_all_singers_text, CANCELED
+from misc.messages.changes_dictionary import blacklist_text, empty_blacklist_text
 from misc.messages.event_dictionary import set_event_date_text, events_to_add_text_tuple,\
     song_or_event_text, choose_location_text
 from misc.messages.song_dictionary import enter_the_song_name_text, now_add_or_edit_text, song_name_exists_text
@@ -65,6 +66,31 @@ def delete_menu_handler(message: Message):
         data.append((location_name, f"{call_config}:{name}:{location_id}"))
 
     bot.send_message(message.chat.id, choose_location_text, reply_markup=callback_buttons(data))
+
+
+@bot.message_handler(commands=["blacklist"])
+def show_singers_search(message: Message):
+    """Display callback buttons with search singer options"""
+
+    is_admin = db_singer.is_admin(message.from_user.id)
+
+    if not is_admin:
+        bot.send_message(message.chat.id, you_shell_not_pass_text)
+        return
+
+    blocked_users = db_singer.get_all_blocked_users()
+
+    if not blocked_users:
+        bot.send_message(message.chat.id, empty_blacklist_text)
+        return
+
+    call_config = "unblock_user"
+    data = []
+
+    for user_id, telegram_name in blocked_users:
+        data.append((telegram_name, f"{call_config}:{user_id}"))
+
+    bot.send_message(message.chat.id, blacklist_text, reply_markup=callback_buttons(data))
 
 
 @bot.callback_query_handler(func=lambda c: c.data == "show_all")

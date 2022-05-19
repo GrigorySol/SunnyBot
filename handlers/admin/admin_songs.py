@@ -187,7 +187,7 @@ def edit_song_materials(call: CallbackQuery):
             call_config = "delete_confirmation"
             item_type = "sheets"
             data = []
-            msg = f"{ch_d.delete_confirmation_text} {ch_d.all_sounds_text} {item_name}?"
+            msg = f"{ch_d.delete_confirmation_text} {ch_d.all_sheets_text} {item_name}?"
 
         else:
             call_config = "delete_confirmation"

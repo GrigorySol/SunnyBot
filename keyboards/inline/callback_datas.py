@@ -40,6 +40,7 @@ suit_edit_callback = CallbackData("action", "suit_id", prefix="suit")
 info_callback = CallbackData("name", "singer_id", prefix="info")
 singer_add_callback = CallbackData("type", "singer_id", "item_id", prefix="singer_add")
 singer_remove_callback = CallbackData("type", "singer_id", "item_id", prefix="singer_remove")
+unblock_user_callback = CallbackData("s_id", prefix="unblock_user")
 
 # attendance
 attendance_intervals_callback = CallbackData("interval", "s_id", prefix="attendance_intervals")

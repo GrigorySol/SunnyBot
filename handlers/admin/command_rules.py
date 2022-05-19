@@ -25,7 +25,7 @@ def admin_command_rules():
     admin_chats = []
     for admin in admins:
         print(admin[0])
-        bot.delete_my_commands(BotCommandScopeChat(admin))
+        bot.delete_my_commands(BotCommandScopeChat(admin[0]))
         chat = BotCommandScopeChat(admin[0])
         admin_chats.append(chat)
 

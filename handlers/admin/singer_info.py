@@ -63,7 +63,7 @@ def singer_menu(call: CallbackQuery):
         item_type = "singer"
         item_name = db_singer.get_singer_fullname(sid)
         data = []
-        msg = f"{ch_d.delete_confirmation_text} {ch_d.all_sounds_text} {item_name}?"
+        msg = f"{ch_d.delete_confirmation_text} {item_name}?"
 
         for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
             data.append((answer, f"{call_config}:{item_type}:{i}:{sid}"))

@@ -9,8 +9,7 @@ need_something_text = "Если информация не актуальна, е
 song_added_to_concert_text = "Добавлена песня"
 song_already_added = "Эта песня уже добавлена."
 song_removed_from_concert = "Удалена песня"
-bot_cant_change_your_life_text = "Мне очень жаль, но на этом наши полномочия всё."
-bot_cant_change_maning = "Смысл невозможно провернуть назад..."
+bot_cant_change_it_text = "Мне очень жаль, но на этом наши полномочия всё."
 
 select_option_to_change_text = "Что нужно изменить?"
 enter_new_event_name_text = "Напишите новое название мероприятия:"
@@ -24,3 +23,7 @@ ERROR_text = "Произошла ошибка. Повторите попытку
 delete_confirmation_text = "Точно хотите удалить"
 all_sheets_text = "все ноты для песни"
 all_sounds_text = "все учебки для песни"
+
+empty_blacklist_text = "В чёрном списке никого нет."
+blacklist_text = "Эти пользователи заблокированы.\nКого нужно помиловать?"
+user_is_free_text = "Добби свободен!"

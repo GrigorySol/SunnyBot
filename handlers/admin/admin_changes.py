@@ -262,3 +262,14 @@ def delete_item(call: CallbackQuery):
     bot.send_message(call.message.chat.id, f"УДАЛЕНО! НАВСЕГДА!!! ХА-ха-ха-ха! ")
     bot.send_sticker(call.message.chat.id, sticker_id)
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+
+
+@bot.callback_query_handler(func=None, singer_config=cd.unblock_user_callback.filter())
+def blacklist_user_remove(call: CallbackQuery):
+    """Remove a user from the blacklist"""
+
+    _, user_id = call.data.split(":")
+    if db_singer.remove_user_from_blacklist(int(user_id)):
+        bot.send_message(call.message.chat.id, ch_d.user_is_free_text)
+    else:
+        bot.send_message(call.message.chat.id, ch_d.ERROR_text)
