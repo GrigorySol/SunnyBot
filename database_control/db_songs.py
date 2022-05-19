@@ -19,13 +19,17 @@ def get_song_name(_id):
         return cursor.fetchone()[0]
 
 
-def get_songs_in_work():
+def get_songs_in_work(event_type: int, start_date, end_date):
     """Return songs (id, song_name, comment) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT id, song_name, comment FROM songs "
-                       "JOIN current_songs ON current_songs.song_id = songs.id ")
+        # language=SQLITE-SQL
+        cursor.execute("SELECT DISTINCT id, song_name, comment FROM songs "
+                       "JOIN events_songs ON events_songs.song_id = songs.id "
+                       "WHERE events_songs.event_id IN "
+                       "(SELECT id FROM events WHERE events.event_id = ? AND events.date BETWEEN ? AND ?) "
+                       "ORDER BY song_name", (event_type, start_date, end_date))
         return cursor.fetchall()
 
 

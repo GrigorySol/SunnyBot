@@ -4,7 +4,7 @@ from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResult
 from keyboards.inline.choice_buttons import callback_buttons, search_choice_markup, query_button
 from keyboards.inline.calendar_buttons import generate_calendar_days
 from keyboards.inline.callback_datas import add_new_callback
-from handlers.admin.admin_songs import edit_song_menu
+from handlers.admin.admin_songs import add_sheets_or_sounds
 from misc.messages.singer_dictionary import show_singers_text, you_shell_not_pass_text,\
     show_all_singers_text, CANCELED
 from misc.messages.changes_dictionary import blacklist_text, empty_blacklist_text
@@ -163,4 +163,5 @@ def add_song_name(message: Message):
 
     else:
         song_id = db_songs.add_song(message.text)
-        edit_song_menu(message, song_id, now_add_or_edit_text)
+        msg = bot.send_message(message.chat.id, now_add_or_edit_text)
+        bot.register_next_step_handler(msg, add_sheets_or_sounds, int(song_id))

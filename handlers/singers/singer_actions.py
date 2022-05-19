@@ -1,3 +1,4 @@
+import datetime
 from random import randint
 
 from config import VIP
@@ -70,7 +71,7 @@ def edit_suits_buttons(call: CallbackQuery):
 
 
 @bot.message_handler(commands=["songs"])
-def show_songs(message: Message):
+def chose_song_filter(message: Message):
     """Display buttons for selecting the output of all songs, in work or concert program."""
 
     call_config = "song_filter"
@@ -82,42 +83,43 @@ def show_songs(message: Message):
 
 
 @bot.callback_query_handler(func=None, singer_config=song_filter_callback.filter())
-def edit_suits_buttons(call: CallbackQuery):
-    """Display buttons with all song names, songs in work or upcoming concert program."""
+def show_songs(call: CallbackQuery):
+    """Display buttons with all song names, songs in work or upcoming concerts."""
 
     _, filter_id = call.data.split(":")
     data = []
-
     call_config = "song_info"
-    msg = which_song_text
 
     if filter_id == "0":
         songs = db_songs.get_all_songs()
-        for song_id, song_name, _ in songs:
-            data.append((song_name, f"{call_config}:{song_id}"))
 
     elif filter_id == "1":
-        songs = db_songs.get_songs_in_work()
-        for song_id, song_name, _ in songs:
-            data.append((song_name, f"{call_config}:{song_id}"))
+        start_date = datetime.datetime.now().date()
+        end_date = start_date + datetime.timedelta(days=365)
+        songs = db_songs.get_songs_in_work(2, f"{start_date}", f"{end_date}")
 
     else:
-        print(f"edit_suits_buttons IN PROGRESS {call.data}")
         concerts = search_events_by_event_id(2)
         call_config = "concert_filter"
-        msg = sin_d.choose_concert_text
         for concert_id, concert_name, date, _ in concerts:
-            print(date)
             _, month, day = date.split("-")
             name = f"{concert_name} {int(day)} {chosen_months_text_tuple[int(month)-1]}"
             data.append((name, f"{call_config}:{concert_id}"))
+        bot.send_message(call.message.chat.id, sin_d.choose_concert_text, reply_markup=callback_buttons(data))
+        return
 
-    bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+    if songs:
+        for song_id, song_name, _ in songs:
+            data.append((song_name, f"{call_config}:{song_id}"))
+        bot.send_message(call.message.chat.id, which_song_text, reply_markup=callback_buttons(data))
+    else:
+        print("show_songs data is empty")
+        bot.send_message(call.message.chat.id, no_songs_text)
 
 
 @bot.callback_query_handler(func=None, singer_config=concert_filter_callback.filter())
-def edit_suits_buttons(call: CallbackQuery):
-    """Display buttons with all song names, songs in work or upcoming concert programs."""
+def concert_songs(call: CallbackQuery):
+    """Display buttons with song names for a concert program."""
 
     _, event_id = call.data.split(":")
     data = []
