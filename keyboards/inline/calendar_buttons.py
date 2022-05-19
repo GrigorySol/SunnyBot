@@ -15,20 +15,13 @@ EMTPY_FIELD = 'calendar_button'
 CLOSE_BTN = InlineKeyboardButton("Закрыть", callback_data="close")
 
 
-def generate_calendar_days(year: int, month: int, event_id=0, _id=None):
+def generate_calendar_days(year: int, month: int, event_type=0, event_id=0):
     """
     Generates buttons grid with month + year, weeks, days,
     next, previous, zoom out and close buttons
     """
 
     keyboard = InlineKeyboardMarkup(row_width=7)
-
-    # event_datetime = get_all_events_datetime()
-    # event_days = []
-    # for day_time in event_datetime:
-    #     day = day_time[0].split(" ")[0]
-    #     if day not in event_days:
-    #         event_days.append(day)
 
     today = date.today()
     text_month = ""
@@ -75,7 +68,7 @@ def generate_calendar_days(year: int, month: int, event_id=0, _id=None):
             week_buttons.append(
                 InlineKeyboardButton(
                     text=day_name,
-                    callback_data=f"calendar_data:{event_id}:{year}:{month}:{day}:{_id}"
+                    callback_data=f"calendar_data:{event_type}:{event_id}:{year}:{month}:{day}"
                 )
             )
         keyboard.add(*week_buttons)
@@ -87,15 +80,19 @@ def generate_calendar_days(year: int, month: int, event_id=0, _id=None):
     keyboard.add(
         InlineKeyboardButton(
             text=prev_button_text,
-            callback_data=calendar_factory.new(event_id=event_id, year=previous_date.year, month=previous_date.month)
+            callback_data=calendar_factory.new(
+                event_type=event_type, event_id=event_id, year=previous_date.year, month=previous_date.month
+            )
         ),
         InlineKeyboardButton(
             text=zoom_out_text,
-            callback_data=calendar_zoom.new(event_id=event_id, year=year)
+            callback_data=calendar_zoom.new(event_type=event_type, event_id=event_id, year=year)
         ),
         InlineKeyboardButton(
             text=next_button_text,
-            callback_data=calendar_factory.new(event_id=event_id, year=next_date.year, month=next_date.month)
+            callback_data=calendar_factory.new(
+                event_type=event_type, event_id=event_id, year=next_date.year, month=next_date.month
+            )
         ),
     )
     keyboard.add(CLOSE_BTN)
@@ -103,7 +100,7 @@ def generate_calendar_days(year: int, month: int, event_id=0, _id=None):
     return keyboard
 
 
-def generate_calendar_months(year: int, event_id=0):
+def generate_calendar_months(year: int, event_type=0, event_id=0):
     """
     Generates buttons grid with year, months,
     next/previous and close buttons
@@ -122,7 +119,9 @@ def generate_calendar_months(year: int, event_id=0):
     keyboard.add(*[
         InlineKeyboardButton(
             text=month,
-            callback_data=calendar_factory.new(event_id=event_id, year=year, month=month_number+1)
+            callback_data=calendar_factory.new(
+                event_type=event_type, event_id=event_id, year=year, month=month_number + 1
+            )
         )
         for month_number, month in enumerate(MONTHS)
     ])
@@ -131,11 +130,11 @@ def generate_calendar_months(year: int, event_id=0):
     keyboard.add(
         InlineKeyboardButton(
             text=prev_button_text,
-            callback_data=calendar_zoom.new(event_id=event_id, year=year - 1)
+            callback_data=calendar_zoom.new(event_type=event_type, event_id=event_id, year=year - 1)
         ),
         InlineKeyboardButton(
             text=next_button_text,
-            callback_data=calendar_zoom.new(event_id=event_id, year=year + 1)
+            callback_data=calendar_zoom.new(event_type=event_type, event_id=event_id, year=year + 1)
         )
     )
     keyboard.add(CLOSE_BTN)

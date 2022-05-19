@@ -40,10 +40,10 @@ def add_menu_handler(message: Message):
 
     call_config = "add_new"
     data = []
-    for i, event in enumerate(events_to_add_text_tuple):
-        if not i:
+    for item_type, event in enumerate(events_to_add_text_tuple):
+        if not item_type:
             continue
-        data.append((event, f"{call_config}:{i}"))
+        data.append((event, f"{call_config}:{item_type}"))
     bot.send_message(message.chat.id, song_or_event_text, reply_markup=callback_buttons(data))
 
 
@@ -87,8 +87,8 @@ def show_singers_search(message: Message):
     call_config = "unblock_user"
     data = []
 
-    for user_id, telegram_name in blocked_users:
-        data.append((telegram_name, f"{call_config}:{user_id}"))
+    for telegram_id, telegram_name in blocked_users:
+        data.append((telegram_name, f"{call_config}:{telegram_id}"))
 
     bot.send_message(message.chat.id, blacklist_text, reply_markup=callback_buttons(data))
 
@@ -101,8 +101,8 @@ def show_all_singers(call: CallbackQuery):
     call_config = "show_singer"
     data = []
 
-    for singer in singers:
-        data.append((singer[0], f"{call_config}:{singer[1]}"))
+    for name, singer_id in singers:
+        data.append((name, f"{call_config}:{singer_id}"))
 
     bot.send_message(call.message.chat.id, show_all_singers_text, reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
@@ -116,10 +116,10 @@ def location_query(query: InlineQuery):
     call_config = "show_singer"
     data = []
 
-    for i, singer in enumerate(singers):
-        if query.query.lower().strip() in singer[0].lower():
-            voices = ", ".join([voice for _, voice in db_singer.get_singer_voices(singer[1])])
-            suits = ", ".join([suit for _, suit, _ in db_singer.get_singer_suits(singer[1])])
+    for i, (name, singer_id) in enumerate(singers):
+        if query.query.lower().strip() in name.lower():
+            voices = ", ".join([voice for _, voice in db_singer.get_singer_voices(singer_id)])
+            suits = ", ".join([suit for _, suit, _ in db_singer.get_singer_suits(singer_id)])
             if voices and suits:
                 content = InputTextMessageContent(f"Голос: {voices}\nКостюмы: {suits}")
             elif voices:
@@ -128,8 +128,8 @@ def location_query(query: InlineQuery):
                 content = InputTextMessageContent(f"Костюмы: {suits}")
             else:
                 content = InputTextMessageContent(f"У этого певуна ещё нет ни голоса, ни костюмов.")
-            btn = query_button(singer[0], f"{call_config}:{singer[1]}")
-            data.append(InlineQueryResultArticle(i, singer[0], content, reply_markup=btn))
+            btn = query_button(name, f"{call_config}:{singer_id}")
+            data.append(InlineQueryResultArticle(i, name, content, reply_markup=btn))
 
     bot.answer_inline_query(query.id, data)
 
@@ -139,8 +139,9 @@ def song_or_event(call: CallbackQuery):
     """Get id from data and call a song or an event creation"""
 
     print(f"song_or_event {call.data}")
-    _, _id = call.data.split(":")
-    if _id == "4":
+    _, item_type = call.data.split(":")
+    if item_type == "4":
+        """Add song"""
         msg = bot.send_message(call.message.chat.id, enter_the_song_name_text)
         bot.register_next_step_handler(msg, add_song_name)
 
@@ -148,7 +149,7 @@ def song_or_event(call: CallbackQuery):
         """Show calendar buttons"""
         now = date.today()
         bot.send_message(call.message.chat.id, set_event_date_text,
-                         reply_markup=generate_calendar_days(now.year, now.month, int(_id)))
+                         reply_markup=generate_calendar_days(now.year, now.month, int(item_type)))
 
 
 def add_song_name(message: Message):

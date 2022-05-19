@@ -43,7 +43,7 @@ def get_all_telegram_singer_id_by_event_id(event_id):
         cursor = db.cursor()
 
         # language=SQLITE-SQL
-        cursor.execute("SELECT singers.singer_id FROM singers "
+        cursor.execute("SELECT singers.telegram_id FROM singers "
                        "JOIN attendance ON attendance.singer_id = singers.id "
                        "WHERE attendance.event_id = ?", (event_id,))
         return cursor.fetchall()
@@ -63,7 +63,7 @@ def create_new_attendance(event_id):
 
 # UPDATE
 
-def edit_singer_attendance(event_id, singer_id, attend):
+def edit_singer_attendance(event_id, telegram_id, attend):
     """Edit singer attendance for an event in the database/"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -71,7 +71,7 @@ def edit_singer_attendance(event_id, singer_id, attend):
         # language=SQLITE-SQL
         cursor.execute("UPDATE attendance SET attend = ? "
                        "WHERE attendance.event_id = ? AND attendance.singer_id = "
-                       "(SELECT id FROM singers WHERE singer_id = ?)", (attend, event_id, singer_id))
+                       "(SELECT id FROM singers WHERE telegram_id = ?)", (attend, event_id, telegram_id))
 
 
 # DELETE

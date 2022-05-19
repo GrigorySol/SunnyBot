@@ -4,7 +4,7 @@ from random import randint
 from config import VIP
 from loader import bot
 from database_control import db_singer, db_songs
-from database_control.db_event import search_event_by_id, search_location_by_id, search_events_by_event_id
+from database_control.db_event import search_event_by_id, search_location_by_id, search_events_by_event_type
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.inline.callback_datas import suit_edit_callback, \
     event_callback, song_filter_callback, concert_filter_callback, buttons_roll_callback
@@ -60,8 +60,8 @@ def show_voice(message: Message):
 @bot.message_handler(commands=["suits"])
 def show_suits(message: Message):
     """Display singer suits and buttons to add or remove"""
-    sid = db_singer.get_singer_id(message.from_user.id)
-    display_suits(message, sid)
+    singer_id = db_singer.get_singer_id(message.from_user.id)
+    display_suits(message, singer_id)
 
 
 @bot.callback_query_handler(func=None, singer_config=suit_edit_callback.filter())
@@ -99,7 +99,7 @@ def show_songs(call: CallbackQuery):
         songs = db_songs.get_songs_in_work(2, f"{start_date}", f"{end_date}")
 
     else:
-        concerts = search_events_by_event_id(2)
+        concerts = search_events_by_event_type(2)
         call_config = "concert_filter"
         for concert_id, concert_name, date, _ in concerts:
             _, month, day = date.split("-")
@@ -164,8 +164,8 @@ def nothing_to_say(message: Message):
 def show_event(call: CallbackQuery):
     """Display info about the chosen event"""
 
-    _, eid = call.data.split(":")
-    _, event_id, event_name, event_date, time, location_id, comment = search_event_by_id(eid)
+    _, event_id = call.data.split(":")
+    _, event_type, event_name, event_date, time, location_id, comment = search_event_by_id(event_id)
     _, location_name, url = search_location_by_id(location_id)
 
     location = f"{location_name}\n\n{url}"
@@ -175,8 +175,8 @@ def show_event(call: CallbackQuery):
 
     msg = f"{event_name} {event_date_text} в {time}\n"
 
-    if event_id == 2:
-        songs = db_songs.get_songs_by_event_id(eid)
+    if event_type == 2:
+        songs = db_songs.get_songs_by_event_id(event_id)
         msg += f"\n{repertoire}:\n"
         if songs:
             for _, song, _ in songs:
@@ -193,16 +193,16 @@ def show_event(call: CallbackQuery):
     # ask singer to set the attendance
     call_config = "singer_attendance"
     data = [
-        (text, f"{call_config}:edit:{eid}:{i}")
+        (text, f"{call_config}:edit:{event_id}:{i}")
         for i, text in enumerate(at_d.set_attendance_text_tuple)
     ]
     bot.send_message(singer_id, at_d.select_attendance_text, reply_markup=callback_buttons(data))
 
     # Admin can change the record about the event
-    name = "event"
+    item = "event"
 
     if db_singer.is_admin(singer_id):
-        bot.send_message(singer_id, need_something_text, reply_markup=change_buttons(name, eid))
+        bot.send_message(singer_id, need_something_text, reply_markup=change_buttons(item, event_id))
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')
@@ -251,7 +251,7 @@ def nothing_to_say(message: Message):
     """Random answer on unrecognised message"""
 
     text = {randomizer(random_answer_text_tuple)}
-    bot.forward_message(VIP, message.chat.id, message.id)
+    bot.forward_message(VIP, message.chat.id, message.id, disable_notification=True)
     print(message.text)
     print(text)
     bot.send_message(message.chat.id, text)
@@ -261,11 +261,3 @@ def randomizer(items):
     """Takes items and returns a random item"""
     i = randint(0, len(items) - 1)
     return items[i]
-
-
-"""
-@bot.callback_query_handler(func=None)
-def remove_btn(call: CallbackQuery):
-    # Close unused buttons
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
-"""

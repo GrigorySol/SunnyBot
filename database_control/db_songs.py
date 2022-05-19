@@ -28,7 +28,7 @@ def get_songs_in_work(event_type: int, start_date, end_date):
         cursor.execute("SELECT DISTINCT id, song_name, comment FROM songs "
                        "JOIN events_songs ON events_songs.song_id = songs.id "
                        "WHERE events_songs.event_id IN "
-                       "(SELECT id FROM events WHERE events.event_id = ? AND events.date BETWEEN ? AND ?) "
+                       "(SELECT id FROM events WHERE events.event_type = ? AND events.date BETWEEN ? AND ?) "
                        "ORDER BY song_name", (event_type, start_date, end_date))
         return cursor.fetchall()
 
@@ -44,12 +44,12 @@ def get_songs_by_event_id(event_id):
         return cursor.fetchall()
 
 
-def song_exists(_id):
+def song_exists(song_id):
     """Check if the song exists in the database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT song_name FROM songs WHERE id = ?", (_id,))
+        cursor.execute("SELECT song_name FROM songs WHERE id = ?", (song_id,))
         return bool(cursor.fetchone())
 
 
@@ -134,13 +134,13 @@ def add_sheets(song_id: int, voice_id: int, file_id):
 
 # UPDATE
 
-def edit_song_name(_id, song_name):
+def edit_song_name(song_id, song_name):
     """Edit song_name by song _id and Return bool to confirm changes"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         try:
-            cursor.execute("UPDATE songs SET song_name = ? WHERE id = ?", (song_name, _id))
+            cursor.execute("UPDATE songs SET song_name = ? WHERE id = ?", (song_name, song_id))
             return True
 
         except sqlite3.Error as err:
@@ -148,13 +148,13 @@ def edit_song_name(_id, song_name):
             return False
 
 
-def edit_song_comment(_id, comment):
+def edit_song_comment(song_id, comment):
     """Edit song comment by song _id and Return bool to confirm changes"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         try:
-            cursor.execute("UPDATE songs SET comment = ? WHERE id = ?", (comment, _id))
+            cursor.execute("UPDATE songs SET comment = ? WHERE id = ?", (comment, song_id))
             return True
 
         except sqlite3.Error as err:
@@ -162,12 +162,12 @@ def edit_song_comment(_id, comment):
             return False
 
 
-def edit_sound_by_id(_id, voice_id):
+def edit_sound_by_id(song_id, voice_id):
     """edit sound by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
         try:
-            cursor.execute("UPDATE sounds SET voice_id = ? WHERE id = ?", (voice_id, _id))
+            cursor.execute("UPDATE sounds SET voice_id = ? WHERE id = ?", (voice_id, song_id))
             return True
 
         except sqlite3.Error as err:
@@ -175,12 +175,12 @@ def edit_sound_by_id(_id, voice_id):
             return False
 
 
-def edit_sheets_by_id(_id, voice_id):
+def edit_sheets_by_id(song_id, voice_id):
     """Edit sheets by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
         try:
-            cursor.execute("UPDATE sheets SET voice_id = ? WHERE id = ?", (voice_id, _id))
+            cursor.execute("UPDATE sheets SET voice_id = ? WHERE id = ?", (voice_id, song_id))
             return True
 
         except sqlite3.Error as err:
@@ -190,12 +190,12 @@ def edit_sheets_by_id(_id, voice_id):
 
 # DELETE
 
-def delete_song_by_id(_id):
+def delete_song_by_id(song_id):
     """DELETE song by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
         try:
-            cursor.execute("DELETE FROM songs WHERE id = ?", (_id,))
+            cursor.execute("DELETE FROM songs WHERE id = ?", (song_id,))
             return True
 
         except sqlite3.Error as err:

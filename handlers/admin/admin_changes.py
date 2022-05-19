@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date
 
 from config import VIP
 from loader import bot
@@ -72,9 +72,9 @@ def edit_event_name(call: CallbackQuery):
     """Edit name for an Event"""
 
     print(f"edit_event_name {call.data}")
-    _, _, _id = call.data.split(":")
+    _, _, event_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, ch_d.enter_new_event_name_text)
-    bot.register_next_step_handler(msg, enter_new_event_name, _id)
+    bot.register_next_step_handler(msg, enter_new_event_name, event_id)
 
 
 def enter_new_event_name(message: Message, event_id):
@@ -94,11 +94,11 @@ def edit_event_date(call: CallbackQuery):
     """Edit date for an Event"""
 
     print(f"edit_event_date {call.data}")
-    _, _, _id = call.data.split(":")
+    _, _, event_id = call.data.split(":")
     now = date.today()
-    event_id = "4"  # edit
+    event_type = "4"  # edit
     bot.send_message(call.message.chat.id, ev_d.set_event_date_text,
-                     reply_markup=generate_calendar_days(now.year, now.month, int(event_id), _id))
+                     reply_markup=generate_calendar_days(now.year, now.month, int(event_type), event_id))
 
 
 @bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="2"))
@@ -106,10 +106,10 @@ def edit_event_time(call: CallbackQuery):
     """Edit time for an Event"""
 
     print(f"edit_event_time {call.data}")
-    _, _, _id = call.data.split(":")
-    event_date = db_event.get_event_date(_id)
+    _, _, event_id = call.data.split(":")
+    event_date = db_event.get_event_date(event_id)
     msg = bot.send_message(call.message.chat.id, ch_d.enter_new_event_time_text)
-    bot.register_next_step_handler(msg, enter_new_event_time, _id, event_date)
+    bot.register_next_step_handler(msg, enter_new_event_time, event_id, event_date)
 
 
 @bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="3"))
@@ -131,16 +131,16 @@ def delete_event(call: CallbackQuery):
     """DELETE Event"""
 
     print(f"delete_event {call.data}")
-    _, _, _id = call.data.split(":")
+    _, _, event_id = call.data.split(":")
 
-    item_name = db_event.get_event_name(_id)
+    item_name = db_event.get_event_name(event_id)
     call_config = "delete_confirmation"
     item_type = "event"
     data = []
     msg = f"{ch_d.delete_confirmation_text} {item_name}?"
 
     for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
-        data.append((answer, f"{call_config}:{item_type}:{_id}:{i}"))
+        data.append((answer, f"{call_config}:{item_type}:{event_id}:{i}"))
 
     bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
@@ -151,13 +151,13 @@ def edit_event_songs(call: CallbackQuery):
     """Edit songs for a concert"""
 
     print(f"edit_event_songs {call.data}")
-    _, _, _id = call.data.split(":")
+    _, _, event_id = call.data.split(":")
 
     call_config = "change_songs"
     data = []
 
     for option_id, option_name in enumerate(ch_d.edit_buttons_text_tuple):
-        data.append((option_name, f"{call_config}:{_id}:{option_id}"))
+        data.append((option_name, f"{call_config}:{event_id}:{option_id}"))
 
     bot.send_message(call.message.chat.id, sin_d.what_to_do_text, reply_markup=callback_buttons(data))
 
@@ -213,16 +213,16 @@ def delete_location(call: CallbackQuery):
     """DELETE location"""
 
     print(f"delete_location {call.data}")
-    _, _, _id = call.data.split(":")
+    _, _, location_id = call.data.split(":")
 
-    item_name = db_event.search_location_by_id(_id)[2]
+    item_name = db_event.search_location_by_id(location_id)[1]
     call_config = "delete_confirmation"
     item_type = "location"
     data = []
     msg = f"{ch_d.delete_confirmation_text}\n{item_name}?"
 
     for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
-        data.append((answer, f"{call_config}:{item_type}:{_id}:{i}"))
+        data.append((answer, f"{call_config}:{item_type}:{location_id}:{i}"))
 
     bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
@@ -268,8 +268,8 @@ def delete_item(call: CallbackQuery):
 def blacklist_user_remove(call: CallbackQuery):
     """Remove a user from the blacklist"""
 
-    _, user_id = call.data.split(":")
-    if db_singer.remove_user_from_blacklist(int(user_id)):
+    _, telegram_id = call.data.split(":")
+    if db_singer.remove_user_from_blacklist(int(telegram_id)):
         bot.send_message(call.message.chat.id, ch_d.user_is_free_text)
     else:
         bot.send_message(call.message.chat.id, ch_d.ERROR_text)

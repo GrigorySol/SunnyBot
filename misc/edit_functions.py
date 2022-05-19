@@ -137,7 +137,7 @@ def edit_voices(call):
     bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
 
 
-def enter_new_event_time(message: Message, _id, date):
+def enter_new_event_time(message: Message, event_id: int, date):
     """Update the time for an event"""
 
     time = message.text
@@ -159,5 +159,5 @@ def enter_new_event_time(message: Message, _id, date):
         bot.register_next_step_handler(msg_data, enter_new_event_time)
         return
 
-    if db_event.edit_event_datetime(_id, date, time):
+    if db_event.edit_event_datetime(event_id, date, time):
         bot.send_message(message.chat.id, ch_d.event_time_changed_text)

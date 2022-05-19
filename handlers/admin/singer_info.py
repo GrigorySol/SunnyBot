@@ -15,17 +15,17 @@ from database_control import db_singer, db_attendance
 def display_singer_info(call: CallbackQuery):
     """Display info buttons"""
 
-    sid = int(call.data.split(":")[1])
-    print(f"display_singer_info {call.data} {db_singer.singer_exists_by_id(sid)}")
+    singer_id = int(call.data.split(":")[1])
+    print(f"display_singer_info {call.data} {db_singer.singer_exists_by_id(singer_id)}")
 
-    if not db_singer.singer_exists_by_id(sid):
+    if not db_singer.singer_exists_by_id(singer_id):
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
         bot.send_message(call.message.chat.id, singer_not_exists_text)
         bot.send_sticker(call.message.chat.id, sticker_id)
         return
 
-    singername = db_singer.get_singer_telegram_name(sid)
-    reply_markup = singer_info_buttons(singername, sid, ch_d.info_button_names_text_tuple)
+    telegram_name = db_singer.get_singer_telegram_name(singer_id)
+    reply_markup = singer_info_buttons(telegram_name, singer_id, ch_d.info_button_names_text_tuple)
     bot.send_message(call.from_user.id, what_to_do_text, reply_markup=reply_markup)
 
 
@@ -33,15 +33,15 @@ def display_singer_info(call: CallbackQuery):
 def singer_menu(call: CallbackQuery):
     """Display """
 
-    _, option_id, sid = call.data.split(":")
-    sid = int(sid)
+    _, option_id, singer_id = call.data.split(":")
+    singer_id = int(singer_id)
     print(f"singer_menu {call.data}")
 
     if option_id == "0":            # Голос
-        display_voices(call.message, sid)
+        display_voices(call.message, singer_id)
 
     elif option_id == "1":          # Костюмы
-        display_suits(call.message, sid)
+        display_suits(call.message, singer_id)
 
     elif option_id == "2":          # Посещаемость
         call_config = "attendance_intervals"
@@ -49,7 +49,7 @@ def singer_menu(call: CallbackQuery):
         msg = "Выберите интервал:"
 
         for i, interval in enumerate(("За месяц", "За год", "За всё время")):
-            data.append((interval, f"{call_config}:{i}:{sid}"))
+            data.append((interval, f"{call_config}:{i}:{singer_id}"))
 
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
@@ -61,12 +61,12 @@ def singer_menu(call: CallbackQuery):
     elif option_id == "4":          # УДАЛИТЬ
         call_config = "delete_confirmation"
         item_type = "singer"
-        item_name = db_singer.get_singer_fullname(sid)
+        item_name = db_singer.get_singer_fullname(singer_id)
         data = []
         msg = f"{ch_d.delete_confirmation_text} {item_name}?"
 
         for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
-            data.append((answer, f"{call_config}:{item_type}:{i}:{sid}"))
+            data.append((answer, f"{call_config}:{item_type}:{i}:{singer_id}"))
 
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
@@ -86,7 +86,7 @@ def display_attendance(call: CallbackQuery):
     """Display attendance for a singer"""
 
     print(f"display_attendance {call.data}")
-    _, interval, sid = call.data.split(":")
+    _, interval, singer_id = call.data.split(":")
     end_date = date.today()
 
     if interval == "0":
@@ -100,6 +100,6 @@ def display_attendance(call: CallbackQuery):
         start_date = f"{end_date.year - 1}-{month}-{day}"
 
     else:
-        start_date = db_singer.get_singer_join_date(int(sid))
+        start_date = db_singer.get_singer_join_date(int(singer_id))
 
-    print(f"{db_attendance.get_attendance_interval_by_singer(int(sid), start_date, end_date.strftime('%Y-%m-%d'))}")
+    print(f"{db_attendance.get_attendance_interval_by_singer(int(singer_id),start_date,end_date.strftime('%Y-%m-%d'))}")

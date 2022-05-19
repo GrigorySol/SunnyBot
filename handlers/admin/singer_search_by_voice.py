@@ -32,7 +32,7 @@ def show_voice(call: CallbackQuery):
         msg = f"Вы выбрали {voice}"
         call_config = "show_singer"
         data = []
-        for singer in singers:
-            data.append((singer[0], f"{call_config}:{singer[1]}"))
+        for name, singer_id in singers:
+            data.append((name, f"{call_config}:{singer_id}"))
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)

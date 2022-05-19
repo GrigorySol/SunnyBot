@@ -80,18 +80,18 @@ def add_concert_songs_buttons(concert_id):
     return concert_markup
 
 
-def repeat_buttons(eid):
+def repeat_buttons(event_id):
     repeat_markup = InlineKeyboardMarkup(row_width=1)
-    repeat_button = InlineKeyboardButton("Повторить", callback_data=f"repeat:{eid}")
+    repeat_button = InlineKeyboardButton("Повторить", callback_data=f"repeat:{event_id}")
     repeat_markup.add(repeat_button)
     repeat_markup.add(close_btn)
     return repeat_markup
 
 
-def change_buttons(name, _id):
+def change_buttons(item, item_id):
     change_markup = InlineKeyboardMarkup(row_width=1)
-    attend_button = InlineKeyboardButton("Посещение", callback_data=f"show_attendance:{_id}")
-    change_button = InlineKeyboardButton("Изменить", callback_data=f"change:{name}:{_id}")
+    attend_button = InlineKeyboardButton("Посещение", callback_data=f"show_attendance:{item_id}")
+    change_button = InlineKeyboardButton("Изменить", callback_data=f"change:{item}:{item_id}")
     change_markup.add(attend_button)
     change_markup.add(change_button)
     change_markup.add(close_btn)
@@ -201,13 +201,13 @@ def rolling_buttons(btn_type, event_id):
     return next_btn, previous_btn
 
 
-def singer_info_buttons(telegram_name, sid, btn_names):
-    print(f"{telegram_name}, {sid}, {btn_names}")
+def singer_info_buttons(telegram_name, singer_id, btn_names):
+    print(f"{telegram_name}, {singer_id}, {btn_names}")
     markup = InlineKeyboardMarkup(row_width=2)
     send_msg_btn = InlineKeyboardButton("Написать", url=f"t.me/{telegram_name}")
     buttons = [send_msg_btn]
     for i, text in enumerate(btn_names):
-        btn = InlineKeyboardButton(text, callback_data=f"info:{i}:{sid}")
+        btn = InlineKeyboardButton(text, callback_data=f"info:{i}:{singer_id}")
         buttons.append(btn)
     markup.add(*buttons)
     markup.add(close_btn)

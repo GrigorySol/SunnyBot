@@ -1,104 +1,59 @@
 import sqlite3
 
 
-# def get_all_events():
-#     """Return all (id, event_id, event_name, date, time, location_id, comment) from the database."""
-#     with sqlite3.connect("database_control/sunny_bot.db") as db:
-#         cursor = db.cursor()
-#
-#         cursor.execute("SELECT * FROM events ORDER BY datetime")
-#         return cursor.fetchall()
-
-
-def get_event_by_id(_id):
-    """Return id, event_id, event_name, date, time, location_id, comment from the database."""
+def get_event_by_id(event_id):
+    """Return id, event_type, event_name, date, time, location_id, comment from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events WHERE id = ?", (_id,))
+        cursor.execute("SELECT * FROM events WHERE id = ?", (event_id,))
         return cursor.fetchone()
 
 
-def get_event_name(_id):
+def get_event_name(event_id):
     """Return event_name from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT event_name FROM events WHERE id = ?", (_id,))
+        cursor.execute("SELECT event_name FROM events WHERE id = ?", (event_id,))
         return cursor.fetchone()[0]
 
 
-# def get_event_datetime(_id):
-#     """Return datetime from the database."""
-#     with sqlite3.connect("database_control/sunny_bot.db") as db:
-#         cursor = db.cursor()
-#
-#         cursor.execute("SELECT date || time AS datetime FROM events WHERE id = ?", (_id,))
-#         return cursor.fetchone()[0]
-
-
-def get_event_date(_id):
+def get_event_date(event_id):
     """Return date from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT date FROM events WHERE id = ?", (_id,))
+        cursor.execute("SELECT date FROM events WHERE id = ?", (event_id,))
         return cursor.fetchone()[0]
 
 
-# def get_event_time(_id):
-#     """Return time from the database."""
-#     with sqlite3.connect("database_control/sunny_bot.db") as db:
-#         cursor = db.cursor()
-#
-#         cursor.execute("SELECT time FROM events WHERE id = ?", (_id,))
-#         return cursor.fetchone()[0]
-
-
-# def get_event_location_id(_id):
-#     """Return location_id from the database."""
-#     with sqlite3.connect("database_control/sunny_bot.db") as db:
-#         cursor = db.cursor()
-#
-#         cursor.execute("SELECT location_id FROM events WHERE id = ?", (_id,))
-#         return cursor.fetchone()[0]
-
-
-# def get_event_comment(_id):
-#     """Return event_name from the database."""
-#     with sqlite3.connect("database_control/sunny_bot.db") as db:
-#         cursor = db.cursor()
-#
-#         cursor.execute("SELECT comment FROM events WHERE id = ?", (_id,))
-#         return cursor.fetchone()[0]
-
-
-def search_event_by_id(_id):
-    """Return id, event_id, event_name, date, time, location_id, comment from the database."""
+def search_event_by_id(event_id):
+    """Return id, event_type, event_name, date, time, location_id, comment from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events WHERE id = ?", (_id,))
+        cursor.execute("SELECT * FROM events WHERE id = ?", (event_id,))
         return cursor.fetchone()
 
 
-def search_events_by_event_id(event_id):
+def search_events_by_event_type(event_type):
     """Return (id, location_name, date, time) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         cursor.execute("SELECT events.id, location_name, events.date, events.time FROM events "
                        "JOIN locations ON locations.id = events.location_id "
-                       "WHERE event_id = ? ORDER BY date", (event_id,))
+                       "WHERE event_type = ? ORDER BY date", (event_type,))
         return cursor.fetchall()
 
 
 def search_event_by_date(date):
-    """Return (id, event_id, event_name, time) from the database."""
+    """Return (id, event_type, event_name, time) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT id, event_id, event_name, time "
+        cursor.execute("SELECT id, event_type, event_name, time "
                        "FROM events WHERE date LIKE ? ORDER BY time", (date,))
         return cursor.fetchall()
 
@@ -121,12 +76,12 @@ def get_all_locations():
         return cursor.fetchall()
 
 
-def search_location_by_id(_id):
+def search_location_by_id(location_id):
     """Return id, location_name, url from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM locations WHERE id = ?", (_id,))
+        cursor.execute("SELECT * FROM locations WHERE id = ?", (location_id,))
         return cursor.fetchone()
 
 
@@ -150,13 +105,13 @@ def location_name_exists(location_name):
 
 # INSERT
 
-def add_event(event_id, event_name, date, time, location_id):
+def add_event(event_type, event_name, date, time, location_id):
     """Add new event into the database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("INSERT INTO events (event_id, event_name, date, time, location_id) VALUES (?, ?, ?, ?, ?)",
-                       (event_id, event_name, date, time, location_id))
+        cursor.execute("INSERT INTO events (event_type, event_name, date, time, location_id) VALUES (?, ?, ?, ?, ?)",
+                       (event_type, event_name, date, time, location_id))
         cursor.execute("SELECT id FROM events WHERE date = ? AND time = ?", (date, time,))
         return cursor.fetchone()[0]
 
@@ -186,13 +141,13 @@ def add_song_to_concert(concert_id: int, song_id: int):
 
 # UPDATE
 
-def edit_event_name(_id, event_name):
+def edit_event_name(event_id, event_name):
     """Edit event_name by event _id and Return bool to confirm changes"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         try:
-            cursor.execute("UPDATE events SET event_name = ? WHERE id = ?", (event_name, _id))
+            cursor.execute("UPDATE events SET event_name = ? WHERE id = ?", (event_name, event_id))
             return True
 
         except sqlite3.Error as err:
@@ -200,13 +155,13 @@ def edit_event_name(_id, event_name):
             return False
 
 
-def edit_event_datetime(_id, date, time):
-    """Edit date and time by event _id and Return bool to confirm changes"""
+def edit_event_datetime(event_id: int, date, time):
+    """Edit date and time by event id and Return bool to confirm changes"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         try:
-            cursor.execute("UPDATE events SET date = ?, time = ? WHERE id = ?", (date, time, _id))
+            cursor.execute("UPDATE events SET date = ?, time = ? WHERE id = ?", (date, time, event_id))
             return True
 
         except sqlite3.Error as err:
@@ -216,20 +171,20 @@ def edit_event_datetime(_id, date, time):
 
 # DELETE
 
-def delete_event_by_id(_id: int):
+def delete_event_by_id(event_id: int):
     """DELETE event by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("DELETE FROM events WHERE id = ?", (_id,))
+        cursor.execute("DELETE FROM events WHERE id = ?", (event_id,))
 
 
-def delete_location_by_id(_id: int):
+def delete_location_by_id(location_id: int):
     """DELETE location by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("DELETE FROM location WHERE id = ?", (_id,))
+        cursor.execute("DELETE FROM location WHERE id = ?", (location_id,))
 
 
 def delete_song_from_concert(concert_id: int, song_id: int):
