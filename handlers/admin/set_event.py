@@ -11,8 +11,7 @@ from keyboards.inline.calendar_buttons import generate_calendar_days, generate_c
 from keyboards.inline.choice_buttons import choose_location_markup, callback_buttons, \
     repeat_buttons, add_concert_songs_buttons, message_buttons
 from misc.edit_functions import enter_new_event_time
-from misc.messages import event_dictionary as ev_d, changes_dictionary as ch_d, \
-    singer_dictionary as sin_d, attendance_dictionary as at_d
+from misc.messages import event_dictionary as ev_d, attendance_dictionary as at_d
 
 
 class EventData:
@@ -24,13 +23,7 @@ class EventData:
         self.is_in_progress = False
 
 
-class LocationData:
-    def __init__(self):
-        self.url = None
-
-
 event_data = EventData()
-location_data = LocationData()
 
 
 @bot.message_handler(commands=['calendar'])
@@ -97,38 +90,30 @@ def add_event_time_handler(call: CallbackQuery):
 def add_time_for_event(message: Message):
     """Get time from the input and ask to name the event or set the place"""
 
-    try:
-        time = message.text
-        if ':' in time:
-            event_data.time = time
-        elif '-' in time:
-            hours, minutes = time.split("-")
-            event_data.time = f"{hours}:{minutes}"
-        elif ' ' in time:
-            hours, minutes = time.split(" ")
-            event_data.time = f"{hours}:{minutes}"
-
-        if db_event.event_datetime_exists(event_data.date, time):
-            print("Time exists")
-            msg_data = bot.send_message(message.chat.id, ev_d.event_time_exists_text)
-            bot.register_next_step_handler(msg_data, add_time_for_event)
-            return
-
-        if event_data.event_id == 1:
-            msg = f"{ev_d.set_event_name_text}{ev_d.events_to_add_text_tuple[event_data.event_id]}:"
-            msg_data = bot.send_message(message.chat.id, msg)
-            bot.register_next_step_handler(msg_data, set_name_for_event)
-        else:
-            bot.send_message(message.chat.id, ev_d.choose_event_location_text, reply_markup=choose_location_markup)
-
-    except ValueError:
+    time = message.text
+    if ':' in time:
+        event_data.time = time
+    elif '-' in time:
+        hours, minutes = time.split("-")
+        event_data.time = f"{hours}:{minutes}"
+    elif ' ' in time:
+        hours, minutes = time.split(" ")
+        event_data.time = f"{hours}:{minutes}"
+    else:
         msg_data = bot.send_message(message.chat.id, ev_d.wrong_event_time_text)
         bot.register_next_step_handler(msg_data, add_time_for_event)
 
-    except Exception as e:
-        print(f"ОШИБОЧКА В add_time_for_event: {e}")
-        msg_data = bot.send_message(message.chat.id, ev_d.wrong_event_time_text)
+    if db_event.event_datetime_exists(event_data.date, time):
+        msg_data = bot.send_message(message.chat.id, ev_d.event_time_exists_text)
         bot.register_next_step_handler(msg_data, add_time_for_event)
+        return
+
+    if event_data.event_id == 1:
+        msg = f"{ev_d.set_event_name_text}{ev_d.events_to_add_text_tuple[event_data.event_id]}:"
+        msg_data = bot.send_message(message.chat.id, msg)
+        bot.register_next_step_handler(msg_data, set_name_for_event)
+    else:
+        bot.send_message(message.chat.id, ev_d.choose_event_location_text, reply_markup=choose_location_markup)
 
 
 def set_name_for_event(message: Message):
@@ -153,30 +138,28 @@ def check_location_url(message: Message):
             if db_event.location_url_exists(url):
                 bot.send_message(message.chat.id, ev_d.location_url_exists_text, reply_markup=choose_location_markup)
             else:
-                location_data.url = url
                 msg_data = bot.send_message(message.chat.id, ev_d.enter_location_name_text)
-                bot.register_next_step_handler(msg_data, save_new_location_and_event)
+                bot.register_next_step_handler(msg_data, save_new_location_and_event, url)
         else:
             msg_data = bot.send_message(message.chat.id, ev_d.wrong_location_url_text)
             bot.register_next_step_handler(msg_data, check_location_url)
 
 
-def save_new_location_and_event(message: Message):
+def save_new_location_and_event(message: Message, url):
     """Save new location and event"""
 
     if db_event.location_name_exists(message.text):
         msg_data = bot.send_message(message.chat.id, ev_d.location_name_exists_text)
-        bot.register_next_step_handler(msg_data, save_new_location_and_event)
+        bot.register_next_step_handler(msg_data, save_new_location_and_event, url)
         return
     else:
-        location_id = db_event.add_location(message.text, location_data.url)
+        location_id = db_event.add_location(message.text, url)
         bot.send_message(message.chat.id, f"{ev_d.new_location_text}{message.text}")
 
     if event_data.is_in_progress:
-        location_data.location_name = message.text
         event_data.eid = db_event.add_event(event_data.event_id, event_data.event_name,
                                             event_data.date, event_data.time, location_id)
-        bot.send_message(message.chat.id, f"{ev_d.new_location_text}{location_data.location_name}")
+        bot.send_message(message.chat.id, f"{ev_d.new_location_text}{message.text}")
         print(f"save_new_location_and_event {event_data.event_id},"
               f"{event_data.event_name}, {event_data.date, event_data.time}")
         if event_data.event_id == 2:

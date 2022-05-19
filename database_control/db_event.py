@@ -206,7 +206,7 @@ def edit_event_datetime(_id, date, time):
         cursor = db.cursor()
 
         try:
-            cursor.execute("UPDATE events SET date = ? AND time = ? WHERE id = ?", (date, time, _id))
+            cursor.execute("UPDATE events SET date = ?, time = ? WHERE id = ?", (date, time, _id))
             return True
 
         except sqlite3.Error as err:

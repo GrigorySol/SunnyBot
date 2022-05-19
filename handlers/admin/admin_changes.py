@@ -1,5 +1,6 @@
 from datetime import datetime, date
 
+from config import VIP
 from loader import bot
 from telebot.types import CallbackQuery, Message
 from keyboards.inline.choice_buttons import callback_buttons, choose_location_markup
@@ -85,7 +86,7 @@ def enter_new_event_name(message: Message, event_id):
     else:
         bot.send_message(message.chat.id, ch_d.ERROR_text)
         msg = f"ERROR in enter_new_event_name\nData: {message.text} {event_id} "
-        bot.send_message(434767263, msg)
+        bot.send_message(VIP, msg)
 
 
 @bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="1"))
@@ -106,9 +107,9 @@ def edit_event_time(call: CallbackQuery):
 
     print(f"edit_event_time {call.data}")
     _, _, _id = call.data.split(":")
-    year, month, day = db_event.get_event_date(_id).split(" ")
+    event_date = db_event.get_event_date(_id)
     msg = bot.send_message(call.message.chat.id, ch_d.enter_new_event_time_text)
-    bot.register_next_step_handler(msg, enter_new_event_time, _id, year, month, day)
+    bot.register_next_step_handler(msg, enter_new_event_time, _id, event_date)
 
 
 @bot.callback_query_handler(func=None, singer_config=cd.selected_event_callback.filter(option_id="3"))

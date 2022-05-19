@@ -1,3 +1,4 @@
+from config import VIP
 from loader import bot
 from telebot.types import InputMediaPhoto, Message
 from keyboards.inline.choice_buttons import callback_buttons
@@ -139,33 +140,24 @@ def edit_voices(call):
 def enter_new_event_time(message: Message, _id, date):
     """Update the time for an event"""
 
-    try:
-        time = message.text
-        if ' ' in time:
-            pass
-        elif '-' in time:
-            hours, minutes = time.split("-")
-            time = f"{hours}:{minutes}"
-        elif ' ':
-            hours, minutes = time.split(" ")
-            time = f"{hours}:{minutes}"
-
-        print(f"enter_new_event_time {date} {time}")
-        if db_event.event_datetime_exists(date, time):
-            print("Time exists")
-            msg_data = bot.send_message(message.chat.id, ch_d.event_time_busy)
-            bot.register_next_step_handler(msg_data, enter_new_event_time)
-            return
-
-        if db_event.edit_event_datetime(_id, date, time):
-            bot.send_message(message.chat.id, ch_d.event_time_changed_text)
-
-    except ValueError:
+    time = message.text
+    if '-' in time:
+        hours, minutes = time.split("-")
+        time = f"{hours}:{minutes}"
+    elif ' ' in time:
+        hours, minutes = time.split(" ")
+        time = f"{hours}:{minutes}"
+    elif ':' not in time:
         msg_data = bot.send_message(message.chat.id, ev_d.wrong_event_time_text)
         bot.register_next_step_handler(msg_data, enter_new_event_time)
+        return
 
-    else:
-        bot.send_message(message.chat.id, ch_d.ERROR_text)
-        msg = f"ERROR in enter_new_event_time\nData: {message.text} {_id} "
-        bot.send_message(434767263, msg)
+    print(f"enter_new_event_time {date} {time}")
+    if db_event.event_datetime_exists(date, time):
+        print("Time exists")
+        msg_data = bot.send_message(message.chat.id, ch_d.event_time_busy)
+        bot.register_next_step_handler(msg_data, enter_new_event_time)
+        return
 
+    if db_event.edit_event_datetime(_id, date, time):
+        bot.send_message(message.chat.id, ch_d.event_time_changed_text)

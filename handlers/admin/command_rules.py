@@ -3,7 +3,6 @@ from telebot.types import BotCommand, BotCommandScopeChat
 from misc.bot_commands import admin_commands, singer_commands
 from database_control.db_singer import get_all_admins
 
-bot.delete_my_commands(BotCommandScopeChat(434767263))
 
 s_commands = []
 for s_command in singer_commands:
@@ -26,6 +25,7 @@ def admin_command_rules():
     admin_chats = []
     for admin in admins:
         print(admin[0])
+        bot.delete_my_commands(BotCommandScopeChat(admin))
         chat = BotCommandScopeChat(admin[0])
         admin_chats.append(chat)
 

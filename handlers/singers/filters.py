@@ -1,7 +1,17 @@
 from telebot.callback_data import CallbackDataFilter
 from telebot.custom_filters import SimpleCustomFilter, AdvancedCustomFilter
 from telebot.types import Message, CallbackQuery
-from database_control.db_singer import singer_exists
+from database_control.db_singer import singer_exists, is_blocked
+
+
+class UserBlocked(SimpleCustomFilter):
+    """Check whether the user is blocked"""
+
+    key = "is_blocked"
+
+    def check(self, message: Message):
+        blocked = is_blocked(message.from_user.id)
+        return blocked
 
 
 class NewSingerFilter(SimpleCustomFilter):
@@ -10,8 +20,7 @@ class NewSingerFilter(SimpleCustomFilter):
     key = "is_new_singer"
 
     def check(self, message: Message):
-        singer_id = message.from_user.id
-        exists = singer_exists(singer_id)
+        exists = singer_exists(message.from_user.id)
         return not exists
 
 

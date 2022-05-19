@@ -11,13 +11,13 @@ from misc.messages import attendance_dictionary as at_d, event_dictionary as ev_
 
 def schedule_pending():
     while True:
-        print(f"schedule running {datetime.now()}")
+        print(f"schedule pending {datetime.now()}")
         schedule.run_pending()
-        sleep(100)
+        sleep(50)
 
 
 def check_event_date():
-    """Check if there is an event in one week or one day in the database."""
+    """Check if there is an event in one week, one day or day to day in the database."""
 
     current_date = datetime.now().date()
     before_week = current_date + timedelta(weeks=1)
@@ -30,7 +30,7 @@ def check_event_date():
     if today_events:
         for event_id, _, event_name, event_time in today_events:
             print(f"Events for today:\n{event_name}")
-            event_reminder(event_id, event_name, f"{current_date}", event_time)
+            event_reminder(event_id, event_name, "Cегодня", event_time)
     if day_events:
         for event_id, _, event_name, event_time in day_events:
             print(f"Events in one day:\n{event_name}")
@@ -42,22 +42,26 @@ def check_event_date():
 
 
 def event_reminder(event_id: int, event_name: str, event_date: str, event_time: str):
+    """Create and send a message to all participating singers."""
+
     call_config = "singer_attendance"
     data = [
         (text, f"{call_config}:edit:{event_id}:{i}")
         for i, text in enumerate(at_d.set_attendance_text_tuple)
     ]
-    year, month, day = event_date.split("-")
-    msg_date = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
-    msg = f"{msg_date} {rem_d.will_be_text} {event_name}.\n" \
+
+    msg_date = f"{event_date} в {event_time}"
+
+    if event_date != "Cегодня":
+        year, month, day = event_date.split("-")
+        msg_date = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
+
+    msg = f"{msg_date} {rem_d.will_be_text} '{event_name}'.\n" \
           f"{rem_d.info_in_calendar_text}\n" \
           f"{rem_d.select_attendance_text}"
     markup = callback_buttons(data)
 
-    # return bot.send_message(434767263, msg, reply_markup=markup)
-    print(get_singers_id_by_event(event_id))
     for singer_id in get_singers_id_by_event(event_id):
-        print(singer_id[0])
         try:
             print(f"Message for singer id {singer_id[0]}")
             bot.send_message(singer_id[0], msg, reply_markup=markup)
@@ -65,4 +69,4 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
             print(f"{e}\n{singer_id[0]} not exists")
 
 
-schedule.every().day.at("09:15").do(check_event_date)
+schedule.every().day.at("10:15").do(check_event_date)

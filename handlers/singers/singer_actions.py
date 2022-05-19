@@ -1,35 +1,20 @@
-from datetime import datetime
 from random import randint
 
+from config import VIP
 from loader import bot
 from database_control import db_singer, db_songs
 from database_control.db_event import search_event_by_id, search_location_by_id, search_events_by_event_id
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.inline.callback_datas import suit_edit_callback, \
     event_callback, song_filter_callback, concert_filter_callback, buttons_roll_callback
-from keyboards.inline.choice_buttons import new_singer_markup, accept_markup,\
-    change_buttons, callback_buttons, add_concert_songs_buttons, keep_data, message_buttons
+from keyboards.inline.choice_buttons import accept_markup, change_buttons, callback_buttons,\
+    add_concert_songs_buttons, keep_data, message_buttons
 from misc.edit_functions import display_suits, edit_suits
-from misc.bot_speech import greetings
 from misc.messages.event_dictionary import chosen_months_text_tuple, repertoire, repertoire_is_empty_text
 from misc.messages.changes_dictionary import need_something_text
 from misc.messages.song_dictionary import which_song_text, no_songs_text, wanna_add_text
 from misc.messages import singer_dictionary as sin_d, attendance_dictionary as at_d
 from misc.messages.joke_dictionary import *
-
-
-@bot.message_handler(is_new_singer=True)
-def singer_not_registered(message: Message):
-    """Interact with a new user and offer to register"""
-
-    singer_id = message.from_user.id
-    singer_time = datetime.utcfromtimestamp(message.date).hour
-    if message.from_user.username == "Alex_3owls":
-        text = f"{greetings(singer_time)}, Сашенька\n"
-    else:
-        text = f"{greetings(singer_time)}\n"
-    text += sin_d.not_registered_text
-    bot.send_message(singer_id, text, reply_markup=new_singer_markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=buttons_roll_callback.filter())
@@ -264,7 +249,7 @@ def nothing_to_say(message: Message):
     """Random answer on unrecognised message"""
 
     text = {randomizer(random_answer_text_tuple)}
-    bot.forward_message(434767263, message.chat.id, message.id)
+    bot.forward_message(VIP, message.chat.id, message.id)
     print(message.text)
     print(text)
     bot.send_message(message.chat.id, text)
