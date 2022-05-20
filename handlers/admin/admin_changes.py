@@ -15,7 +15,7 @@ from database_control import db_songs, db_singer, db_event
 def display_event_options_to_change(call: CallbackQuery):
     """Display event options to change"""
 
-    print(f"We are in display_options_to_change CALL DATA = {call.data}\n")
+    print(f"We are in display_event_options_to_change CALL DATA = {call.data}\n")
     _, name, item_id = call.data.split(":")
 
     # "Название", "Дату", "Время", "Место", "Комментарий", "УДАЛИТЬ"
@@ -29,7 +29,7 @@ def display_event_options_to_change(call: CallbackQuery):
 
     call_config = "selected_event"
     if event[1] == 2:
-        options = ch_d.event_options_to_edit_text_tuple.__add__(("Песни", ))
+        options = ch_d.event_options_to_edit_text_tuple.__add__(("Песни", "Костюмы"))
         print(options)
     else:
         options = ch_d.event_options_to_edit_text_tuple
@@ -41,7 +41,7 @@ def display_event_options_to_change(call: CallbackQuery):
 def display_location_options_to_change(call: CallbackQuery):
     """Display location options to change"""
 
-    print(f"We are in display_options_to_change CALL DATA = {call.data}\n")
+    print(f"We are in display_location_options_to_change CALL DATA = {call.data}\n")
     _, name, item_id = call.data.split(":")
 
     # "location" - "Название", "Ссылку на карту", "Ничего", "УДАЛИТЬ
@@ -259,7 +259,7 @@ def delete_item(call: CallbackQuery):
     elif item_type == "sounds":
         db_songs.delete_sounds_by_song_id(int(item_id))
 
-    bot.send_message(call.message.chat.id, f"УДАЛЕНО! НАВСЕГДА!!! ХА-ха-ха-ха! ")
+    bot.send_message(call.message.chat.id, ch_d.DELETED_text)
     bot.send_sticker(call.message.chat.id, sticker_id)
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 

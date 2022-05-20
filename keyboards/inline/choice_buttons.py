@@ -1,6 +1,7 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from typing import List
 from misc.messages.event_dictionary import next_button_text, prev_button_text
+from misc.messages import buttons_dictionary as bu_d
 
 EMTPY_FIELD = 'calendar_button'
 
@@ -34,47 +35,50 @@ keep_data = DataKeeper()
 
 # Regular buttons
 
-confirm_btn = InlineKeyboardButton("Да", callback_data="confirm")
-decline_btn = InlineKeyboardButton("Нет", callback_data="decline")
-close_btn = InlineKeyboardButton("Закрыть", callback_data="close")
-back_btn = InlineKeyboardButton("Вернуться в меню", callback_data="back")
-
-# Confirmation buttons
-confirm_markup = InlineKeyboardMarkup(row_width=2)
-confirm_markup.add(confirm_btn)
-confirm_markup.add(decline_btn)
+close_btn = InlineKeyboardButton(bu_d.close_btn_text, callback_data="close")
 
 # New singer buttons
 new_singer_markup = InlineKeyboardMarkup(row_width=2)
-add_singer = InlineKeyboardButton("Зарегистрироваться", callback_data="registration")
+add_singer = InlineKeyboardButton(bu_d.register_btn_text, callback_data="registration")
 new_singer_markup.add(add_singer)
 new_singer_markup.add(close_btn)
 
 # Singer search choice buttons
 search_choice_markup = InlineKeyboardMarkup(row_width=2)
-search_by_name = InlineKeyboardButton("По имени", switch_inline_query_current_chat="а")
-search_by_voice = InlineKeyboardButton("По голосу", callback_data="search:voice")
-show_all_btn = InlineKeyboardButton("Посмотреть всех", callback_data="show_all")
+search_by_name = InlineKeyboardButton(bu_d.singer_filter_btn_text_tuple[0], switch_inline_query_current_chat="а")
+search_by_voice = InlineKeyboardButton(bu_d.singer_filter_btn_text_tuple[1], callback_data="search:voice")
+show_all_btn = InlineKeyboardButton(bu_d.singer_filter_btn_text_tuple[2], callback_data="show_all")
 search_choice_markup.add(search_by_name, search_by_voice, show_all_btn)
 search_choice_markup.add(close_btn)
 
 # Reply with joke
 accept_markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-yes_btn = KeyboardButton("Да!")
-of_course_btn = KeyboardButton("Конечно!")
+yes_btn = KeyboardButton(bu_d.accept_btn_text_tuple[0])
+of_course_btn = KeyboardButton(bu_d.accept_btn_text_tuple[1])
 accept_markup.add(yes_btn, of_course_btn, close_btn)
 
 # choose old or new location buttons
 choose_location_markup = InlineKeyboardMarkup(row_width=2)
-choose_old = InlineKeyboardButton("Выбрать", callback_data="location:db")
-get_url = InlineKeyboardButton("Добавить", callback_data="location:url")
+choose_old = InlineKeyboardButton(bu_d.choose_location_btn_text_tuple[0], callback_data="location:db")
+get_url = InlineKeyboardButton(bu_d.choose_location_btn_text_tuple[1], callback_data="location:url")
 choose_location_markup.add(choose_old, get_url)
 choose_location_markup.add(close_btn)
 
 
+def show_participation(event_id) -> InlineKeyboardMarkup:
+    markup = InlineKeyboardMarkup(row_width=1)
+    singers_button = InlineKeyboardButton(
+        bu_d.show_participation_btn_text, callback_data=f"show_participation:{event_id}"
+    )
+    markup.add(singers_button)
+    return markup
+
+
 def add_concert_songs_buttons(concert_id):
     concert_markup = InlineKeyboardMarkup(row_width=1)
-    add_songs_button = InlineKeyboardButton("Добавить песни в программу", callback_data=f"change_songs:{concert_id}:0")
+    add_songs_button = InlineKeyboardButton(
+        bu_d.add_songs_btn_text, callback_data=f"change_songs:{concert_id}:0"
+    )
     concert_markup.add(add_songs_button)
     concert_markup.add(close_btn)
     return concert_markup
@@ -82,17 +86,19 @@ def add_concert_songs_buttons(concert_id):
 
 def repeat_buttons(event_id):
     repeat_markup = InlineKeyboardMarkup(row_width=1)
-    repeat_button = InlineKeyboardButton("Повторить", callback_data=f"repeat:{event_id}")
+    repeat_button = InlineKeyboardButton(
+        bu_d.repeat_btn_text, callback_data=f"repeat:{event_id}"
+    )
     repeat_markup.add(repeat_button)
     repeat_markup.add(close_btn)
     return repeat_markup
 
 
-def change_buttons(item, item_id):
+def change_buttons(item_type, item_id):
     change_markup = InlineKeyboardMarkup(row_width=1)
-    attend_button = InlineKeyboardButton("Посещение", callback_data=f"show_attendance:{item_id}")
-    change_button = InlineKeyboardButton("Изменить", callback_data=f"change:{item}:{item_id}")
-    change_markup.add(attend_button)
+    change_button = InlineKeyboardButton(
+        bu_d.event_change_btn_text, callback_data=f"change:{item_type}:{item_id}"
+    )
     change_markup.add(change_button)
     change_markup.add(close_btn)
     return change_markup
@@ -166,7 +172,7 @@ def message_buttons(data: List, event_id, row=2, multiple=None):
         ]
         markup.add(*buttons)
 
-    remove_btn = InlineKeyboardButton("Убрать участника", callback_data=f"remove_attendance:{event_id}")
+    remove_btn = InlineKeyboardButton(bu_d.event_remove_singer_btn_text, callback_data=f"remove_participation:{event_id}")
     markup.add(remove_btn)
     markup.add(close_btn)
     return markup
@@ -204,7 +210,7 @@ def rolling_buttons(btn_type, event_id):
 def singer_info_buttons(telegram_name, singer_id, btn_names):
     print(f"{telegram_name}, {singer_id}, {btn_names}")
     markup = InlineKeyboardMarkup(row_width=2)
-    send_msg_btn = InlineKeyboardButton("Написать", url=f"t.me/{telegram_name}")
+    send_msg_btn = InlineKeyboardButton(bu_d.send_msg_btn_text, url=f"t.me/{telegram_name}")
     buttons = [send_msg_btn]
     for i, text in enumerate(btn_names):
         btn = InlineKeyboardButton(text, callback_data=f"info:{i}:{singer_id}")

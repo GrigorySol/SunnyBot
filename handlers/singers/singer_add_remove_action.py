@@ -13,20 +13,19 @@ def add_action(call: CallbackQuery):
     _, item, singer_id, item_id = call.data.split(":")
     print(f"{item}, {singer_id}, {item_id}, {call.data}")
 
-    msg = add_wrong_text
-
     if item == "suit":
         db_singer.add_suit(singer_id, item_id)
-        msg = suit_added_text
+        bot.send_message(call.message.chat.id, suit_added_text)
         display_suits(call.message, singer_id)
 
     elif item == "voice":
         db_singer.add_voice(singer_id, item_id)
-        msg = voice_added_text
+        bot.send_message(call.message.chat.id, voice_added_text)
         display_voices(call.message, singer_id)
+    else:
+        bot.send_message(call.message.chat.id, add_wrong_text)
 
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
-    bot.send_message(call.message.chat.id, msg)
 
 
 @bot.callback_query_handler(func=None, singer_config=singer_remove_callback.filter())
@@ -35,17 +34,16 @@ def remove_action(call: CallbackQuery):
     _, item, singer_id, item_id = call.data.split(":")
     print(f"{item}, {singer_id}, {item_id}, {call.data}")
 
-    msg = remove_wrong_text
-
     if item == "suit":
         db_singer.delete_suit(singer_id, item_id)
-        msg = suit_removed_text
+        bot.send_message(call.message.chat.id, suit_removed_text)
         display_suits(call.message, singer_id)
 
     elif item == "voice":
         db_singer.delete_voice(singer_id, item_id)
-        msg = voice_removed_text
+        bot.send_message(call.message.chat.id, voice_removed_text)
         display_voices(call.message, singer_id)
+    else:
+        bot.send_message(call.message.chat.id, remove_wrong_text)
 
     bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
-    bot.send_message(call.message.chat.id, msg)

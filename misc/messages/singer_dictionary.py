@@ -35,7 +35,7 @@ choose_voice_text = "Выберите голосище:"
 song_filter_text_tuple = ("Все", "В работе", "По концертам")
 choose_filter_text = "Выберите фильтр песен или посмотрите весь репертуар:"
 choose_concert_text = "Выберите концерт:"
-what_to_do_text = "Что хотите сделать?"
+what_to_do_text = "Что хотите сделать или изменить?"
 show_all_singers_text = "Любуйтесь"
 you_shell_not_pass_text = "Ти сюда нэ ходы, ти туда ходы, а то пэсня в башка пападёт, совсэм глупий станэшь!.. э?"
 

@@ -5,7 +5,7 @@ from keyboards.inline.callback_datas import show_singer_callback, info_callback,
     attendance_intervals_callback
 from keyboards.inline.choice_buttons import singer_info_buttons, callback_buttons
 from misc.messages.singer_dictionary import what_to_do_text, singer_not_exists_text
-from misc.messages import changes_dictionary as ch_d
+from misc.messages import changes_dictionary as ch_d, attendance_dictionary as at_d
 from misc.edit_functions import display_suits, display_voices
 from misc.edit_functions import edit_voices
 from database_control import db_singer, db_attendance
@@ -37,28 +37,27 @@ def singer_menu(call: CallbackQuery):
     singer_id = int(singer_id)
     print(f"singer_menu {call.data}")
 
-    if option_id == "0":            # Голос
+    if option_id == "0":  # Голос
         display_voices(call.message, singer_id)
 
-    elif option_id == "1":          # Костюмы
+    elif option_id == "1":  # Костюмы
         display_suits(call.message, singer_id)
 
-    elif option_id == "2":          # Посещаемость
+    elif option_id == "2":  # Посещаемость
         call_config = "attendance_intervals"
         data = []
         msg = "Выберите интервал:"
 
-        for i, interval in enumerate(("За месяц", "За год", "За всё время")):
+        for i, interval in enumerate(at_d.attendance_interval_text_tuple):
             data.append((interval, f"{call_config}:{i}:{singer_id}"))
 
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
-        bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
-    elif option_id == "3":          # Комментарий
+    elif option_id == "3":  # Комментарий
         msg = "Нечего комментировать."
         bot.send_message(call.from_user.id, msg)
 
-    elif option_id == "4":          # УДАЛИТЬ
+    elif option_id == "4":  # УДАЛИТЬ
         call_config = "delete_confirmation"
         item_type = "singer"
         item_name = db_singer.get_singer_fullname(singer_id)
@@ -66,13 +65,13 @@ def singer_menu(call: CallbackQuery):
         msg = f"{ch_d.delete_confirmation_text} {item_name}?"
 
         for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
-            data.append((answer, f"{call_config}:{item_type}:{i}:{singer_id}"))
+            data.append((answer, f"{call_config}:{item_type}:{singer_id}:{i}"))
 
         bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
     else:
-        print(f"singer_menu again {call.data}")
+        print(f"singer_menu again !!! {call.data}")
 
 
 @bot.callback_query_handler(func=None, singer_config=edit_voice_callback.filter())
@@ -87,19 +86,35 @@ def display_attendance(call: CallbackQuery):
 
     print(f"display_attendance {call.data}")
     _, interval, singer_id = call.data.split(":")
+    start_date = db_singer.get_singer_join_date(int(singer_id))
     end_date = date.today()
+    msg = at_d.attendance_interval_text_tuple[2]
 
     if interval == "0":
+        msg = at_d.attendance_interval_text_tuple[0]
         month = str(end_date.month - 1).zfill(2)
         day = str(end_date.day).zfill(2)
-        start_date = f"{end_date.year}-{month}-{day}"
+        new_date = f"{end_date.year}-{month}-{day}"
+        if start_date < new_date:
+            start_date = new_date
 
     elif interval == "1":
+        msg = at_d.attendance_interval_text_tuple[0]
         month = str(end_date.month).zfill(2)
         day = str(end_date.day).zfill(2)
-        start_date = f"{end_date.year - 1}-{month}-{day}"
+        new_date = f"{end_date.year - 1}-{month}-{day}"
+        if start_date < new_date:
+            start_date = new_date
 
-    else:
-        start_date = db_singer.get_singer_join_date(int(singer_id))
+    attendance = db_attendance.get_attendance_by_interval(int(singer_id), start_date,
+                                                          end_date.strftime('%Y-%m-%d'))
+    print(f"{attendance}")
 
-    print(f"{db_attendance.get_attendance_interval_by_singer(int(singer_id),start_date,end_date.strftime('%Y-%m-%d'))}")
+    if not attendance:
+        bot.send_message(call.message.chat.id, at_d.no_attendance_text)
+
+    msg += f"\n{at_d.attendance_description_text_tuple[0]}: {attendance.count('0')}" \
+           f"\n{at_d.attendance_description_text_tuple[1]}: {attendance.count('1')}" \
+           f"\n{at_d.attendance_description_text_tuple[2]}: {attendance.count('2')}"
+
+    bot.send_message(call.message.chat.id, msg)

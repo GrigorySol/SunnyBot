@@ -8,8 +8,8 @@ from database_control.db_event import search_event_by_id, search_location_by_id,
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.inline.callback_datas import suit_edit_callback, \
     event_callback, song_filter_callback, concert_filter_callback, buttons_roll_callback
-from keyboards.inline.choice_buttons import accept_markup, change_buttons, callback_buttons,\
-    add_concert_songs_buttons, keep_data, message_buttons
+from keyboards.inline.choice_buttons import accept_markup, change_buttons, callback_buttons, \
+    add_concert_songs_buttons, keep_data, message_buttons, show_participation
 from misc.edit_functions import display_suits, edit_suits
 from misc.messages.event_dictionary import chosen_months_text_tuple, repertoire, repertoire_is_empty_text
 from misc.messages.changes_dictionary import need_something_text
@@ -199,10 +199,17 @@ def show_event(call: CallbackQuery):
     bot.send_message(singer_id, at_d.select_attendance_text, reply_markup=callback_buttons(data))
 
     # Admin can change the record about the event
-    item = "event"
+    item_type = "event"
 
     if db_singer.is_admin(singer_id):
-        bot.send_message(singer_id, need_something_text, reply_markup=change_buttons(item, event_id))
+        markup = show_participation(event_id)
+
+        for buttons in change_buttons(item_type, event_id).keyboard:
+            markup.add(*buttons)
+
+        bot.send_message(singer_id, need_something_text, reply_markup=markup)
+
+    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')

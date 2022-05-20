@@ -12,7 +12,8 @@ def create_database():
                        "join_date DATETIME NOT NULL DEFAULT ((DATETIME('now'))), "
                        "telegram_name STRING UNIQUE NOT NULL, "
                        "first_name STRING, "
-                       "last_name STRING)")
+                       "last_name STRING, "
+                       "comment STRING)")
 
         cursor.execute("CREATE TABLE admins "
                        "(id INTEGER PRIMARY KEY AUTOINCREMENT, "

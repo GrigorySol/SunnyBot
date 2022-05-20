@@ -59,11 +59,11 @@ def delete_menu_handler(message: Message):
 
     locations = db_event.get_all_locations()
     call_config = "change"
-    name = "location"
+    item_type = "location"
     data = []
 
     for location_id, location_name, _ in locations:
-        data.append((location_name, f"{call_config}:{name}:{location_id}"))
+        data.append((location_name, f"{call_config}:{item_type}:{location_id}"))
 
     bot.send_message(message.chat.id, choose_location_text, reply_markup=callback_buttons(data))
 

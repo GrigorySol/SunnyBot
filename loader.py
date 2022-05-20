@@ -1,10 +1,14 @@
 import logging
+import sys
 
 from config import BOT_TOKEN
 from telebot import TeleBot
 from handlers.singers import filters
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
+
+
+sys.excepthook = logging.exception
 
 bot = TeleBot(BOT_TOKEN)
 

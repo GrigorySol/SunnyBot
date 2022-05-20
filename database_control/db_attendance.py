@@ -24,17 +24,26 @@ def get_attendance_by_singer_id(singer_id):
         return cursor.fetchall()
 
 
-def get_attendance_interval_by_singer(singer_id, start_date, end_date):
-    """Return (event_id, attend) using singer_id and date interval from the database."""
+def get_attendance_by_interval(singer_id, start_date, end_date):
+    """Return (attend) using singer_id and date interval from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         # language=SQLITE-SQL
-        cursor.execute("SELECT attendance.event_id, attendance.attend FROM attendance "
+        cursor.execute("SELECT GROUP_CONCAT(attendance.attend) FROM attendance "
                        "JOIN events ON events.id = attendance.event_id "
                        "WHERE attendance.singer_id = ? AND events.date BETWEEN ? AND ?",
                        (singer_id, start_date, end_date))
-        return cursor.fetchall()
+        return cursor.fetchone()[0]
+
+
+def check_singer_attendance_exists(event_id, singer_id):
+    """Return True if attendance record exists in the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM attendance WHERE event_id = ? AND singer_id = ?", (event_id, singer_id))
+        return bool(cursor.fetchone())
 
 
 def get_all_telegram_singer_id_by_event_id(event_id):
