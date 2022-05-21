@@ -24,7 +24,7 @@ def display_suits(message, sid):
         suit_data.append(InputMediaPhoto(photo, name))
 
     # add/remove/close buttons
-    for i, text in enumerate(ch_d.edit_buttons_text_tuple):
+    for i, text in enumerate(ch_d.add_remove_text_tuple):
         data.append((text, f"{call_config}:{i}:{sid}"))
 
     if not suits:
@@ -36,12 +36,7 @@ def display_suits(message, sid):
     elif len(db_singer.get_all_suits()) == len(suits):
         data.pop(0)
 
-    if db_singer.is_admin(message.chat.id):
-        msg = f"{singer_name} может взять на концерт "
-    else:
-        msg = f"Ваши костюмы: "
-
-    msg += f"{', '.join(suit_names)}.\n{sin_d.edit_text}"
+    msg = f"{sin_d.available_suits} {', '.join(suit_names)}.\n{sin_d.edit_text}"
 
     bot.send_media_group(message.chat.id, suit_data)
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
@@ -53,7 +48,7 @@ def display_voices(message, sid):
     call_config = "voice"
     data = []
 
-    for i, text in enumerate(ch_d.edit_buttons_text_tuple):
+    for i, text in enumerate(ch_d.add_remove_text_tuple):
         data.append((text, f"{call_config}:{i}:{sid}"))
 
     if not voices:

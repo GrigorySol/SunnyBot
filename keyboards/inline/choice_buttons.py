@@ -37,6 +37,9 @@ keep_data = DataKeeper()
 
 close_btn = InlineKeyboardButton(bu_d.close_btn_text, callback_data="close")
 
+close_markup = InlineKeyboardMarkup()
+close_markup.add(close_btn)
+
 # New singer buttons
 new_singer_markup = InlineKeyboardMarkup(row_width=2)
 add_singer = InlineKeyboardButton(bu_d.register_btn_text, callback_data="registration")
@@ -59,8 +62,8 @@ accept_markup.add(yes_btn, of_course_btn, close_btn)
 
 # choose old or new location buttons
 choose_location_markup = InlineKeyboardMarkup(row_width=2)
-choose_old = InlineKeyboardButton(bu_d.choose_location_btn_text_tuple[0], callback_data="location:db")
-get_url = InlineKeyboardButton(bu_d.choose_location_btn_text_tuple[1], callback_data="location:url")
+choose_old = InlineKeyboardButton(bu_d.choose_location_btn_text_tuple[0], callback_data="add_event_location:db")
+get_url = InlineKeyboardButton(bu_d.choose_location_btn_text_tuple[1], callback_data="add_event_location:url")
 choose_location_markup.add(choose_old, get_url)
 choose_location_markup.add(close_btn)
 

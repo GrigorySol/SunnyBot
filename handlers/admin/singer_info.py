@@ -25,7 +25,7 @@ def display_singer_info(call: CallbackQuery):
         return
 
     telegram_name = db_singer.get_singer_telegram_name(singer_id)
-    reply_markup = singer_info_buttons(telegram_name, singer_id, ch_d.info_button_names_text_tuple)
+    reply_markup = singer_info_buttons(telegram_name, singer_id, ch_d.edit_singer_text_tuple)
     bot.send_message(call.from_user.id, what_to_do_text, reply_markup=reply_markup)
 
 

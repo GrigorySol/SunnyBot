@@ -1,15 +1,26 @@
-info_button_names_text_tuple = ("Голос", "Костюмы", "Посещаемость", "Комментарий", "УДАЛИТЬ")
-song_options_to_edit_text_tuple = ("Название", "Ноты", "Учебки", "УДАЛИТЬ")
-event_options_to_edit_text_tuple = ("Название", "Дату", "Время", "Место", "Комментарий", "УДАЛИТЬ")
-location_options_to_edit_text_tuple = ("Название", "Ссылку на карту", "Ничего", "УДАЛИТЬ")
-edit_buttons_text_tuple = ("Добавить", "УДАЛИТЬ")
+edit_singer_text_tuple = ("Голос", "Костюмы", "Посещаемость", "Комментарий", "УДАЛИТЬ")
+edit_song_text_tuple = ("Название", "Ноты", "Учебки", "УДАЛИТЬ")
+edit_event_text_tuple = ("Название", "Дату", "Время", "Место", "Комментарий", "УДАЛИТЬ")
+edit_location_text_tuple = ("Название", "Ссылку на карту", "Ничего", "УДАЛИТЬ")
+edit_suits_text_tuple = ("Название", "Фотографию", "УДАЛИТЬ")
+add_remove_text_tuple = ("Добавить", "УДАЛИТЬ")
 delete_confirmation_text_tuple = ("Наверное нет", "НАПРОЧЬ!")
+
+admin_buttons_text = "Админские кнопочки..."
 DELETED_text = "УДАЛЕНО! НАВСЕГДА!!! ХА-ха-ха-ха!"
 
 need_something_text = "Если информация не актуальна, её можно изменить."
 song_added_to_concert_text = "Добавлена песня"
 song_already_added = "Эта песня уже добавлена."
 song_removed_from_concert = "Удалена песня"
+all_sheets_text = "все ноты для песни"
+all_sounds_text = "все учебки для песни"
+
+show_all_suits_text = "Показать все костюмы?"
+button_show_all_suits_text = "Показать все костюмы"
+no_suits_to_edit_text = "Сначала нужно добавить костюмы через меню /add."
+suit_change_text = "Можно изменить название/фотографию костюма или УДАЛИТЬ."
+
 bot_cant_change_it_text = "Мне очень жаль, но на этом наши полномочия всё."
 
 select_option_to_change_text = "Что нужно изменить?"
@@ -22,8 +33,6 @@ event_time_changed_text = "Событие перенесено на указан
 ERROR_text = "Произошла ошибка. Повторите попытку или напишите Грише."
 
 delete_confirmation_text = "Точно хотите удалить"
-all_sheets_text = "все ноты для песни"
-all_sounds_text = "все учебки для песни"
 
 empty_blacklist_text = "В чёрном списке никого нет."
 blacklist_text = "Эти пользователи заблокированы.\nКого нужно помиловать?"

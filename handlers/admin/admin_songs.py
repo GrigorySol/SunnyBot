@@ -89,7 +89,7 @@ def edit_song_options(call: CallbackQuery):
         sheets_data = []
 
         # add/remove/close buttons
-        for edit_id, text in enumerate(ch_d.edit_buttons_text_tuple):
+        for edit_id, text in enumerate(ch_d.add_remove_text_tuple):
             data.append((text, f"{call_config}:{song_id}:{option_id}:{edit_id}"))
 
         if sheets:
@@ -113,7 +113,7 @@ def edit_song_options(call: CallbackQuery):
         sheets_data = []
 
         # add/remove/close buttons
-        for edit_id, text in enumerate(ch_d.edit_buttons_text_tuple):
+        for edit_id, text in enumerate(ch_d.add_remove_text_tuple):
             data.append((text, f"{call_config}:{song_id}:{option_id}:{edit_id}"))
 
         if sounds:
@@ -258,7 +258,7 @@ def edit_song_menu(message, song_id, msg):
     call_config = "edit_song"
     data = []
 
-    for i, option in enumerate(ch_d.song_options_to_edit_text_tuple):
+    for i, option in enumerate(ch_d.edit_song_text_tuple):
         data.append((option, f"{call_config}:{song_id}:{i}"))
 
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))

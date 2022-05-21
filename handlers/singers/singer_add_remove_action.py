@@ -14,12 +14,12 @@ def add_action(call: CallbackQuery):
     print(f"{item}, {singer_id}, {item_id}, {call.data}")
 
     if item == "suit":
-        db_singer.add_suit(singer_id, item_id)
+        db_singer.add_singer_suit(singer_id, item_id)
         bot.send_message(call.message.chat.id, suit_added_text)
         display_suits(call.message, singer_id)
 
     elif item == "voice":
-        db_singer.add_voice(singer_id, item_id)
+        db_singer.add_singer_voice(singer_id, item_id)
         bot.send_message(call.message.chat.id, voice_added_text)
         display_voices(call.message, singer_id)
     else:
@@ -35,12 +35,12 @@ def remove_action(call: CallbackQuery):
     print(f"{item}, {singer_id}, {item_id}, {call.data}")
 
     if item == "suit":
-        db_singer.delete_suit(singer_id, item_id)
+        db_singer.remove_suit(singer_id, item_id)
         bot.send_message(call.message.chat.id, suit_removed_text)
         display_suits(call.message, singer_id)
 
     elif item == "voice":
-        db_singer.delete_voice(singer_id, item_id)
+        db_singer.remove_singer_from_voice(singer_id, item_id)
         bot.send_message(call.message.chat.id, voice_removed_text)
         display_voices(call.message, singer_id)
     else:

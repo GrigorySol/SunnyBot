@@ -30,7 +30,7 @@ def create_database():
 
         cursor.execute("CREATE TABLE suits "
                        "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                       "suit STRING UNIQUE NOT NULL, "
+                       "suit_name STRING UNIQUE NOT NULL, "
                        "image STRING)")
 
         cursor.execute("CREATE TABLE songs "
@@ -69,14 +69,18 @@ def create_database():
                        "singer_id INTEGER NOT NULL REFERENCES singers (id) ON DELETE CASCADE, "
                        "attend INTEGER NOT NULL DEFAULT (2))")
 
+        cursor.execute("CREATE TABLE events_suits "
+                       "(event_id INTEGER REFERENCES events (id) ON DELETE CASCADE NOT NULL, "
+                       "suit_id INTEGER REFERENCES suits (id) ON DELETE CASCADE NOT NULL)")
+
         cursor.execute("CREATE TABLE events_songs "
                        "(event_id INTEGER REFERENCES events (id) ON DELETE CASCADE NOT NULL, "
                        "song_id INTEGER REFERENCES songs (id) ON DELETE CASCADE NOT NULL)")
 
-        cursor.execute("CREATE TABLE singer_suit "
+        cursor.execute("CREATE TABLE singers_suits "
                        "(singer_id INTEGER REFERENCES singers (id) ON DELETE CASCADE NOT NULL, "
                        "suit_id INTEGER REFERENCES suits (id) ON DELETE CASCADE NOT NULL)")
 
-        cursor.execute("CREATE TABLE singer_voice "
+        cursor.execute("CREATE TABLE singers_voices "
                        "(singer_id INTEGER REFERENCES singers (id) ON DELETE CASCADE NOT NULL, "
                        "voice_id INTEGER REFERENCES voices (id) ON DELETE CASCADE NOT NULL)")

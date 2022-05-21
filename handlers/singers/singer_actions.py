@@ -7,12 +7,12 @@ from database_control import db_singer, db_songs
 from database_control.db_event import search_event_by_id, search_location_by_id, search_events_by_event_type
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.inline.callback_datas import suit_edit_callback, \
-    event_callback, song_filter_callback, concert_filter_callback, buttons_roll_callback
+    show_event_callback, song_filter_callback, concert_filter_callback, buttons_roll_callback
 from keyboards.inline.choice_buttons import accept_markup, change_buttons, callback_buttons, \
-    add_concert_songs_buttons, keep_data, message_buttons, show_participation
+    add_concert_songs_buttons, keep_data, message_buttons, show_participation, close_markup
 from misc.edit_functions import display_suits, edit_suits
 from misc.messages.event_dictionary import chosen_months_text_tuple, repertoire, repertoire_is_empty_text
-from misc.messages.changes_dictionary import need_something_text
+from misc.messages import changes_dictionary as ch_d
 from misc.messages.song_dictionary import which_song_text, no_songs_text, wanna_add_text
 from misc.messages import singer_dictionary as sin_d, attendance_dictionary as at_d
 from misc.messages.joke_dictionary import *
@@ -62,6 +62,12 @@ def show_suits(message: Message):
     """Display singer suits and buttons to add or remove"""
     singer_id = db_singer.get_singer_id(message.from_user.id)
     display_suits(message, singer_id)
+
+    if db_singer.is_admin(message.from_user.id):
+        call_config = "show_suits"
+        data = [(ch_d.button_show_all_suits_text, f"{call_config}")]
+        msg = f"{ch_d.admin_buttons_text}\n{ch_d.show_all_suits_text}"
+        bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
 
 
 @bot.callback_query_handler(func=None, singer_config=suit_edit_callback.filter())
@@ -160,16 +166,16 @@ def nothing_to_say(message: Message):
                    "CQACAgIAAxkBAAETnYJicIzUt04joDIy7_uLOkUpHENW3wACKBoAAhFE4UpblvEevwxe_yQE")
 
 
-@bot.callback_query_handler(func=None, calendar_config=event_callback.filter())
+@bot.callback_query_handler(func=None, calendar_config=show_event_callback.filter())
 def show_event(call: CallbackQuery):
     """Display info about the chosen event"""
 
     _, event_id = call.data.split(":")
     _, event_type, event_name, event_date, time, location_id, comment = search_event_by_id(event_id)
     _, location_name, url = search_location_by_id(location_id)
+    singer_id = call.from_user.id
 
     location = f"{location_name}\n\n{url}"
-    bot.send_message(call.message.chat.id, location)
     _, month, day = event_date.split("-")
     event_date_text = f"{int(day)} {chosen_months_text_tuple[int(month)-1]}"
 
@@ -186,17 +192,16 @@ def show_event(call: CallbackQuery):
 
     if comment:
         msg += comment
-    bot.send_message(call.message.chat.id, msg)
+    bot.edit_message_text(location, singer_id, call.message.id, reply_markup=close_markup)
 
-    singer_id = call.from_user.id
-
-    # ask singer to set the attendance
+    # ask a singer to set the attendance
     call_config = "singer_attendance"
     data = [
         (text, f"{call_config}:edit:{event_id}:{i}")
         for i, text in enumerate(at_d.set_attendance_text_tuple)
     ]
-    bot.send_message(singer_id, at_d.select_attendance_text, reply_markup=callback_buttons(data))
+    msg += f"\n{at_d.select_attendance_text}"
+    bot.send_message(singer_id, msg, reply_markup=callback_buttons(data))
 
     # Admin can change the record about the event
     item_type = "event"
@@ -207,15 +212,15 @@ def show_event(call: CallbackQuery):
         for buttons in change_buttons(item_type, event_id).keyboard:
             markup.add(*buttons)
 
-        bot.send_message(singer_id, need_something_text, reply_markup=markup)
-
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+        bot.send_message(singer_id, ch_d.need_something_text, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')
 def close_btn(call: CallbackQuery):
     """Remove a block of the buttons"""
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+    bot.delete_message(call.message.chat.id, call.message.id)
+    # bot.edit_message_text("----", call.message.chat.id, call.message.id, reply_markup=None)
+    # bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
 @bot.message_handler(func=lambda m: "скучно" in m.text.lower())

@@ -3,7 +3,7 @@ from loader import bot
 from database_control import db_event, db_attendance, db_singer
 from telebot.types import Message, CallbackQuery
 from keyboards.inline.callback_datas import calendar_zoom, calendar_factory, \
-    calendar_data, location_callback, repeat_callback, interval_callback, show_participation_callback, \
+    calendar_data, add_event_location_callback, repeat_callback, interval_callback, show_participation_callback, \
     remove_participation_callback, singer_attendance_callback
 
 from keyboards.inline.calendar_buttons import generate_calendar_days, generate_calendar_months, EMTPY_FIELD
@@ -38,13 +38,13 @@ def calendar_command_handler(message: Message):
 
 @bot.callback_query_handler(func=None, calendar_config=calendar_data.filter(event_type="0"))
 def calendar_show_event_handler(call: CallbackQuery):
-    """Show events for the chosen day."""
+    """Show events for the chosen date"""
 
     *_, year, month, day = call.data.split(":")
     # Show all events for this day
     event_data.date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
     events = db_event.search_event_by_date(event_data.date)
-    call_config = "event"
+    call_config = "show_event"
     data = []
 
     if not events:
@@ -65,7 +65,7 @@ def edit_event_date_handler(call: CallbackQuery):
     event_data.date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
     # Edit event date
     msg = bot.send_message(call.message.chat.id,
-                           f"Вы выбрали {ev_d.events_to_add_text_tuple[int(event_type)]} на {day} "
+                           f"Вы выбрали {ev_d.to_add_text_tuple[int(event_type)]} на {day} "
                            f"{ev_d.chosen_months_text_tuple[int(month) - 1]} {year} года.\n{ev_d.set_event_time_text}")
     bot.register_next_step_handler(msg, enter_new_event_time, int(event_id), event_data.date)
 
@@ -79,8 +79,8 @@ def add_event_time_handler(call: CallbackQuery):
     # Continue to add an event
     event_data.is_in_progress = True
     event_data.event_type = int(event_type)
-    event_data.event_name = ev_d.events_to_save_text_tuple[event_data.event_type]
-    msg = f"Вы выбрали {ev_d.events_to_add_text_tuple[event_data.event_type]} на {day} " \
+    event_data.event_name = ev_d.to_save_text_tuple[event_data.event_type]
+    msg = f"Вы выбрали {ev_d.to_add_text_tuple[event_data.event_type]} на {day} " \
           f"{ev_d.chosen_months_text_tuple[int(month) - 1]} {year} года.\n{ev_d.set_event_time_text}"
     msg_data = bot.send_message(call.message.chat.id, msg)
     bot.register_next_step_handler(msg_data, add_time_for_event)
@@ -102,13 +102,13 @@ def add_time_for_event(message: Message):
         msg_data = bot.send_message(message.chat.id, ev_d.wrong_event_time_text)
         bot.register_next_step_handler(msg_data, add_time_for_event)
 
-    if db_event.event_datetime_exists(event_data.date, time):
+    if db_event.event_datetime_exists(event_data.date, event_data.time):
         msg_data = bot.send_message(message.chat.id, ev_d.event_time_exists_text)
         bot.register_next_step_handler(msg_data, add_time_for_event)
         return
 
     if event_data.event_type == 1:
-        msg = f"{ev_d.set_event_name_text}{ev_d.events_to_add_text_tuple[event_data.event_type]}:"
+        msg = f"{ev_d.set_event_name_text}{ev_d.to_add_text_tuple[event_data.event_type]}:"
         msg_data = bot.send_message(message.chat.id, msg)
         bot.register_next_step_handler(msg_data, set_name_for_event)
     else:
@@ -121,7 +121,7 @@ def set_name_for_event(message: Message):
     bot.send_message(message.chat.id, ev_d.choose_event_location_text, reply_markup=choose_location_markup)
 
 
-@bot.callback_query_handler(func=None, calendar_config=location_callback.filter(type="url"))
+@bot.callback_query_handler(func=None, calendar_config=add_event_location_callback.filter(type="url"))
 def add_new_location(call: CallbackQuery):
     """Ask to input the URL for a new location"""
     msg_data = bot.send_message(call.message.chat.id, ev_d.enter_location_url_text)
@@ -185,9 +185,8 @@ def save_new_event(location_id, message):
         msg = f"{ev_d.new_event_text}{event_data.event_name}"
         bot.send_message(message.chat.id, msg, reply_markup=markup)
 
-    # TODO: Add singers attendance edit
     db_attendance.create_new_attendance(event_data.event_id)
-    bot.edit_message_reply_markup(message.chat.id, message.id, reply_markup=None)
+    bot.delete_message(message.chat.id, message.id)
     event_data.is_in_progress = False
 
 
@@ -203,7 +202,7 @@ def show_repeat_interval_buttons(call: CallbackQuery):
         data.append((interval, f"{call_config}:{event_id}:{i}"))
 
     bot.send_message(call.message.chat.id, ev_d.choose_period_text, reply_markup=callback_buttons(data))
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=interval_callback.filter())
@@ -213,7 +212,7 @@ def number_of_repeats(call: CallbackQuery):
     print(f"number_of_repeats {call.data}")
     _, event_id, interval = call.data.split(":")
     # Save data to use in the next function set_event_repeating
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+    bot.delete_message(call.message.chat.id, call.message.id)
     msg_data = bot.send_message(call.message.chat.id, ev_d.set_repeat_times_text)
     bot.register_next_step_handler(msg_data, check_data_for_event_repeating, event_id, interval)
 
@@ -246,7 +245,7 @@ def check_data_for_event_repeating(message: Message, event_id, interval):
     bot.send_message(message.chat.id, f"{ev_d.event_repeated_text}")
 
 
-@bot.callback_query_handler(func=None, calendar_config=location_callback.filter(type="db"))
+@bot.callback_query_handler(func=None, calendar_config=add_event_location_callback.filter(type="db"))
 def choose_location(call: CallbackQuery):
     """Show the location buttons"""
 
@@ -258,7 +257,7 @@ def choose_location(call: CallbackQuery):
     bot.send_message(call.message.chat.id, ev_d.choose_location_text, reply_markup=callback_buttons(data))
 
 
-@bot.callback_query_handler(func=None, calendar_config=location_callback.filter())
+@bot.callback_query_handler(func=None, calendar_config=add_event_location_callback.filter())
 def save_event(call: CallbackQuery):
     """Get location from the callback data and save the event"""
 
@@ -277,8 +276,8 @@ def event_attendance(call: CallbackQuery):
         (fullname, telegram_name, at_d.attendance_pics_tuple[int(attendance)])
         for _, fullname, telegram_name, attendance in db_attendance.get_attendance_by_event_id(int(event_id))
     ]
-    bot.edit_message_text(at_d.attendant_singers_text, call.message.chat.id, call.message.id)
-    bot.edit_message_reply_markup(
+    bot.edit_message_text(
+        at_d.attendant_singers_text,
         call.message.chat.id,
         call.message.id,
         reply_markup=message_buttons(attendance_data, event_id)
@@ -290,12 +289,20 @@ def remove_participation(call: CallbackQuery):
     """Display singers to remove from an event"""
 
     _, event_id = call.data.split(":")
+    remove_participant_buttons(call, event_id)
+
+
+def remove_participant_buttons(call, event_id):
     remove_data = [
         (fullname, f"singer_attendance:remove:{event_id}:{singer_id}")
         for singer_id, fullname, _, _ in db_attendance.get_attendance_by_event_id(int(event_id))
     ]
-    bot.edit_message_text(at_d.choose_singer_to_remove_text, call.message.chat.id, call.message.id)
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=callback_buttons(remove_data))
+    bot.delete_message(call.message.chat.id, call.message.id)
+    bot.send_message(
+        call.message.chat.id,
+        at_d.choose_singer_to_remove_text,
+        reply_markup=callback_buttons(remove_data)
+    )
 
 
 @bot.callback_query_handler(func=None, calendar_config=singer_attendance_callback.filter(action="remove"))
@@ -312,6 +319,7 @@ def remove_singer_attendance(call: CallbackQuery):
 
     db_attendance.remove_singer_attendance(int(event_id), int(singer_id))
     bot.send_message(call.message.chat.id, f"{singer_name} {at_d.singer_removed_text}")
+    remove_participant_buttons(call, event_id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=singer_attendance_callback.filter(action="edit"))
@@ -329,8 +337,10 @@ def calendar_action_handler(call: CallbackQuery):
     """Create calendar day buttons"""
 
     _, event_type, event_id, year, month = call.data.split(":")
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id,
-                                  reply_markup=generate_calendar_days(int(year), int(month), int(event_type), event_id))
+    bot.edit_message_reply_markup(
+        call.message.chat.id, call.message.id,
+        reply_markup=generate_calendar_days(int(year), int(month), int(event_type), event_id)
+    )
 
 
 @bot.callback_query_handler(func=None, calendar_config=calendar_zoom.filter())
