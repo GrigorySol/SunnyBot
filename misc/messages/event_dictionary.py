@@ -23,8 +23,10 @@ choose_period_text = "Выберите период повторений."
 set_repeat_times_text = "Укажите число повторов."
 digits_ERROR_text = "Необходимо указать число цифрами. Отправьте ещё раз."
 event_repeated_text = "Повторы сохранены. Не забудьте проверить участников!"
-repertoire = "Программа"
+repertoire_text = "Программа"
+comment_text = "Комментарий:"
 repertoire_is_empty_text = "На данный момент отсутствует"
+suit_for_event_text = "Концертный костюм:"
 
 
 # Locations

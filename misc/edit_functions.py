@@ -13,7 +13,6 @@ def display_suits(message, sid):
     """
 
     suits = db_singer.get_singer_suits(sid)
-    singer_name = db_singer.get_singer_fullname(sid)
     call_config = "suit"
     data = []
     suit_names = []

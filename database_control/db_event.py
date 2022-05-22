@@ -28,6 +28,18 @@ def get_event_date(event_id):
         return cursor.fetchone()[0]
 
 
+def get_suit_by_event_id(event_id):
+    """Return is, suit_name, photo from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT id, suit_name, photo FROM suits "
+                       "JOIN events_suits ON events_suits.suit_id = suits.id "
+                       "WHERE events_suits.event_id = ?", (event_id,))
+        return cursor.fetchone()
+
+
 def search_event_by_id(event_id):
     """Return id, event_type, event_name, date, time, location_id, comment from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -127,7 +139,7 @@ def add_location(location_name, url):
 
 
 def add_song_to_concert(concert_id: int, song_id: int):
-    """Add song to the events_songs."""
+    """Add event_is, song_id to the events_songs."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
@@ -136,6 +148,19 @@ def add_song_to_concert(concert_id: int, song_id: int):
             return False
 
         cursor.execute("INSERT INTO events_songs VALUES (?, ?)", (concert_id, song_id))
+        return True
+
+
+def add_suit_to_concert(concert_id: int, suit_id: int):
+    """Add event_is, suit_id to the events_suits."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM events_suits WHERE event_id = ? and suit_id = ?", (concert_id, suit_id))
+        if cursor.fetchall():
+            return False
+
+        cursor.execute("INSERT INTO events_suits VALUES (?, ?)", (concert_id, suit_id))
         return True
 
 
@@ -188,8 +213,16 @@ def delete_location_by_id(location_id: int):
 
 
 def delete_song_from_concert(concert_id: int, song_id: int):
-    """DELETE songs from events_songs."""
+    """DELETE song from events_songs."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         cursor.execute("DELETE FROM events_songs WHERE concert_id = ? and song_id = ?", (concert_id, song_id))
+
+
+def delete_suit_from_concert(concert_id: int, suit_id: int):
+    """DELETE suit from events_suits."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("DELETE FROM events_suits WHERE event_id = ? and suit_id = ?", (concert_id, suit_id))

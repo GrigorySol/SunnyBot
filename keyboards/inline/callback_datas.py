@@ -18,7 +18,8 @@ selected_location_callback = CallbackData("option_id", "location_id", prefix="se
 
 change_songs_callback = CallbackData("concert_id", "option_id", prefix="change_songs")
 concert_songs_callback = CallbackData("option", "concert_id", "song_id", prefix="concert_songs")
-change_suits_callback = CallbackData("concert_id", "option_id", prefix="change_suits")
+remove_suit_callback = CallbackData("concert_id", "option_id", prefix="remove_suit")
+select_suit_callback = CallbackData("concert_id", "option_id", prefix="select_suit")
 
 # songs
 song_filter_callback = CallbackData("filter_id", prefix="song_filter")

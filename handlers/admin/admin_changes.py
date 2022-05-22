@@ -3,7 +3,7 @@ from datetime import date
 from config import VIP
 from loader import bot
 from telebot.types import CallbackQuery, Message, InputMediaPhoto
-from keyboards.inline.choice_buttons import callback_buttons, choose_location_markup
+from keyboards.inline.choice_buttons import callback_buttons, choose_location_markup, change_buttons, close_markup
 from keyboards.inline.calendar_buttons import generate_calendar_days
 from keyboards.inline import callback_datas as cd
 from misc.edit_functions import enter_new_event_time
@@ -27,7 +27,7 @@ def show_suits(call: CallbackQuery):
             suit_data.append(InputMediaPhoto(photo, suit_name))
 
         bot.send_media_group(call.message.chat.id, suit_data)
-        bot.send_message(call.message.chat.id, ch_d.suit_change_text, reply_markup=callback_buttons(data))
+        bot.send_message(call.message.chat.id, ch_d.edit_suit_text, reply_markup=callback_buttons(data))
 
     else:
         bot.send_message(call.message.chat.id, ch_d.no_suits_to_edit_text)
@@ -53,8 +53,7 @@ def display_event_options_to_change(call: CallbackQuery):
 
     call_config = "selected"
     if event[1] == 2:
-        options = ch_d.edit_event_text_tuple.__add__(("Песни", "Костюмы"))
-        print(options)
+        options = ch_d.edit_concert_text_tuple
     else:
         options = ch_d.edit_event_text_tuple
 
@@ -79,17 +78,6 @@ def display_location_options_to_change(call: CallbackQuery):
     # "location" - "Название", "Ссылку на карту", "Ничего", "УДАЛИТЬ
     call_config = "selected_location"
     create_option_buttons(call.message, call_config, item_id, ch_d.edit_location_text_tuple)
-
-
-@bot.callback_query_handler(func=None, singer_config=cd.change_callback.filter(type="suit"))
-def display_suit_options_to_change(call: CallbackQuery):
-    """Display suit options to change"""
-
-    print(f"We are in display_suit_options_to_change CALL DATA = {call.data}\n")
-    bot.send_sticker(
-        call.message.chat.id,
-        "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
-    )
 
 
 def create_option_buttons(message: Message, call_config, item_id, options):
@@ -185,7 +173,7 @@ def delete_event(call: CallbackQuery):
 
 
 @bot.callback_query_handler(func=None, singer_config=cd.selected_callback.filter(option_id="6"))
-def edit_event_songs(call: CallbackQuery):
+def edit_concert_songs(call: CallbackQuery):
     """Edit songs for a concert"""
 
     print(f"edit_event_songs {call.data}")
@@ -201,19 +189,54 @@ def edit_event_songs(call: CallbackQuery):
 
 
 @bot.callback_query_handler(func=None, singer_config=cd.selected_callback.filter(option_id="7"))
-def edit_event_suits(call: CallbackQuery):
-    """Edit suits for a concert"""
+def edit_concert_suit(call: CallbackQuery):
+    """Show add or remove button to edit suit for a concert"""
 
-    print(f"edit_event_suits {call.data}")
+    print(f"edit_event_suit {call.data}")
     _, _, event_id = call.data.split(":")
+    suit = db_event.get_suit_by_event_id(int(event_id))
 
-    call_config = "change_suits"
+    if suit:
+        call_config = "remove_suit"
+        msg = ch_d.concert_suit_change_text
+        markup = callback_buttons([(ch_d.suit_change_btn_text, f"{call_config}:{event_id}:{suit[0]}")])
+        bot.send_photo(call.message.chat.id, suit[2], reply_markup=close_markup)
+        bot.send_message(call.message.chat.id, msg, reply_markup=markup)
+
+    else:
+        select_suit_for_concert(call, event_id)
+
+
+def select_suit_for_concert(call, event_id):
+    """Display all suits to choose for a concert"""
+
+    suits = db_singer.get_all_suits()
+    msg = ch_d.choose_suit_text
+    call_config = "select_suit"
     data = []
+    suit_data = []
 
-    for option_id, option_name in enumerate(ch_d.add_remove_text_tuple):
-        data.append((option_name, f"{call_config}:{event_id}:{option_id}"))
+    for suit_id, suit_name, photo in suits:
+        data.append((suit_name, f"{call_config}:{event_id}:{suit_id}"))
+        suit_data.append(InputMediaPhoto(photo, suit_name))
 
-    bot.send_message(call.message.chat.id, sin_d.what_to_do_text, reply_markup=callback_buttons(data))
+    bot.send_media_group(call.message.chat.id, suit_data)
+    bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+    bot.delete_message(call.message.chat.id, call.message.id)
+
+
+@bot.callback_query_handler(func=None, singer_config=cd.remove_suit_callback.filter())
+def display_suit_options_to_change(call: CallbackQuery):
+    """Remove current concert suit and display suit options to change"""
+
+    print(f"We are in display_suit_options_to_change CALL DATA = {call.data}\n")
+    _, event_id, suit_id = call.data.split(":")
+    # bot.send_sticker(
+    #     call.message.chat.id,
+    #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
+    # )
+    db_event.delete_suit_from_concert(int(event_id), int(suit_id))
+    select_suit_for_concert(call, event_id)
 
 
 @bot.callback_query_handler(func=None, singer_config=cd.change_songs_callback.filter())
@@ -266,10 +289,17 @@ def add_or_remove_songs(call: CallbackQuery):
         bot.send_message(call.message.chat.id, f"{ch_d.song_removed_from_concert} {song_name}")
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.change_suits_callback.filter())
-def edit_suits_for_concert(call: CallbackQuery):
-    """List of suits to edit"""
-    print(f"admin_changes.py edit_suits_for_concert")
+@bot.callback_query_handler(func=None, singer_config=cd.select_suit_callback.filter())
+def edit_suit_for_concert(call: CallbackQuery):
+    """Add a suit for a concert"""
+
+    print(f"admin_changes.py edit_suit_for_concert {call.data}")
+    _, concert_id, suit_id = call.data.split(":")
+    if db_event.add_suit_to_concert(int(concert_id), int(suit_id)):
+        bot.edit_message_text(ch_d.suit_added_text, call.message.chat.id, call.message.id, reply_markup=None)
+    else:
+        bot.send_message(call.message.chat.id, ch_d.ERROR_text)
+        bot.send_message(VIP, f"ERROR in {__name__}\nedit_suit_for_concert {call.data}")
 
 
 @bot.callback_query_handler(func=None, singer_config=cd.selected_location_callback.filter(option_id="0"))

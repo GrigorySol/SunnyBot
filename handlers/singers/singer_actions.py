@@ -3,7 +3,7 @@ from random import randint
 
 from config import VIP
 from loader import bot
-from database_control import db_singer, db_songs
+from database_control import db_singer, db_songs, db_event
 from database_control.db_event import search_event_by_id, search_location_by_id, search_events_by_event_type
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from keyboards.inline.callback_datas import suit_edit_callback, \
@@ -11,10 +11,9 @@ from keyboards.inline.callback_datas import suit_edit_callback, \
 from keyboards.inline.choice_buttons import accept_markup, change_buttons, callback_buttons, \
     add_concert_songs_buttons, keep_data, message_buttons, show_participation, close_markup
 from misc.edit_functions import display_suits, edit_suits
-from misc.messages.event_dictionary import chosen_months_text_tuple, repertoire, repertoire_is_empty_text
-from misc.messages import changes_dictionary as ch_d
 from misc.messages.song_dictionary import which_song_text, no_songs_text, wanna_add_text
-from misc.messages import singer_dictionary as sin_d, attendance_dictionary as at_d
+from misc.messages import singer_dictionary as sin_d, attendance_dictionary as at_d,\
+    changes_dictionary as ch_d, event_dictionary as ev_d
 from misc.messages.joke_dictionary import *
 
 
@@ -109,7 +108,7 @@ def show_songs(call: CallbackQuery):
         call_config = "concert_filter"
         for concert_id, concert_name, date, _ in concerts:
             _, month, day = date.split("-")
-            name = f"{concert_name} {int(day)} {chosen_months_text_tuple[int(month)-1]}"
+            name = f"{concert_name} {int(day)} {ev_d.chosen_months_text_tuple[int(month)-1]}"
             data.append((name, f"{call_config}:{concert_id}"))
         bot.send_message(call.message.chat.id, sin_d.choose_concert_text, reply_markup=callback_buttons(data))
         return
@@ -176,23 +175,28 @@ def show_event(call: CallbackQuery):
     singer_id = call.from_user.id
 
     location = f"{location_name}\n\n{url}"
+
     _, month, day = event_date.split("-")
-    event_date_text = f"{int(day)} {chosen_months_text_tuple[int(month)-1]}"
+    event_date_text = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month)-1]}"
 
     msg = f"{event_name} {event_date_text} в {time}\n"
 
     if event_type == 2:
         songs = db_songs.get_songs_by_event_id(event_id)
-        msg += f"\n{repertoire}:\n"
+        suit = db_event.get_suit_by_event_id(event_id)
+
+        if suit:
+            msg += f"{ev_d.suit_for_event_text} {suit[1]}\n"
+
+        msg += f"{ev_d.repertoire_text}:\n"
         if songs:
             for _, song, _ in songs:
                 msg += f"{song}\n"
         else:
-            msg += f"{repertoire_is_empty_text}\n"
+            msg += f"{ev_d.repertoire_is_empty_text}\n"
 
     if comment:
-        msg += comment
-    bot.edit_message_text(location, singer_id, call.message.id, reply_markup=close_markup)
+        msg += f"{ev_d.comment_text}\n{comment}\n"
 
     # ask a singer to set the attendance
     call_config = "singer_attendance"
@@ -200,7 +204,9 @@ def show_event(call: CallbackQuery):
         (text, f"{call_config}:edit:{event_id}:{i}")
         for i, text in enumerate(at_d.set_attendance_text_tuple)
     ]
-    msg += f"\n{at_d.select_attendance_text}"
+    msg += f"{at_d.select_attendance_text}"
+
+    bot.edit_message_text(location, singer_id, call.message.id, reply_markup=close_markup)
     bot.send_message(singer_id, msg, reply_markup=callback_buttons(data))
 
     # Admin can change the record about the event
