@@ -1,14 +1,10 @@
 from loader import bot
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
-from keyboards.inline.choice_buttons import callback_buttons
-from keyboards.inline.callback_datas import edit_song_callback, edit_song_material_callback, song_info_callback
-from misc.messages import changes_dictionary as ch_d
-from misc.messages.singer_dictionary import CANCELED, edit_text
-from misc.messages import song_dictionary as song_d
 from database_control import db_songs, db_singer
+from misc import dicts, keys
 
 
-@bot.callback_query_handler(func=None, calendar_config=song_info_callback.filter())
+@bot.callback_query_handler(func=None, calendar_config=keys.call.song_info_callback.filter())
 def show_song_info(call: CallbackQuery):
     """
     Show song info and allow admin to edit.
@@ -17,7 +13,7 @@ def show_song_info(call: CallbackQuery):
     print(f"show_song_info {print(call.data)}")
     song_id = int(call.data.split(":")[1])
     sheets = db_songs.get_sheets_by_song_id(song_id)
-    sounds = db_songs.get_sounds_by_song_id(song_id)
+    sounds = db_songs.get_sound_by_song_id(song_id)
     media_sheets = []
     media_sounds = []
 
@@ -28,16 +24,16 @@ def show_song_info(call: CallbackQuery):
                 media_sheets.append(InputMediaDocument(sheet_id))
             bot.send_media_group(call.message.chat.id, media_sheets)
         else:
-            bot.send_message(call.message.chat.id, song_d.no_sheets_text)
+            bot.send_message(call.message.chat.id, dicts.songs.no_sheets_text)
 
         if sounds:
             for _, _, _, sound_id in sounds:
                 media_sounds.append(InputMediaAudio(sound_id))
             bot.send_media_group(call.message.chat.id, media_sounds)
         else:
-            bot.send_message(call.message.chat.id, song_d.no_sounds_text)
+            bot.send_message(call.message.chat.id, dicts.songs.no_sounds_text)
 
-        edit_song_menu(call.message, song_id, edit_text)
+        edit_song_menu(call.message, song_id, dicts.singers.edit_text)
 
     else:
         singer_id = db_singer.get_singer_id(call.message.chat.id)
@@ -53,7 +49,7 @@ def show_song_info(call: CallbackQuery):
                         media_sheets.append(InputMediaDocument(sheet_id))
             bot.send_media_group(call.message.chat.id, media_sheets)
         else:
-            bot.send_message(call.message.chat.id, song_d.no_sheets_text)
+            bot.send_message(call.message.chat.id, dicts.songs.no_sheets_text)
 
         if sounds:
             for _, _, sound_voice_id, sound_id in sounds:
@@ -65,10 +61,10 @@ def show_song_info(call: CallbackQuery):
                         media_sounds.append(InputMediaAudio(sound_id))
             bot.send_media_group(call.message.chat.id, media_sounds)
         else:
-            bot.send_message(call.message.chat.id, song_d.no_sounds_text)
+            bot.send_message(call.message.chat.id, dicts.songs.no_sounds_text)
 
 
-@bot.callback_query_handler(func=None, calendar_config=edit_song_callback.filter())
+@bot.callback_query_handler(func=None, calendar_config=keys.call.edit_song_callback.filter())
 def edit_song_options(call: CallbackQuery):
     """Manage song edit options: Name, Sheets, Sound or DELETE"""
 
@@ -77,7 +73,7 @@ def edit_song_options(call: CallbackQuery):
     # change name
     if option_id == "0":
         print(f"edit_song_options {option_id}")
-        msg = bot.send_message(call.message.chat.id, song_d.enter_new_name_text)
+        msg = bot.send_message(call.message.chat.id, dicts.songs.enter_new_name_text)
         bot.register_next_step_handler(msg, enter_new_song_name, song_id)
 
     # add/delete sheets
@@ -89,50 +85,50 @@ def edit_song_options(call: CallbackQuery):
         sheets_data = []
 
         # add/remove/close buttons
-        for edit_id, text in enumerate(ch_d.add_remove_text_tuple):
+        for edit_id, text in enumerate(dicts.changes.add_remove_text_tuple):
             data.append((text, f"{call_config}:{song_id}:{option_id}:{edit_id}"))
 
         if sheets:
             for sh in sheets:
                 sheets_data.append(InputMediaDocument(sh[3]))
             bot.send_media_group(call.message.chat.id, sheets_data)
-            msg = song_d.add_or_delete_text
+            msg = dicts.songs.add_or_delete_text
 
         else:
             data.pop()
-            msg = f"{song_d.no_sheets_text}\n{song_d.wanna_add_text}"
+            msg = f"{dicts.songs.no_sheets_text}\n{dicts.songs.wanna_add_text}"
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
     # add/delete sounds
     elif option_id == "2":
         print(f"edit_song_options {option_id}")
-        sounds = db_songs.get_sounds_by_song_id(song_id)
+        sounds = db_songs.get_sound_by_song_id(song_id)
         call_config = "edit_song_material"
         data = []
         sheets_data = []
 
         # add/remove/close buttons
-        for edit_id, text in enumerate(ch_d.add_remove_text_tuple):
+        for edit_id, text in enumerate(dicts.changes.add_remove_text_tuple):
             data.append((text, f"{call_config}:{song_id}:{option_id}:{edit_id}"))
 
         if sounds:
             for sound in sounds:
                 sheets_data.append(InputMediaAudio(sound[3]))
             bot.send_media_group(call.message.chat.id, sheets_data)
-            msg = song_d.add_or_delete_text
+            msg = dicts.songs.add_or_delete_text
 
         else:
             data.pop()
-            msg = song_d.not_sound_add_text
+            msg = dicts.songs.not_sound_add_text
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
     # delete song
     else:
         if not db_songs.song_exists(song_id):
             sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
-            bot.send_message(call.message.chat.id, song_d.song_not_found_text)
+            bot.send_message(call.message.chat.id, dicts.songs.song_not_found_text)
             bot.send_sticker(call.message.chat.id, sticker_id)
             return
 
@@ -140,12 +136,12 @@ def edit_song_options(call: CallbackQuery):
         call_config = "delete_confirmation"
         item_type = "song"
         data = []
-        msg = f"{ch_d.delete_confirmation_text} {item_name}?"
+        msg = f"{dicts.changes.delete_confirmation_text} {item_name}?"
 
-        for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
+        for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
             data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
         bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
@@ -154,17 +150,17 @@ def enter_new_song_name(message: Message, song_id):
 
     print(f"enter_new_song_name {song_id}, {message.text}")
     if "/" in message.text:
-        bot.send_message(message.chat.id, CANCELED)
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
     elif db_songs.edit_song_name(song_id, message.text):
-        bot.send_message(message.chat.id, song_d.song_name_changed_text)
+        bot.send_message(message.chat.id, dicts.songs.song_name_changed_text)
 
     else:
-        bot.send_message(message.chat.id, song_d.SONG_WRONG_TEXT)
+        bot.send_message(message.chat.id, dicts.songs.SONG_WRONG_TEXT)
 
 
-@bot.callback_query_handler(func=None, calendar_config=edit_song_material_callback.filter())
+@bot.callback_query_handler(func=None, calendar_config=keys.call.edit_song_material_callback.filter())
 def edit_song_materials(call: CallbackQuery):
     """Add or Remove sheets and sounds for a song"""
 
@@ -172,14 +168,14 @@ def edit_song_materials(call: CallbackQuery):
     _, song_id, option_id, edit_id = call.data.split(":")
 
     def _add():
-        msg = bot.send_message(call.message.chat.id, song_d.drop_the_file_text)
+        msg = bot.send_message(call.message.chat.id, dicts.songs.drop_the_file_text)
         bot.register_next_step_handler(msg, add_sheets_or_sounds, int(song_id))
 
     def _delete():
         item_name = db_songs.get_song_name(int(song_id))
         if not item_name:
             sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
-            bot.send_message(call.message.chat.id, song_d.song_not_found_text)
+            bot.send_message(call.message.chat.id, dicts.songs.song_not_found_text)
             bot.send_sticker(call.message.chat.id, sticker_id)
             return
 
@@ -187,18 +183,18 @@ def edit_song_materials(call: CallbackQuery):
             call_config = "delete_confirmation"
             item_type = "sheets"
             data = []
-            msg = f"{ch_d.delete_confirmation_text} {ch_d.all_sheets_text} {item_name}?"
+            msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sheets_text} {item_name}?"
 
         else:
             call_config = "delete_confirmation"
             item_type = "sounds"
             data = []
-            msg = f"{ch_d.delete_confirmation_text} {ch_d.all_sounds_text} {item_name}?"
+            msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sounds_text} {item_name}?"
 
-        for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
+        for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
             data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
     if edit_id == "0":
         _add()
@@ -207,7 +203,7 @@ def edit_song_materials(call: CallbackQuery):
         _delete()
 
     else:
-        bot.send_message(call.message.chat.id, song_d.SONG_WRONG_TEXT)
+        bot.send_message(call.message.chat.id, dicts.songs.SONG_WRONG_TEXT)
 
 
 def add_sheets_or_sounds(message: Message, song_id):
@@ -220,7 +216,7 @@ def add_sheets_or_sounds(message: Message, song_id):
 
         print(f"add_sheets_or_sounds file_id {doc_file_id}")
         db_songs.add_sheets(song_id, voice_id, doc_file_id)
-        msg = bot.send_message(message.chat.id, song_d.sheets_added_text)
+        msg = bot.send_message(message.chat.id, dicts.songs.sheets_added_text)
         bot.register_next_step_handler(msg, add_sheets_or_sounds, song_id)
 
     elif message.audio:      # sounds
@@ -230,15 +226,15 @@ def add_sheets_or_sounds(message: Message, song_id):
 
         print(f"add_sheets_or_sounds file_id {audio_file_id}")
         db_songs.add_sound(song_id, voice_id, audio_file_id)
-        msg = bot.send_message(message.chat.id, song_d.audio_added_text)
+        msg = bot.send_message(message.chat.id, dicts.songs.audio_added_text)
         bot.register_next_step_handler(msg, add_sheets_or_sounds, song_id)
 
     else:
-        edit_song_menu(message, song_id, song_d.something_else)
+        edit_song_menu(message, song_id, dicts.songs.something_else)
 
 
 def voice_detect(file_name):
-    for i, voice in enumerate(song_d.song_voices_text_tuple):
+    for i, voice in enumerate(dicts.songs.song_voices_text_tuple):
         if voice in file_name:
             print(f"{voice} in {file_name}")
             return i + 1
@@ -251,16 +247,16 @@ def edit_song_menu(message, song_id, msg):
 
     if not db_songs.song_exists(song_id):
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
-        bot.send_message(message.chat.id, song_d.song_not_found_text)
+        bot.send_message(message.chat.id, dicts.songs.song_not_found_text)
         bot.send_sticker(message.chat.id, sticker_id)
         return
 
     call_config = "edit_song"
     data = []
 
-    for i, option in enumerate(ch_d.edit_song_text_tuple):
+    for i, option in enumerate(dicts.changes.edit_song_text_tuple):
         data.append((option, f"{call_config}:{song_id}:{i}"))
 
-    bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
+    bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
 

@@ -67,7 +67,7 @@ def create_new_attendance(event_id):
 
         # language=SQLITE-SQL
         cursor.execute("INSERT INTO attendance (event_id, singer_id) "
-                       "SELECT DISTINCT ?, singer_id FROM singers_voices ", (event_id,))
+                       "SELECT DISTINCT ?, singer_id FROM singer_voice ", (event_id,))
 
 
 # UPDATE

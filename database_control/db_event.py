@@ -35,8 +35,8 @@ def get_suit_by_event_id(event_id):
 
         # language=SQLITE-SQL
         cursor.execute("SELECT id, suit_name, photo FROM suits "
-                       "JOIN events_suits ON events_suits.suit_id = suits.id "
-                       "WHERE events_suits.event_id = ?", (event_id,))
+                       "JOIN event_suit ON event_suit.suit_id = suits.id "
+                       "WHERE event_suit.event_id = ?", (event_id,))
         return cursor.fetchone()
 
 
@@ -139,28 +139,28 @@ def add_location(location_name, url):
 
 
 def add_song_to_concert(concert_id: int, song_id: int):
-    """Add event_is, song_id to the events_songs."""
+    """Add event_is, song_id to the event_song."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events_songs WHERE event_id = ? and song_id = ?", (concert_id, song_id))
+        cursor.execute("SELECT * FROM event_song WHERE event_id = ? and song_id = ?", (concert_id, song_id))
         if cursor.fetchall():
             return False
 
-        cursor.execute("INSERT INTO events_songs VALUES (?, ?)", (concert_id, song_id))
+        cursor.execute("INSERT INTO event_song VALUES (?, ?)", (concert_id, song_id))
         return True
 
 
 def add_suit_to_concert(concert_id: int, suit_id: int):
-    """Add event_is, suit_id to the events_suits."""
+    """Add event_is, suit_id to the event_suit."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM events_suits WHERE event_id = ? and suit_id = ?", (concert_id, suit_id))
+        cursor.execute("SELECT * FROM event_suit WHERE event_id = ? and suit_id = ?", (concert_id, suit_id))
         if cursor.fetchall():
             return False
 
-        cursor.execute("INSERT INTO events_suits VALUES (?, ?)", (concert_id, suit_id))
+        cursor.execute("INSERT INTO event_suit VALUES (?, ?)", (concert_id, suit_id))
         return True
 
 
@@ -213,16 +213,16 @@ def delete_location_by_id(location_id: int):
 
 
 def delete_song_from_concert(concert_id: int, song_id: int):
-    """DELETE song from events_songs."""
+    """DELETE song from event_song."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("DELETE FROM events_songs WHERE concert_id = ? and song_id = ?", (concert_id, song_id))
+        cursor.execute("DELETE FROM event_song WHERE concert_id = ? and song_id = ?", (concert_id, song_id))
 
 
 def delete_suit_from_concert(concert_id: int, suit_id: int):
-    """DELETE suit from events_suits."""
+    """DELETE suit from event_suit."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("DELETE FROM events_suits WHERE event_id = ? and suit_id = ?", (concert_id, suit_id))
+        cursor.execute("DELETE FROM event_suit WHERE event_id = ? and suit_id = ?", (concert_id, suit_id))

@@ -3,11 +3,8 @@ from datetime import date
 from config import VIP
 from loader import bot
 from telebot.types import CallbackQuery, Message, InputMediaPhoto
-from keyboards.inline.choice_buttons import callback_buttons, choose_location_markup, change_buttons, close_markup
-from keyboards.inline.calendar_buttons import generate_calendar_days
-from keyboards.inline import callback_datas as cd
 from misc.edit_functions import enter_new_event_time
-from misc.messages import event_dictionary as ev_d, singer_dictionary as sin_d, changes_dictionary as ch_d
+from misc import dicts, keys
 from database_control import db_songs, db_singer, db_event
 
 
@@ -27,15 +24,17 @@ def show_suits(call: CallbackQuery):
             suit_data.append(InputMediaPhoto(photo, suit_name))
 
         bot.send_media_group(call.message.chat.id, suit_data)
-        bot.send_message(call.message.chat.id, ch_d.edit_suit_text, reply_markup=callback_buttons(data))
+        bot.send_message(
+            call.message.chat.id, dicts.changes.edit_suit_text, reply_markup=keys.buttons.callback_buttons(data)
+        )
 
     else:
-        bot.send_message(call.message.chat.id, ch_d.no_suits_to_edit_text)
+        bot.send_message(call.message.chat.id, dicts.changes.no_suits_to_edit_text)
 
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.change_callback.filter(type="event"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.change_callback.filter(type="event"))
 def display_event_options_to_change(call: CallbackQuery):
     """Display event options to change"""
 
@@ -47,20 +46,20 @@ def display_event_options_to_change(call: CallbackQuery):
 
     if not event:
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
-        bot.send_message(call.message.chat.id, ev_d.event_not_found_text)
+        bot.send_message(call.message.chat.id, dicts.events.event_not_found_text)
         bot.send_sticker(call.message.chat.id, sticker_id)
         return
 
     call_config = "selected"
     if event[1] == 2:
-        options = ch_d.edit_concert_text_tuple
+        options = dicts.changes.edit_concert_text_tuple
     else:
-        options = ch_d.edit_event_text_tuple
+        options = dicts.changes.edit_event_text_tuple
 
     create_option_buttons(call.message, call_config, item_id, options)
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.change_callback.filter(type="location"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.change_callback.filter(type="location"))
 def display_location_options_to_change(call: CallbackQuery):
     """Display location options to change"""
 
@@ -71,13 +70,13 @@ def display_location_options_to_change(call: CallbackQuery):
 
     if not location:
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
-        bot.send_message(call.message.chat.id, ev_d.location_not_found_text)
+        bot.send_message(call.message.chat.id, dicts.events.location_not_found_text)
         bot.send_sticker(call.message.chat.id, sticker_id)
         return
 
     # "location" - "Название", "Ссылку на карту", "Ничего", "УДАЛИТЬ
     call_config = "selected_location"
-    create_option_buttons(call.message, call_config, item_id, ch_d.edit_location_text_tuple)
+    create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_location_text_tuple)
 
 
 def create_option_buttons(message: Message, call_config, item_id, options):
@@ -87,20 +86,20 @@ def create_option_buttons(message: Message, call_config, item_id, options):
         data.append((option, f"{call_config}:{option_id}:{item_id}"))
 
     bot.edit_message_text(
-        ch_d.select_option_to_change_text,
+        dicts.changes.select_option_to_change_text,
         message.chat.id,
         message.id,
-        reply_markup=callback_buttons(data)
+        reply_markup=keys.buttons.callback_buttons(data)
     )
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_callback.filter(option_id="0"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="0"))
 def edit_event_name(call: CallbackQuery):
     """Edit name for an Event"""
 
     print(f"edit_event_name {call.data}")
     _, _, event_id = call.data.split(":")
-    msg = bot.send_message(call.message.chat.id, ch_d.enter_new_event_name_text)
+    msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_event_name_text)
     bot.register_next_step_handler(msg, enter_new_event_name, event_id)
 
 
@@ -108,15 +107,15 @@ def enter_new_event_name(message: Message, event_id):
     """Updates the name for an event"""
 
     if db_event.edit_event_name(event_id, message.text):
-        bot.send_message(message.chat.id, ch_d.event_name_changed_text)
+        bot.send_message(message.chat.id, dicts.changes.event_name_changed_text)
 
     else:
-        bot.send_message(message.chat.id, ch_d.ERROR_text)
+        bot.send_message(message.chat.id, dicts.changes.ERROR_text)
         msg = f"ERROR in enter_new_event_name\nData: {message.text} {event_id} "
         bot.send_message(VIP, msg)
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_callback.filter(option_id="1"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="1"))
 def edit_event_date(call: CallbackQuery):
     """Edit date for an Event"""
 
@@ -124,36 +123,38 @@ def edit_event_date(call: CallbackQuery):
     _, _, event_id = call.data.split(":")
     now = date.today()
     event_type = "4"  # edit
-    bot.send_message(call.message.chat.id, ev_d.set_event_date_text,
-                     reply_markup=generate_calendar_days(now.year, now.month, int(event_type), event_id))
+    markup = keys.calendar.generate_calendar_days(now.year, now.month, int(event_type), event_id)
+    bot.send_message(call.message.chat.id, dicts.events.set_event_date_text, reply_markup=markup)
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_callback.filter(option_id="2"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="2"))
 def edit_event_time(call: CallbackQuery):
     """Edit time for an Event"""
 
     print(f"edit_event_time {call.data}")
     _, _, event_id = call.data.split(":")
     event_date = db_event.get_event_date(event_id)
-    msg = bot.send_message(call.message.chat.id, ch_d.enter_new_event_time_text)
+    msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_event_time_text)
     bot.register_next_step_handler(msg, enter_new_event_time, event_id, event_date)
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_callback.filter(option_id="3"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="3"))
 def edit_event_location(call: CallbackQuery):
     """Edit location for an Event"""
     print(f"edit_event_location {call.data}")
-    bot.send_message(call.message.chat.id, ev_d.choose_event_location_text, reply_markup=choose_location_markup)
+    bot.send_message(
+        call.message.chat.id, dicts.events.choose_event_location_text, reply_markup=keys.buttons.choose_location_markup
+    )
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_callback.filter(option_id="4"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="4"))
 def edit_comment_event(call: CallbackQuery):
     """Edit comment for an Event"""
     print(f"edit_comment_event {call.data}")
-    bot.send_message(call.message.chat.id, sin_d.NOTHING)
+    bot.send_message(call.message.chat.id, dicts.singers.NOTHING)
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_callback.filter(option_id="5"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="5"))
 def delete_event(call: CallbackQuery):
     """DELETE Event"""
 
@@ -164,15 +165,15 @@ def delete_event(call: CallbackQuery):
     call_config = "delete_confirmation"
     item_type = "event"
     data = []
-    msg = f"{ch_d.delete_confirmation_text} {item_name}?"
+    msg = f"{dicts.changes.delete_confirmation_text} {item_name}?"
 
-    for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
+    for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
         data.append((answer, f"{call_config}:{item_type}:{event_id}:{i}"))
 
-    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=callback_buttons(data))
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.callback_buttons(data))
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_callback.filter(option_id="6"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="6"))
 def edit_concert_songs(call: CallbackQuery):
     """Edit songs for a concert"""
 
@@ -182,13 +183,15 @@ def edit_concert_songs(call: CallbackQuery):
     call_config = "change_songs"
     data = []
 
-    for option_id, option_name in enumerate(ch_d.add_remove_text_tuple):
+    for option_id, option_name in enumerate(dicts.changes.add_remove_text_tuple):
         data.append((option_name, f"{call_config}:{event_id}:{option_id}"))
 
-    bot.send_message(call.message.chat.id, sin_d.what_to_do_text, reply_markup=callback_buttons(data))
+    bot.send_message(
+        call.message.chat.id, dicts.singers.what_to_do_text, reply_markup=keys.buttons.callback_buttons(data)
+    )
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_callback.filter(option_id="7"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="7"))
 def edit_concert_suit(call: CallbackQuery):
     """Show add or remove button to edit suit for a concert"""
 
@@ -198,9 +201,10 @@ def edit_concert_suit(call: CallbackQuery):
 
     if suit:
         call_config = "remove_suit"
-        msg = ch_d.concert_suit_change_text
-        markup = callback_buttons([(ch_d.suit_change_btn_text, f"{call_config}:{event_id}:{suit[0]}")])
-        bot.send_photo(call.message.chat.id, suit[2], reply_markup=close_markup)
+        msg = dicts.changes.concert_suit_change_text
+        markup = keys.buttons.callback_buttons([(dicts.changes.suit_change_btn_text, 
+                                                 f"{call_config}:{event_id}:{suit[0]}")])
+        bot.send_photo(call.message.chat.id, suit[2], reply_markup=keys.buttons.close_markup)
         bot.send_message(call.message.chat.id, msg, reply_markup=markup)
 
     else:
@@ -211,7 +215,7 @@ def select_suit_for_concert(call, event_id):
     """Display all suits to choose for a concert"""
 
     suits = db_singer.get_all_suits()
-    msg = ch_d.choose_suit_text
+    msg = dicts.changes.choose_suit_text
     call_config = "select_suit"
     data = []
     suit_data = []
@@ -221,11 +225,11 @@ def select_suit_for_concert(call, event_id):
         suit_data.append(InputMediaPhoto(photo, suit_name))
 
     bot.send_media_group(call.message.chat.id, suit_data)
-    bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+    bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.remove_suit_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=keys.call.remove_suit_callback.filter())
 def display_suit_options_to_change(call: CallbackQuery):
     """Remove current concert suit and display suit options to change"""
 
@@ -239,7 +243,7 @@ def display_suit_options_to_change(call: CallbackQuery):
     select_suit_for_concert(call, event_id)
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.change_songs_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=keys.call.change_songs_callback.filter())
 def edit_songs_for_concert(call: CallbackQuery):
     """List of songs to edit"""
 
@@ -261,14 +265,14 @@ def edit_songs_for_concert(call: CallbackQuery):
         data.append((song_name, f"{call_config}:{option}:{concert_id}:{song_id}"))
 
     bot.edit_message_text(
-        ch_d.add_remove_text_tuple[int(option_id)],
+        dicts.changes.add_remove_text_tuple[int(option_id)],
         call.message.chat.id,
         call.message.id,
-        reply_markup=callback_buttons(data)
+        reply_markup=keys.buttons.callback_buttons(data)
     )
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.concert_songs_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=keys.call.concert_songs_callback.filter())
 def add_or_remove_songs(call: CallbackQuery):
     """Add or remove songs in concert program"""
 
@@ -278,31 +282,31 @@ def add_or_remove_songs(call: CallbackQuery):
     if option == "add":
         if db_event.add_song_to_concert(int(concert_id), int(song_id)):
             song_name = db_songs.get_song_name(int(song_id))
-            bot.send_message(call.message.chat.id, f"{ch_d.song_added_to_concert_text} {song_name}")
+            bot.send_message(call.message.chat.id, f"{dicts.changes.song_added_to_concert_text} {song_name}")
 
         else:
-            bot.send_message(call.message.chat.id, ch_d.song_already_added)
+            bot.send_message(call.message.chat.id, dicts.changes.song_already_added)
 
     else:
         song_name = db_songs.get_song_name(int(song_id))
         db_event.delete_song_from_concert(int(concert_id), int(song_id))
-        bot.send_message(call.message.chat.id, f"{ch_d.song_removed_from_concert} {song_name}")
+        bot.send_message(call.message.chat.id, f"{dicts.changes.song_removed_from_concert} {song_name}")
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.select_suit_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=keys.call.select_suit_callback.filter())
 def edit_suit_for_concert(call: CallbackQuery):
     """Add a suit for a concert"""
 
     print(f"admin_changes.py edit_suit_for_concert {call.data}")
     _, concert_id, suit_id = call.data.split(":")
     if db_event.add_suit_to_concert(int(concert_id), int(suit_id)):
-        bot.edit_message_text(ch_d.suit_added_text, call.message.chat.id, call.message.id, reply_markup=None)
+        bot.edit_message_text(dicts.changes.suit_added_text, call.message.chat.id, call.message.id, reply_markup=None)
     else:
-        bot.send_message(call.message.chat.id, ch_d.ERROR_text)
+        bot.send_message(call.message.chat.id, dicts.changes.ERROR_text)
         bot.send_message(VIP, f"ERROR in {__name__}\nedit_suit_for_concert {call.data}")
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_location_callback.filter(option_id="0"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_location_callback.filter(option_id="0"))
 def edit_location_name(call: CallbackQuery):
     """Edit location name"""
 
@@ -313,7 +317,7 @@ def edit_location_name(call: CallbackQuery):
     )
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_location_callback.filter(option_id="1"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_location_callback.filter(option_id="1"))
 def edit_location_url(call: CallbackQuery):
     """Edit location URL"""
 
@@ -324,7 +328,7 @@ def edit_location_url(call: CallbackQuery):
     )
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_location_callback.filter(option_id="2"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_location_callback.filter(option_id="2"))
 def edit_location_name(call: CallbackQuery):
     """Edit location none"""
 
@@ -335,7 +339,7 @@ def edit_location_name(call: CallbackQuery):
     )
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.selected_location_callback.filter(option_id="3"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_location_callback.filter(option_id="3"))
 def delete_location(call: CallbackQuery):
     """DELETE location"""
 
@@ -346,15 +350,15 @@ def delete_location(call: CallbackQuery):
     call_config = "delete_confirmation"
     item_type = "location"
     data = []
-    msg = f"{ch_d.delete_confirmation_text}\n{item_name}?"
+    msg = f"{dicts.changes.delete_confirmation_text}\n{item_name}?"
 
-    for i, answer in enumerate(ch_d.delete_confirmation_text_tuple):
+    for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
         data.append((answer, f"{call_config}:{item_type}:{location_id}:{i}"))
 
-    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=callback_buttons(data))
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.callback_buttons(data))
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.delete_confirmation_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=keys.call.delete_confirmation_callback.filter())
 def delete_item(call: CallbackQuery):
     """DELETE confirmation"""
 
@@ -386,12 +390,12 @@ def delete_item(call: CallbackQuery):
         db_songs.delete_sheets_by_song_id(int(item_id))
 
     elif item_type == "sounds":
-        db_songs.delete_sounds_by_song_id(int(item_id))
+        db_songs.delete_sound_by_song_id(int(item_id))
 
     elif item_type == "suit":
         db_songs.delete_song_by_id(int(item_id))
 
-    bot.send_message(call.message.chat.id, ch_d.DELETED_text)
+    bot.send_message(call.message.chat.id, dicts.changes.DELETED_text)
     bot.send_sticker(
         call.message.chat.id,
         "CAACAgIAAxkBAAET3TFielLLC-xjt4t8w12Gju8HUNrC-gACpgAD9wLID6sM5POpKsZYJAQ"       # Ha-ha-ha
@@ -399,12 +403,12 @@ def delete_item(call: CallbackQuery):
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
-@bot.callback_query_handler(func=None, singer_config=cd.unblock_user_callback.filter())
+@bot.callback_query_handler(func=None, singer_config=keys.call.unblock_user_callback.filter())
 def blacklist_user_remove(call: CallbackQuery):
     """Remove a user from the blacklist"""
 
     _, telegram_id = call.data.split(":")
     if db_singer.remove_user_from_blacklist(int(telegram_id)):
-        bot.send_message(call.message.chat.id, ch_d.user_is_free_text)
+        bot.send_message(call.message.chat.id, dicts.changes.user_is_free_text)
     else:
-        bot.send_message(call.message.chat.id, ch_d.ERROR_text)
+        bot.send_message(call.message.chat.id, dicts.changes.ERROR_text)
