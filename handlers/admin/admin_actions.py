@@ -1,9 +1,11 @@
+import datetime
+
 from loader import bot
 from datetime import date
 from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from handlers.admin.admin_songs import add_sheets_or_sounds
 from misc import dicts, keys
-from database_control import db_singer, db_songs, db_event
+from database_control import db_singer, db_songs, db_event, db_attendance
 
 
 @bot.message_handler(commands=["singers"])
@@ -16,7 +18,8 @@ def show_singers_search(message: Message):
         return
 
     amount = db_singer.count_singers()
-    bot.send_message(message.chat.id, f"В хоре {amount} певунов.\n{dicts.singers.show_singers_text}",
+    bot.send_message(message.chat.id,
+                     f"В хоре {amount} певунов.\n{dicts.singers.show_singers_text}",
                      reply_markup=keys.buttons.search_choice_markup)
 
 
@@ -100,12 +103,37 @@ def show_all_singers(call: CallbackQuery):
     data = []
 
     for name, singer_id in singers:
-        data.append((name, f"{call_config}:{singer_id}"))
+        indicator = indicate_attendance(singer_id)
+        data.append((f"{indicator} {name}", f"{call_config}:{singer_id}"))
 
     bot.send_message(
         call.message.chat.id, dicts.singers.show_all_singers_text, reply_markup=keys.buttons.callback_buttons(data)
     )
     bot.delete_message(call.message.chat.id, call.message.id)
+
+
+def indicate_attendance(singer_id):
+    """
+    Calculate the singer's attendance percentage for the last month.
+    Return colored indicators: 🔴 (0-30), 🟡 (30-80), 🟢 (80+) or 🟣 if not yet attended.
+    """
+
+    end_date = datetime.datetime.now().date()
+    start_date = end_date - datetime.timedelta(days=30)
+    attend = db_attendance.get_attendance_by_interval(singer_id, start_date, end_date)
+
+    if not attend:
+        return dicts.attends.attendance_indicator_text_tuple[3]
+
+    attended = sum([int(i) for i in attend if int(i) == 1])
+    percent_attend = 100 // (len(attend) / attended) if attended else 0
+
+    if percent_attend < 30:
+        return dicts.attends.attendance_indicator_text_tuple[0]
+    elif 30 < percent_attend < 80:
+        return dicts.attends.attendance_indicator_text_tuple[1]
+    else:
+        return dicts.attends.attendance_indicator_text_tuple[2]
 
 
 @bot.inline_handler(func=lambda query: len(query.query))
@@ -117,6 +145,7 @@ def location_query(query: InlineQuery):
     data = []
 
     for i, (name, singer_id) in enumerate(singers):
+        indicator = indicate_attendance(singer_id)
         if query.query.lower().strip() in name.lower():
             voices = ", ".join([voice for _, voice in db_singer.get_singer_voices(singer_id)])
             suits = ", ".join([suit for _, suit, _ in db_singer.get_singer_suits(singer_id)])
@@ -129,7 +158,7 @@ def location_query(query: InlineQuery):
             else:
                 content = InputTextMessageContent(f"У этого певуна ещё нет ни голоса, ни костюмов.")
             markup = keys.buttons.query_button(name, f"{call_config}:{singer_id}")
-            data.append(InlineQueryResultArticle(i, name, content, reply_markup=markup))
+            data.append(InlineQueryResultArticle(i, f"{indicator} {name}", content, reply_markup=markup))
 
     bot.answer_inline_query(query.id, data)
 

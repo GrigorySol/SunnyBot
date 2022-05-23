@@ -14,5 +14,6 @@ set_attendance_text_tuple = ("❌ Не в этот раз", "✅ Приду")
 attendance_pics_tuple = ("❌", "✅", "💭")     # ❔
 attendance_interval_text_tuple = ("За месяц", "За год", "За всё время")
 attendance_description_text_tuple = ("❌ Пропущено", "✅ Посещено", "💭 Без отметки")
+attendance_indicator_text_tuple = ("🔴", "🟡", "🟢", "🟣")
 
 attendant_singers_text = "Список участников:"

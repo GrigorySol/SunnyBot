@@ -63,8 +63,23 @@ def get_all_singers():
 
         # language=SQLITE-SQL
         cursor.execute("SELECT first_name || ' ' || last_name AS fullname, id "
-                       "FROM singers ORDER BY first_name")
+                       "FROM singers "
+                       "ORDER BY first_name")
         return cursor.fetchall()
+
+
+# def get_last_month_attendance(start_date, end_date):
+#     """Return (attendance, singer_id) of the all singers from the database."""
+#     with sqlite3.connect("sunny_bot.db") as db:
+#         cursor = db.cursor()
+#
+#         # language=SQLITE-SQL
+#         cursor.execute("SELECT GROUP_CONCAT(attend, ''), singer_id "
+#                        "FROM attendance "
+#                        "JOIN events ON events.id = attendance.event_id "
+#                        "WHERE events.date BETWEEN ? AND ? "
+#                        "GROUP BY (singer_id)", (start_date, end_date))
+#         return cursor.fetchall()
 
 
 def get_all_admins():

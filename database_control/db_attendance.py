@@ -15,22 +15,13 @@ def get_attendance_by_event_id(event_id):
         return cursor.fetchall()
 
 
-def get_attendance_by_singer_id(singer_id):
-    """Return all (event id, attend) from the database."""
-    with sqlite3.connect("database_control/sunny_bot.db") as db:
-        cursor = db.cursor()
-
-        cursor.execute("SELECT event_id, attend FROM attendance WHERE singer_id = ?", (singer_id,))
-        return cursor.fetchall()
-
-
 def get_attendance_by_interval(singer_id, start_date, end_date):
     """Return (attend) using singer_id and date interval from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         # language=SQLITE-SQL
-        cursor.execute("SELECT GROUP_CONCAT(attendance.attend) FROM attendance "
+        cursor.execute("SELECT GROUP_CONCAT(attendance.attend, '') FROM attendance "
                        "JOIN events ON events.id = attendance.event_id "
                        "WHERE attendance.singer_id = ? AND events.date BETWEEN ? AND ?",
                        (singer_id, start_date, end_date))
