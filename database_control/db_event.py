@@ -194,6 +194,34 @@ def edit_event_datetime(event_id, date, time):
             return False
 
 
+def edit_location_name(location_id, location_name):
+    """Edit location_name by location_id and Return bool to confirm changes"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        try:
+            cursor.execute("UPDATE locations SET location_name = ? WHERE id = ?", (location_name, location_id))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
+
+def edit_location_url(location_id, url):
+    """Edit location_name by location_id and Return bool to confirm changes"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        try:
+            cursor.execute("UPDATE locations SET url = ? WHERE id = ?", (url, location_id))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
+
 # DELETE
 
 def delete_event(event_id):

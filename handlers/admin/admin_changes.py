@@ -1,10 +1,11 @@
+import datetime
 from datetime import date
 
 from config import VIP
 from loader import bot
 from telebot.types import CallbackQuery, Message, InputMediaPhoto
 from misc.edit_functions import enter_new_event_time
-from misc import dicts, keys
+from misc import dicts, keys, bot_speech
 from database_control import db_songs, db_singer, db_event
 
 
@@ -129,7 +130,7 @@ def enter_new_event_name(message: Message, event_id):
         return
 
     if db_event.edit_event_name(event_id, message.text):
-        bot.send_message(message.chat.id, dicts.changes.new_name_changed_text)
+        bot.send_message(message.chat.id, dicts.changes.name_changed_text)
 
     else:
         bot.send_message(message.chat.id, dicts.changes.ERROR_text)
@@ -330,10 +331,27 @@ def edit_location_name(call: CallbackQuery):
 
     print(f"We are in edit_location_name CALL DATA = {call.data}\n")
     _, _, location_id = call.data.split(":")
-    bot.send_sticker(
-        call.message.chat.id,
-        "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
-    )
+    msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_name_text)
+    bot.register_next_step_handler(msg, enter_new_location_name, location_id)
+    # bot.send_sticker(
+    #     call.message.chat.id,
+    #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
+    # )
+
+
+def enter_new_location_name(message: Message, location_id):
+    """Update the name for a location"""
+
+    if message.text and "/" in message.text:
+        return
+
+    if db_event.edit_location_name(location_id, message.text):
+        bot.send_message(message.chat.id, dicts.changes.name_changed_text)
+
+    else:
+        bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        msg = f"ERROR in enter_new_suit_name\nData: {message.text} {location_id} "
+        bot.send_message(VIP, msg)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_location_callback.filter(option_id="1"))
@@ -342,14 +360,32 @@ def edit_location_url(call: CallbackQuery):
 
     print(f"We are in edit_location_url CALL DATA = {call.data}\n")
     _, _, location_id = call.data.split(":")
-    bot.send_sticker(
-        call.message.chat.id,
-        "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
-    )
+    msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_url_text)
+    bot.register_next_step_handler(msg, enter_new_location_url, location_id)
+    # bot.send_sticker(
+    #     call.message.chat.id,
+    #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
+    # )
+
+
+def enter_new_location_url(message: Message, location_id):
+    """Update the name for a location"""
+
+    if message.text and "http" not in message.text:
+        msg = bot.send_message(message.chat.id, dicts.events.wrong_location_url_text)
+        bot.register_next_step_handler(msg, enter_new_location_url, location_id)
+
+    if db_event.edit_location_url(location_id, message.text):
+        bot.send_message(message.chat.id, dicts.changes.url_changed_text)
+
+    else:
+        bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        msg = f"ERROR in enter_new_suit_name\nData: {message.text} {location_id} "
+        bot.send_message(VIP, msg)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_location_callback.filter(option_id="2"))
-def edit_location_name(call: CallbackQuery):
+def edit_location_none(call: CallbackQuery):
     """Edit location none"""
 
     print(f"We are in edit_location_none CALL DATA = {call.data}\n")
@@ -358,6 +394,7 @@ def edit_location_name(call: CallbackQuery):
         call.message.chat.id,
         "CAACAgIAAxkBAAEUN15iiCeJU0iv22TLeXi_IU39-U4JWQACLgADa-18CgqvqjvoHnoDJAQ"    # Причесать дизайн
     )
+    bot.send_message(call.message.chat.id, bot_speech.greetings(datetime.datetime.now().time().hour))
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_location_callback.filter(option_id="3"))
@@ -400,7 +437,7 @@ def enter_new_suit_name(message: Message, suit_id):
         return
 
     if db_singer.edit_suit_name(suit_id, message.text):
-        bot.send_message(message.chat.id, dicts.changes.new_name_changed_text)
+        bot.send_message(message.chat.id, dicts.changes.name_changed_text)
 
     else:
         bot.send_message(message.chat.id, dicts.changes.ERROR_text)
