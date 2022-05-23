@@ -144,6 +144,15 @@ def get_singer_suits(singer_id):
         return cursor.fetchall()
 
 
+def get_singer_comment(singer_id):
+    """Return comment about a singer from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT comment FROM singers WHERE id = ?", (singer_id,))
+        return cursor.fetchone()[0]
+
+
 def get_all_suits():
     """Return all (id, suit_name, photo) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -286,6 +295,20 @@ def add_singer_voice(singer_id, voice_id):
 
 
 # UPDATE
+
+def edit_singer_comment(singer_id, comment):
+    """Edit comment by singer_id and Return bool to confirm changes"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        try:
+            cursor.execute("UPDATE singers SET comment = ? WHERE id = ?", (comment, singer_id))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
 
 def edit_suit_name(suit_id, suit_name):
     """Edit suit_name by suit_id and Return bool to confirm changes"""

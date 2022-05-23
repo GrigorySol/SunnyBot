@@ -180,6 +180,20 @@ def edit_event_name(event_id, event_name):
             return False
 
 
+def edit_event_comment(event_id, comment):
+    """Edit comment by event_id and Return bool to confirm changes"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        try:
+            cursor.execute("UPDATE events SET comment = ? WHERE id = ?", (comment, event_id))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
+
 def edit_event_datetime(event_id, date, time):
     """Edit date and time by event id and Return bool to confirm changes"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:

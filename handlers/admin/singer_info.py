@@ -1,6 +1,8 @@
 from datetime import date
+
+from config import VIP
 from loader import bot
-from telebot.types import CallbackQuery
+from telebot.types import CallbackQuery, Message
 from misc.edit_functions import display_suits, display_voices, edit_voices
 from database_control import db_singer, db_attendance
 from misc import dicts, keys
@@ -19,14 +21,19 @@ def display_singer_info(call: CallbackQuery):
         bot.send_sticker(call.message.chat.id, sticker_id)
         return
 
+    comment = db_singer.get_singer_comment(singer_id)
+    msg = dicts.singers.what_to_do_text
+    if comment:
+        msg = f"{dicts.singers.singer_comment_text}\n{comment}\n\n{msg}"
+
     telegram_name = db_singer.get_singer_telegram_name(singer_id)
-    reply_markup = keys.buttons.singer_info_buttons(telegram_name, singer_id, dicts.changes.edit_singer_text_tuple)
-    bot.send_message(call.from_user.id, dicts.singers.what_to_do_text, reply_markup=reply_markup)
+    markup = keys.buttons.singer_info_buttons(telegram_name, singer_id, dicts.changes.edit_singer_text_tuple)
+    bot.send_message(call.from_user.id, msg, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.info_callback.filter())
 def singer_menu(call: CallbackQuery):
-    """Display """
+    """Edit singer's info or DELETE a singer"""
 
     _, option_id, singer_id = call.data.split(":")
     singer_id = int(singer_id)
@@ -49,8 +56,8 @@ def singer_menu(call: CallbackQuery):
         bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
     elif option_id == "3":  # Комментарий
-        msg = "Нечего комментировать."
-        bot.send_message(call.from_user.id, msg)
+        msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_comment_text)
+        bot.register_next_step_handler(msg, enter_new_singer_comment, singer_id)
 
     elif option_id == "4":  # УДАЛИТЬ
         call_config = "delete_confirmation"
@@ -67,6 +74,22 @@ def singer_menu(call: CallbackQuery):
 
     else:
         print(f"singer_menu again !!! {call.data}")
+
+
+def enter_new_singer_comment(message: Message, singer_id):
+    """Update the comment for a singer"""
+
+    if message.text and "/" in message.text:
+        return
+
+    if db_singer.edit_singer_comment(singer_id, message.text):
+        bot.send_message(message.chat.id, dicts.changes.comment_changed_text)
+
+    else:
+        msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        bot.register_next_step_handler(msg, enter_new_singer_comment, singer_id)
+        vip_msg = f"ERROR in enter_new_event_name\nData: {message.text} {singer_id} "
+        bot.send_message(VIP, vip_msg)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.edit_voice_callback.filter())
@@ -107,6 +130,7 @@ def display_attendance(call: CallbackQuery):
 
     if not attendance:
         bot.send_message(call.message.chat.id, dicts.attends.no_attendance_text)
+        return
 
     msg += f"\n{dicts.attends.attendance_description_text_tuple[0]}: {attendance.count('0')}" \
            f"\n{dicts.attends.attendance_description_text_tuple[1]}: {attendance.count('1')}" \

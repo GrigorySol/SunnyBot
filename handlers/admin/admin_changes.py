@@ -118,7 +118,7 @@ def edit_event_name(call: CallbackQuery):
     """Edit name for an Event"""
 
     print(f"edit_event_name {call.data}")
-    _, _, event_id = call.data.split(":")
+    *_, event_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_event_name_text)
     bot.register_next_step_handler(msg, enter_new_event_name, event_id)
 
@@ -133,9 +133,10 @@ def enter_new_event_name(message: Message, event_id):
         bot.send_message(message.chat.id, dicts.changes.name_changed_text)
 
     else:
-        bot.send_message(message.chat.id, dicts.changes.ERROR_text)
-        msg = f"ERROR in enter_new_event_name\nData: {message.text} {event_id} "
-        bot.send_message(VIP, msg)
+        msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        bot.register_next_step_handler(msg, enter_new_event_comment, event_id)
+        vip_msg = f"ERROR in enter_new_event_name\nData: {message.text} {event_id} "
+        bot.send_message(VIP, vip_msg)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="1"))
@@ -143,7 +144,7 @@ def edit_event_date(call: CallbackQuery):
     """Edit date for an Event"""
 
     print(f"edit_event_date {call.data}")
-    _, _, event_id = call.data.split(":")
+    *_, event_id = call.data.split(":")
     now = date.today()
     event_type = "4"  # edit
     markup = keys.calendar.generate_calendar_days(now.year, now.month, int(event_type), event_id)
@@ -155,7 +156,7 @@ def edit_event_time(call: CallbackQuery):
     """Edit time for an Event"""
 
     print(f"edit_event_time {call.data}")
-    _, _, event_id = call.data.split(":")
+    *_, event_id = call.data.split(":")
     event_date = db_event.get_event_date(event_id)
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_event_time_text)
     bot.register_next_step_handler(msg, enter_new_event_time, event_id, event_date)
@@ -164,17 +165,39 @@ def edit_event_time(call: CallbackQuery):
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="3"))
 def edit_event_location(call: CallbackQuery):
     """Edit location for an Event"""
+
     print(f"edit_event_location {call.data}")
     bot.send_message(
-        call.message.chat.id, dicts.events.choose_event_location_text, reply_markup=keys.buttons.choose_location_markup
+        call.message.chat.id,
+        dicts.events.choose_event_location_text,
+        reply_markup=keys.buttons.choose_location_markup
     )
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="4"))
 def edit_comment_event(call: CallbackQuery):
     """Edit comment for an Event"""
+
     print(f"edit_comment_event {call.data}")
-    bot.send_message(call.message.chat.id, dicts.singers.NOTHING)
+    *_, event_id = call.data.split(":")
+    msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_comment_text)
+    bot.register_next_step_handler(msg, enter_new_event_comment, event_id)
+
+
+def enter_new_event_comment(message: Message, event_id):
+    """Update the comment for an event"""
+
+    if message.text and "/" in message.text:
+        return
+
+    if db_event.edit_event_comment(event_id, message.text):
+        bot.send_message(message.chat.id, dicts.changes.comment_changed_text)
+
+    else:
+        msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        bot.register_next_step_handler(msg, enter_new_event_comment, event_id)
+        vip_msg = f"ERROR in enter_new_event_name\nData: {message.text} {event_id} "
+        bot.send_message(VIP, vip_msg)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="5"))
@@ -182,7 +205,7 @@ def delete_event(call: CallbackQuery):
     """DELETE Event"""
 
     print(f"delete_event {call.data}")
-    _, _, event_id = call.data.split(":")
+    *_, event_id = call.data.split(":")
 
     item_name = db_event.get_event_name(event_id)
     call_config = "delete_confirmation"
@@ -201,7 +224,7 @@ def edit_concert_songs(call: CallbackQuery):
     """Edit songs for a concert"""
 
     print(f"edit_event_songs {call.data}")
-    _, _, event_id = call.data.split(":")
+    *_, event_id = call.data.split(":")
 
     call_config = "change_songs"
     data = []
@@ -219,7 +242,7 @@ def edit_concert_suit(call: CallbackQuery):
     """Show add or remove button to edit suit for a concert"""
 
     print(f"edit_event_suit {call.data}")
-    _, _, event_id = call.data.split(":")
+    *_, event_id = call.data.split(":")
     suit = db_event.get_suit_by_event_id(event_id)
 
     if suit:
@@ -330,7 +353,7 @@ def edit_location_name(call: CallbackQuery):
     """Edit location name"""
 
     print(f"We are in edit_location_name CALL DATA = {call.data}\n")
-    _, _, location_id = call.data.split(":")
+    *_, location_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_name_text)
     bot.register_next_step_handler(msg, enter_new_location_name, location_id)
     # bot.send_sticker(
@@ -359,7 +382,7 @@ def edit_location_url(call: CallbackQuery):
     """Edit location URL"""
 
     print(f"We are in edit_location_url CALL DATA = {call.data}\n")
-    _, _, location_id = call.data.split(":")
+    *_, location_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_url_text)
     bot.register_next_step_handler(msg, enter_new_location_url, location_id)
     # bot.send_sticker(
@@ -379,9 +402,10 @@ def enter_new_location_url(message: Message, location_id):
         bot.send_message(message.chat.id, dicts.changes.url_changed_text)
 
     else:
-        bot.send_message(message.chat.id, dicts.changes.ERROR_text)
-        msg = f"ERROR in enter_new_suit_name\nData: {message.text} {location_id} "
-        bot.send_message(VIP, msg)
+        msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        bot.register_next_step_handler(msg, enter_new_location_url, location_id)
+        vip_msg = f"ERROR in enter_new_event_name\nData: {message.text} {location_id} "
+        bot.send_message(VIP, vip_msg)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_location_callback.filter(option_id="2"))
@@ -389,7 +413,7 @@ def edit_location_none(call: CallbackQuery):
     """Edit location none"""
 
     print(f"We are in edit_location_none CALL DATA = {call.data}\n")
-    _, _, location_id = call.data.split(":")
+    *_, location_id = call.data.split(":")
     bot.send_sticker(
         call.message.chat.id,
         "CAACAgIAAxkBAAEUN15iiCeJU0iv22TLeXi_IU39-U4JWQACLgADa-18CgqvqjvoHnoDJAQ"    # Причесать дизайн
@@ -402,7 +426,7 @@ def delete_location(call: CallbackQuery):
     """DELETE location"""
 
     print(f"delete_location {call.data}")
-    _, _, location_id = call.data.split(":")
+    *_, location_id = call.data.split(":")
 
     item_name = db_event.search_location_by_id(location_id)[0]
     call_config = "delete_confirmation"
@@ -421,7 +445,7 @@ def edit_suit_name(call: CallbackQuery):
     """Edit suit name"""
 
     print(f"We are in edit_suit_name CALL DATA = {call.data}\n")
-    _, _, suit_id = call.data.split(":")
+    *_, suit_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_suit_name_text)
     bot.register_next_step_handler(msg, enter_new_suit_name, suit_id)
     # bot.send_sticker(
@@ -440,9 +464,10 @@ def enter_new_suit_name(message: Message, suit_id):
         bot.send_message(message.chat.id, dicts.changes.name_changed_text)
 
     else:
-        bot.send_message(message.chat.id, dicts.changes.ERROR_text)
-        msg = f"ERROR in enter_new_suit_name\nData: {message.text} {suit_id} "
-        bot.send_message(VIP, msg)
+        msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        bot.register_next_step_handler(msg, enter_new_suit_name, suit_id)
+        vip_msg = f"ERROR in enter_new_event_name\nData: {message.text} {suit_id} "
+        bot.send_message(VIP, vip_msg)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_suit_callback.filter(option_id="1"))
@@ -450,7 +475,7 @@ def edit_suit_photo(call: CallbackQuery):
     """Edit suit photo"""
 
     print(f"We are in edit_suit_name CALL DATA = {call.data}\n")
-    _, _, suit_id = call.data.split(":")
+    *_, suit_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.drop_new_photo_text)
     bot.register_next_step_handler(msg, drop_new_suit_photo, suit_id)
     # bot.send_sticker(
@@ -481,16 +506,17 @@ def drop_new_suit_photo(message: Message, suit_id):
         bot.send_message(message.chat.id, dicts.changes.photo_saved_text)
 
     else:
-        bot.send_message(message.chat.id, dicts.changes.ERROR_text)
-        msg = f"ERROR in enter_new_suit_name\nData: {message.text} {suit_id} "
-        bot.send_message(VIP, msg)
+        msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        bot.register_next_step_handler(msg, enter_new_suit_name, suit_id)
+        vip_msg = f"ERROR in enter_new_event_name\nData: {message.text} {suit_id} "
+        bot.send_message(VIP, vip_msg)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_suit_callback.filter(option_id="2"))
 def edit_suit_name(call: CallbackQuery):
     """DELETE suit"""
 
-    _, _, suit_id = call.data.split(":")
+    *_, suit_id = call.data.split(":")
 
     item_name = db_singer.search_suits_by_id(suit_id)[0]
     call_config = "delete_confirmation"
