@@ -9,7 +9,7 @@ Receive singer attendance.
 
 # SELECT
 
-def singer_exists(telegram_id: int) -> bool:
+def singer_exists(telegram_id) -> bool:
     """Return True if the telegram_id is in the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -18,7 +18,7 @@ def singer_exists(telegram_id: int) -> bool:
         return bool(cursor.fetchone())
 
 
-def singer_exists_by_id(singer_id: int) -> bool:
+def singer_exists_by_id(singer_id) -> bool:
     """Return True if id is in the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -27,7 +27,7 @@ def singer_exists_by_id(singer_id: int) -> bool:
         return bool(cursor.fetchone())
 
 
-def get_singer_id(telegram_id: int):
+def get_singer_id(telegram_id):
     """Return the singer id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -36,7 +36,7 @@ def get_singer_id(telegram_id: int):
         return cursor.fetchone()[0]
 
 
-def is_admin(telegram_id: int) -> bool:
+def is_admin(telegram_id) -> bool:
     """Check if the singer is admin of the bot."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -68,20 +68,6 @@ def get_all_singers():
         return cursor.fetchall()
 
 
-# def get_last_month_attendance(start_date, end_date):
-#     """Return (attendance, singer_id) of the all singers from the database."""
-#     with sqlite3.connect("sunny_bot.db") as db:
-#         cursor = db.cursor()
-#
-#         # language=SQLITE-SQL
-#         cursor.execute("SELECT GROUP_CONCAT(attend, ''), singer_id "
-#                        "FROM attendance "
-#                        "JOIN events ON events.id = attendance.event_id "
-#                        "WHERE events.date BETWEEN ? AND ? "
-#                        "GROUP BY (singer_id)", (start_date, end_date))
-#         return cursor.fetchall()
-
-
 def get_all_admins():
     """Return (telegram_id) for each admin from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -93,7 +79,7 @@ def get_all_admins():
         return cursor.fetchall()
 
 
-def get_singers_id_by_event(event_id: int):
+def get_singers_id_by_event(event_id):
     """Return (telegram_id) from singers for event_id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -105,7 +91,7 @@ def get_singers_id_by_event(event_id: int):
         return cursor.fetchall()
 
 
-def get_singer_telegram_name(singer_id: int):
+def get_singer_telegram_name(singer_id):
     """Return (telegram username) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -114,7 +100,7 @@ def get_singer_telegram_name(singer_id: int):
         return cursor.fetchone()[0]
 
 
-def get_singer_fullname(singer_id: int):
+def get_singer_fullname(singer_id):
     """Return (firstname lastname) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -125,7 +111,7 @@ def get_singer_fullname(singer_id: int):
         return cursor.fetchone()[0]
 
 
-def get_singer_join_date(singer_id: int):
+def get_singer_join_date(singer_id):
     """Return singer's join_date from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -134,7 +120,7 @@ def get_singer_join_date(singer_id: int):
         return cursor.fetchone()[0]
 
 
-def get_singer_voices(singer_id: int):
+def get_singer_voices(singer_id):
     """Return (voice_id, voice) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -146,7 +132,7 @@ def get_singer_voices(singer_id: int):
         return cursor.fetchall()
 
 
-def get_singer_suits(singer_id: int):
+def get_singer_suits(singer_id):
     """Return the singer (id, suit_name, photo) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -165,6 +151,15 @@ def get_all_suits():
 
         cursor.execute("SELECT * FROM suits ")
         return cursor.fetchall()
+
+
+def search_suits_by_id(suit_id):
+    """Return (suit_name, photo) from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT suit_name, photo FROM suits WHERE id = ?", (suit_id,))
+        return cursor.fetchone()
 
 
 def suit_name_exists(suit_name):
@@ -192,19 +187,6 @@ def get_voice_list():
 
         cursor.execute("SELECT voice FROM voices")
         return cursor.fetchall()
-
-
-# def search_singer_voices(telegram_id: int):
-#     """Return all singer voices from the database."""
-#     with sqlite3.connect("database_control/sunny_bot.db") as db:
-#         cursor = db.cursor()
-#
-#         # language=SQLITE-SQL
-#         cursor.execute("SELECT GROUP_CONCAT(voices.voice, ', ') FROM singers "
-#                        "JOIN singer_voice ON singer_voice.singer_id = singers.id "
-#                        "JOIN voices ON voices.id = singer_voice.voice_id "
-#                        "WHERE singers.telegram_id = ? ORDER BY singer_voice.voice_id", (telegram_id,))
-#         return cursor.fetchall()
 
 
 def search_singers_by_voice(voice: str):
@@ -241,7 +223,7 @@ def get_all_blocked_users():
         return cursor.fetchall()
 
 
-def is_blocked(telegram_id: int) -> bool:
+def is_blocked(telegram_id) -> bool:
     """Check if the user is blocked."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -252,7 +234,7 @@ def is_blocked(telegram_id: int) -> bool:
 
 # INSERT
 
-def block_user(telegram_id: int, telegram_name: str):
+def block_user(telegram_id, telegram_name: str):
     """Add user id and telegram name in black list in the database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -260,7 +242,7 @@ def block_user(telegram_id: int, telegram_name: str):
         cursor.execute("INSERT INTO black_list VALUES (?, ?)", (telegram_id, telegram_name))
 
 
-def add_singer(telegram_id: int, telegram_name: str, first_name: str = None, last_name: str = None):
+def add_singer(telegram_id, telegram_name: str, first_name: str = None, last_name: str = None):
     """Add new singer into the database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -269,7 +251,7 @@ def add_singer(telegram_id: int, telegram_name: str, first_name: str = None, las
                        (telegram_id, telegram_name, first_name, last_name))
 
 
-def add_admin(telegram_id: int):
+def add_admin(telegram_id):
     """Add singer to admins in the database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -287,7 +269,7 @@ def add_suit(suit_name: str, photo: str):
         cursor.execute("INSERT INTO suits (suit_name, photo) VALUES (?, ?)", (suit_name, photo))
 
 
-def add_singer_suit(singer_id: int, suit_id: int):
+def add_singer_suit(singer_id, suit_id):
     """Add suit for the singer into database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -295,7 +277,7 @@ def add_singer_suit(singer_id: int, suit_id: int):
         cursor.execute("INSERT INTO singer_suit VALUES (?, ?)", (singer_id, suit_id))
 
 
-def add_singer_voice(singer_id: int, voice_id: int):
+def add_singer_voice(singer_id, voice_id):
     """Add voice for the singer into database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -305,10 +287,37 @@ def add_singer_voice(singer_id: int, voice_id: int):
 
 # UPDATE
 
+def edit_suit_name(suit_id, suit_name):
+    """Edit suit_name by suit_id and Return bool to confirm changes"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        try:
+            cursor.execute("UPDATE suits SET suit_name = ? WHERE id = ?", (suit_name, suit_id))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
+
+def edit_suit_photo(suit_id, photo):
+    """Edit photo by suit_id and Return bool to confirm changes"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        try:
+            cursor.execute("UPDATE suits SET photo = ? WHERE id = ?", (photo, suit_id))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
 
 # DELETE
 
-def remove_user_from_blacklist(telegram_id: int):
+def remove_user_from_blacklist(telegram_id):
     """Remove a user from the black list"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -321,7 +330,7 @@ def remove_user_from_blacklist(telegram_id: int):
             return False
 
 
-def delete_singer_by_id(singer_id: int):
+def delete_singer(singer_id):
     """DELETE singer by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -334,7 +343,7 @@ def delete_singer_by_id(singer_id: int):
             return False
 
 
-def delete_suit(suit_id: int):
+def delete_suit(suit_id):
     """DELETE suit from the database"""
 
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -343,7 +352,7 @@ def delete_suit(suit_id: int):
         cursor.execute("DELETE FROM suits WHERE id = ?", (suit_id,))
 
 
-def remove_suit(singer_id: int, suit_id: int):
+def remove_suit(singer_id, suit_id):
     """Remove singer's suit"""
 
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -352,7 +361,7 @@ def remove_suit(singer_id: int, suit_id: int):
         cursor.execute("DELETE FROM singer_suit WHERE singer_id = ? and suit_id = ?", (singer_id, suit_id))
 
 
-def remove_singer_from_voice(singer_id: int, voice_id: int):
+def remove_singer_from_voice(singer_id, voice_id):
     """Remove singer from voice"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()

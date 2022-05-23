@@ -176,7 +176,7 @@ def show_event(call: CallbackQuery):
 
     _, event_id = call.data.split(":")
     _, event_type, event_name, event_date, time, location_id, comment = db_event.search_event_by_id(event_id)
-    _, location_name, url = db_event.search_location_by_id(location_id)
+    location_name, url = db_event.search_location_by_id(location_id)
     singer_id = call.from_user.id
 
     location = f"{location_name}\n\n{url}"

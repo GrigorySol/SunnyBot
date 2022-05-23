@@ -15,6 +15,7 @@ add_new_callback = CallbackData("type", prefix="add_new")
 change_callback = CallbackData("type", "item_id", prefix="change")
 selected_callback = CallbackData("option_id", "event_id", prefix="selected")
 selected_location_callback = CallbackData("option_id", "location_id", prefix="selected_location")
+selected_suit_callback = CallbackData("option_id", "suit_id", prefix="selected_suit")
 
 change_songs_callback = CallbackData("concert_id", "option_id", prefix="change_songs")
 concert_songs_callback = CallbackData("option", "concert_id", "song_id", prefix="concert_songs")

@@ -79,6 +79,25 @@ def display_location_options_to_change(call: CallbackQuery):
     create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_location_text_tuple)
 
 
+@bot.callback_query_handler(func=None, singer_config=keys.call.change_callback.filter(type="suit"))
+def display_suit_options_to_change(call: CallbackQuery):
+    """Display location options to change"""
+
+    print(f"We are in display_suit_options_to_change CALL DATA = {call.data}\n")
+    *_, item_id = call.data.split(":")
+
+    suit = db_singer.search_suits_by_id(int(item_id))
+
+    if not suit:
+        sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
+        bot.send_message(call.message.chat.id, dicts.changes.suit_not_found_text)
+        bot.send_sticker(call.message.chat.id, sticker_id)
+        return
+
+    call_config = "selected_suit"
+    create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_suit_text_tuple)
+
+
 def create_option_buttons(message: Message, call_config, item_id, options):
     data = []
 
@@ -104,10 +123,13 @@ def edit_event_name(call: CallbackQuery):
 
 
 def enter_new_event_name(message: Message, event_id):
-    """Updates the name for an event"""
+    """Update the name for an event"""
+
+    if message.text and "/" in message.text:
+        return
 
     if db_event.edit_event_name(event_id, message.text):
-        bot.send_message(message.chat.id, dicts.changes.event_name_changed_text)
+        bot.send_message(message.chat.id, dicts.changes.new_name_changed_text)
 
     else:
         bot.send_message(message.chat.id, dicts.changes.ERROR_text)
@@ -197,7 +219,7 @@ def edit_concert_suit(call: CallbackQuery):
 
     print(f"edit_event_suit {call.data}")
     _, _, event_id = call.data.split(":")
-    suit = db_event.get_suit_by_event_id(int(event_id))
+    suit = db_event.get_suit_by_event_id(event_id)
 
     if suit:
         call_config = "remove_suit"
@@ -235,11 +257,7 @@ def display_suit_options_to_change(call: CallbackQuery):
 
     print(f"We are in display_suit_options_to_change CALL DATA = {call.data}\n")
     _, event_id, suit_id = call.data.split(":")
-    # bot.send_sticker(
-    #     call.message.chat.id,
-    #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
-    # )
-    db_event.delete_suit_from_concert(int(event_id), int(suit_id))
+    db_event.delete_suit_from_concert(event_id, suit_id)
     select_suit_for_concert(call, event_id)
 
 
@@ -259,7 +277,7 @@ def edit_songs_for_concert(call: CallbackQuery):
 
     else:
         option = "remove"
-        songs = db_songs.get_songs_by_event_id(int(concert_id))
+        songs = db_songs.get_songs_by_event_id(concert_id)
 
     for song_id, song_name, _ in songs:
         data.append((song_name, f"{call_config}:{option}:{concert_id}:{song_id}"))
@@ -280,16 +298,16 @@ def add_or_remove_songs(call: CallbackQuery):
     _, option, concert_id, song_id = call.data.split(":")
 
     if option == "add":
-        if db_event.add_song_to_concert(int(concert_id), int(song_id)):
-            song_name = db_songs.get_song_name(int(song_id))
+        if db_event.add_song_to_concert(concert_id, song_id):
+            song_name = db_songs.get_song_name(song_id)
             bot.send_message(call.message.chat.id, f"{dicts.changes.song_added_to_concert_text} {song_name}")
 
         else:
             bot.send_message(call.message.chat.id, dicts.changes.song_already_added)
 
     else:
-        song_name = db_songs.get_song_name(int(song_id))
-        db_event.delete_song_from_concert(int(concert_id), int(song_id))
+        song_name = db_songs.get_song_name(song_id)
+        db_event.delete_song_from_concert(concert_id, song_id)
         bot.send_message(call.message.chat.id, f"{dicts.changes.song_removed_from_concert} {song_name}")
 
 
@@ -299,7 +317,7 @@ def edit_suit_for_concert(call: CallbackQuery):
 
     print(f"admin_changes.py edit_suit_for_concert {call.data}")
     _, concert_id, suit_id = call.data.split(":")
-    if db_event.add_suit_to_concert(int(concert_id), int(suit_id)):
+    if db_event.add_suit_to_concert(concert_id, suit_id):
         bot.edit_message_text(dicts.changes.suit_added_text, call.message.chat.id, call.message.id, reply_markup=None)
     else:
         bot.send_message(call.message.chat.id, dicts.changes.ERROR_text)
@@ -311,6 +329,7 @@ def edit_location_name(call: CallbackQuery):
     """Edit location name"""
 
     print(f"We are in edit_location_name CALL DATA = {call.data}\n")
+    _, _, location_id = call.data.split(":")
     bot.send_sticker(
         call.message.chat.id,
         "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
@@ -322,6 +341,7 @@ def edit_location_url(call: CallbackQuery):
     """Edit location URL"""
 
     print(f"We are in edit_location_url CALL DATA = {call.data}\n")
+    _, _, location_id = call.data.split(":")
     bot.send_sticker(
         call.message.chat.id,
         "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
@@ -333,6 +353,7 @@ def edit_location_name(call: CallbackQuery):
     """Edit location none"""
 
     print(f"We are in edit_location_none CALL DATA = {call.data}\n")
+    _, _, location_id = call.data.split(":")
     bot.send_sticker(
         call.message.chat.id,
         "CAACAgIAAxkBAAEUN15iiCeJU0iv22TLeXi_IU39-U4JWQACLgADa-18CgqvqjvoHnoDJAQ"    # Причесать дизайн
@@ -346,7 +367,7 @@ def delete_location(call: CallbackQuery):
     print(f"delete_location {call.data}")
     _, _, location_id = call.data.split(":")
 
-    item_name = db_event.search_location_by_id(location_id)[1]
+    item_name = db_event.search_location_by_id(location_id)[0]
     call_config = "delete_confirmation"
     item_type = "location"
     data = []
@@ -354,6 +375,94 @@ def delete_location(call: CallbackQuery):
 
     for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
         data.append((answer, f"{call_config}:{item_type}:{location_id}:{i}"))
+
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.callback_buttons(data))
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_suit_callback.filter(option_id="0"))
+def edit_suit_name(call: CallbackQuery):
+    """Edit suit name"""
+
+    print(f"We are in edit_suit_name CALL DATA = {call.data}\n")
+    _, _, suit_id = call.data.split(":")
+    msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_suit_name_text)
+    bot.register_next_step_handler(msg, enter_new_suit_name, suit_id)
+    # bot.send_sticker(
+    #     call.message.chat.id,
+    #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
+    # )
+
+
+def enter_new_suit_name(message: Message, suit_id):
+    """Update the name for a suit"""
+
+    if message.text and "/" in message.text:
+        return
+
+    if db_singer.edit_suit_name(suit_id, message.text):
+        bot.send_message(message.chat.id, dicts.changes.new_name_changed_text)
+
+    else:
+        bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        msg = f"ERROR in enter_new_suit_name\nData: {message.text} {suit_id} "
+        bot.send_message(VIP, msg)
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_suit_callback.filter(option_id="1"))
+def edit_suit_photo(call: CallbackQuery):
+    """Edit suit photo"""
+
+    print(f"We are in edit_suit_name CALL DATA = {call.data}\n")
+    _, _, suit_id = call.data.split(":")
+    msg = bot.send_message(call.message.chat.id, dicts.changes.drop_new_photo_text)
+    bot.register_next_step_handler(msg, drop_new_suit_photo, suit_id)
+    # bot.send_sticker(
+    #     call.message.chat.id,
+    #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
+    # )
+
+
+def drop_new_suit_photo(message: Message, suit_id):
+    """Update the photo for a suit"""
+
+    if message.text and "/" in message.text:
+        return
+
+    if not message.photo:
+        msg = bot.send_message(message.chat.id, dicts.changes.wrong_photo_format_text)
+        bot.register_next_step_handler(msg, drop_new_suit_photo, suit_id)
+        return
+
+    if len(message.photo) < 3:
+        msg = bot.send_message(message.chat.id, dicts.changes.wrong_photo_format_text)
+        bot.register_next_step_handler(msg, drop_new_suit_photo, suit_id)
+        return
+
+    photo_file_id = message.photo[2].file_id
+
+    if db_singer.edit_suit_photo(suit_id, photo_file_id):
+        bot.send_message(message.chat.id, dicts.changes.photo_saved_text)
+
+    else:
+        bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        msg = f"ERROR in enter_new_suit_name\nData: {message.text} {suit_id} "
+        bot.send_message(VIP, msg)
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_suit_callback.filter(option_id="2"))
+def edit_suit_name(call: CallbackQuery):
+    """DELETE suit"""
+
+    _, _, suit_id = call.data.split(":")
+
+    item_name = db_singer.search_suits_by_id(suit_id)[0]
+    call_config = "delete_confirmation"
+    item_type = "suit"
+    data = []
+    msg = f"{dicts.changes.delete_confirmation_text}\n{item_name}?"
+
+    for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
+        data.append((answer, f"{call_config}:{item_type}:{suit_id}:{i}"))
 
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.callback_buttons(data))
 
@@ -375,25 +484,25 @@ def delete_item(call: CallbackQuery):
         return
 
     if item_type == "singer":
-        db_singer.delete_singer_by_id(int(item_id))
+        db_singer.delete_singer(item_id)
 
     elif item_type == "event":
-        db_event.delete_event_by_id(int(item_id))
+        db_event.delete_event(item_id)
 
     elif item_type == "location":
-        db_event.delete_location_by_id(int(item_id))
+        db_event.delete_location_by_id(item_id)
 
     elif item_type == "song":
-        db_songs.delete_song_by_id(int(item_id))
+        db_songs.delete_song(item_id)
 
     elif item_type == "sheets":
-        db_songs.delete_sheets_by_song_id(int(item_id))
+        db_songs.delete_sheets_by_song_id(item_id)
 
     elif item_type == "sounds":
-        db_songs.delete_sound_by_song_id(int(item_id))
+        db_songs.delete_sound_by_song_id(item_id)
 
     elif item_type == "suit":
-        db_songs.delete_song_by_id(int(item_id))
+        db_singer.delete_suit(item_id)
 
     bot.send_message(call.message.chat.id, dicts.changes.DELETED_text)
     bot.send_sticker(

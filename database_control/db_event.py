@@ -89,11 +89,11 @@ def get_all_locations():
 
 
 def search_location_by_id(location_id):
-    """Return id, location_name, url from the database."""
+    """Return location_name, url from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM locations WHERE id = ?", (location_id,))
+        cursor.execute("SELECT location_name, url FROM locations WHERE id = ?", (location_id,))
         return cursor.fetchone()
 
 
@@ -138,7 +138,7 @@ def add_location(location_name, url):
         return cursor.fetchone()[0]
 
 
-def add_song_to_concert(concert_id: int, song_id: int):
+def add_song_to_concert(concert_id, song_id):
     """Add event_is, song_id to the event_song."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -151,7 +151,7 @@ def add_song_to_concert(concert_id: int, song_id: int):
         return True
 
 
-def add_suit_to_concert(concert_id: int, suit_id: int):
+def add_suit_to_concert(concert_id, suit_id):
     """Add event_is, suit_id to the event_suit."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -180,7 +180,7 @@ def edit_event_name(event_id, event_name):
             return False
 
 
-def edit_event_datetime(event_id: int, date, time):
+def edit_event_datetime(event_id, date, time):
     """Edit date and time by event id and Return bool to confirm changes"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -196,7 +196,7 @@ def edit_event_datetime(event_id: int, date, time):
 
 # DELETE
 
-def delete_event_by_id(event_id: int):
+def delete_event(event_id):
     """DELETE event by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -204,7 +204,7 @@ def delete_event_by_id(event_id: int):
         cursor.execute("DELETE FROM events WHERE id = ?", (event_id,))
 
 
-def delete_location_by_id(location_id: int):
+def delete_location_by_id(location_id):
     """DELETE location by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -212,7 +212,7 @@ def delete_location_by_id(location_id: int):
         cursor.execute("DELETE FROM location WHERE id = ?", (location_id,))
 
 
-def delete_song_from_concert(concert_id: int, song_id: int):
+def delete_song_from_concert(concert_id, song_id):
     """DELETE song from event_song."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
@@ -220,7 +220,7 @@ def delete_song_from_concert(concert_id: int, song_id: int):
         cursor.execute("DELETE FROM event_song WHERE concert_id = ? and song_id = ?", (concert_id, song_id))
 
 
-def delete_suit_from_concert(concert_id: int, suit_id: int):
+def delete_suit_from_concert(concert_id, suit_id):
     """DELETE suit from event_suit."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()

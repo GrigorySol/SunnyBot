@@ -229,13 +229,13 @@ def add_suit_name(message: Message):
 def save_new_suit(message: Message, suit_name):
     photo_file_id = message.photo[2].file_id
 
-    if "/" in message.text:
+    if message.text and "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
 
     elif not photo_file_id:
-        print(message.photo)
         bot.register_next_step_handler(dicts.singers.no_photo_text, save_new_suit, suit_name)
 
     else:
+        assert isinstance(photo_file_id, str)
         db_singer.add_suit(suit_name, photo_file_id)
         bot.send_message(message.chat.id, dicts.singers.new_suit_added_text)

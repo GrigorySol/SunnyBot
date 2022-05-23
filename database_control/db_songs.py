@@ -190,7 +190,7 @@ def edit_sheets_by_id(song_id, voice_id):
 
 # DELETE
 
-def delete_song_by_id(song_id):
+def delete_song(song_id):
     """DELETE song by id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
