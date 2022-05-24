@@ -149,7 +149,7 @@ def callback_buttons(data: List, row=2, multiple=False):
     return markup
 
 
-def message_buttons(data: List, event_id, row=2, multiple=None):
+def participant_message_buttons(data: List, event_id, row=2, multiple=None):
     """Creates markup with url buttons"""
     markup = InlineKeyboardMarkup(row_width=row)
     data_amount = len(data)
@@ -175,8 +175,14 @@ def message_buttons(data: List, event_id, row=2, multiple=None):
         ]
         markup.add(*buttons)
 
-    remove_btn = InlineKeyboardButton(bu_d.event_remove_singer_btn_text, callback_data=f"remove_participation:{event_id}")
-    markup.add(remove_btn)
+    add_one_btn = InlineKeyboardButton(bu_d.event_add_singer_btn_text,
+                                       callback_data=f"add_participant:{event_id}")
+    remove_one_btn = InlineKeyboardButton(bu_d.event_remove_singer_btn_text,
+                                          callback_data=f"remove_participation:{event_id}")
+    add_all_btn = InlineKeyboardButton(bu_d.event_add_all_btn_text,
+                                       callback_data=f"add_all_participants:{event_id}")
+    markup.add(add_one_btn, remove_one_btn)
+    markup.add(add_all_btn)
     markup.add(close_btn)
     return markup
 

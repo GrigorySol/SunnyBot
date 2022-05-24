@@ -109,6 +109,8 @@ def singer_name_step(message: Message, singer: SingerRegister):
         bot.send_message(message.chat.id, sin_d.thanks_for_register_text)
         add_singer(singer.telegram_id, singer.telegram_name, name, lastname)
         if singer.is_admin:
+            from handlers.admin.command_rules import admin_command_rules
+            admin_command_rules()
             add_admin(singer.telegram_id)
         print(f"New singer {name} {lastname} registered")
         del singer

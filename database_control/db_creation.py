@@ -84,3 +84,6 @@ def create_database():
         cursor.execute("CREATE TABLE singer_voice "
                        "(singer_id INTEGER REFERENCES singers (id) ON DELETE CASCADE NOT NULL, "
                        "voice_id INTEGER REFERENCES voices (id) ON DELETE CASCADE NOT NULL)")
+
+        cursor.execute("INSERT INTO voices (voice) VALUES (?), (?), (?), (?), (?), (?)",
+                       ("1 сопрано", "2 сопрано", "Меццо", "Альт", "Тенор", "Бас"))

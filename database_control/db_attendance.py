@@ -2,7 +2,7 @@ import sqlite3
 
 
 def get_attendance_by_event_id(event_id):
-    """Return all (singer id, fullname, telegram_name, attend) and attend from the database."""
+    """Return all (singer id, fullname, telegram_name, attend) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
@@ -12,6 +12,23 @@ def get_attendance_by_event_id(event_id):
                        "FROM attendance "
                        "JOIN singers ON singers.id = attendance.singer_id "
                        "WHERE event_id = ? ORDER BY attend", (event_id,))
+        return cursor.fetchall()
+
+
+def get_not_participating_by_event_id(event_id):
+    """Return all (singer id, fullname, telegram_name) who do not participate in an event from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT singers.id, singers.first_name || ' ' || singers.last_name "
+                       "AS fullname, singers.telegram_name "
+                       "FROM singers EXCEPT "
+                       "SELECT singers.id, singers.first_name || ' ' || singers.last_name "
+                       "AS fullname, singers.telegram_name "
+                       "FROM attendance "
+                       "JOIN singers ON singers.id = attendance.singer_id "
+                       "WHERE event_id = ? ORDER BY fullname", (event_id,))
         return cursor.fetchall()
 
 
@@ -51,14 +68,24 @@ def get_all_telegram_singer_id_by_event_id(event_id):
 
 # INSERT
 
-def create_new_attendance(event_id):
-    """Add singers  with voices and an event to the attendance table in the database."""
+def add_all_singers_attendance(event_id: int):
+    """Add singers with voices and an event to the attendance table in the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         # language=SQLITE-SQL
         cursor.execute("INSERT INTO attendance (event_id, singer_id) "
-                       "SELECT DISTINCT ?, singer_id FROM singer_voice ", (event_id,))
+                       "SELECT DISTINCT ?, singer_id FROM singer_voice "
+                       "EXCEPT SELECT event_id, singer_id FROM attendance", (event_id,))
+
+
+def add_singer_attendance(event_id, singer_id):
+    """Add singers  with voices and an event to the attendance table in the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("INSERT INTO attendance (event_id, singer_id) VALUES (?, ?)", (event_id, singer_id))
 
 
 # UPDATE

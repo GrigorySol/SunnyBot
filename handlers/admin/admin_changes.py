@@ -6,7 +6,7 @@ from loader import bot
 from telebot.types import CallbackQuery, Message, InputMediaPhoto
 from misc.edit_functions import enter_new_event_time
 from misc import dicts, keys, bot_speech
-from database_control import db_songs, db_singer, db_event
+from database_control import db_songs, db_singer, db_event, db_attendance
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'show_suits')
@@ -201,6 +201,24 @@ def enter_new_event_comment(message: Message, event_id):
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="5"))
+def edit_event_participant(call: CallbackQuery):
+    """Edit Event participants"""
+
+    print(f"edit_event_participant {call.data}")
+    *_, event_id = call.data.split(":")
+    attendance_data = [
+        (fullname, telegram_name, dicts.attends.attendance_pics_tuple[int(attendance)])
+        for _, fullname, telegram_name, attendance in db_attendance.get_attendance_by_event_id(event_id)
+    ]
+    bot.edit_message_text(
+        dicts.attends.attendant_singers_text,
+        call.message.chat.id,
+        call.message.id,
+        reply_markup=keys.buttons.participant_message_buttons(attendance_data, event_id)
+    )
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="6"))
 def delete_event(call: CallbackQuery):
     """DELETE Event"""
 
@@ -219,7 +237,7 @@ def delete_event(call: CallbackQuery):
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.callback_buttons(data))
 
 
-@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="6"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="7"))
 def edit_concert_songs(call: CallbackQuery):
     """Edit songs for a concert"""
 
@@ -237,7 +255,7 @@ def edit_concert_songs(call: CallbackQuery):
     )
 
 
-@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="7"))
+@bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="8"))
 def edit_concert_suit(call: CallbackQuery):
     """Show add or remove button to edit suit for a concert"""
 

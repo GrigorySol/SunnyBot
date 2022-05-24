@@ -31,8 +31,8 @@ def rolling_callback_buttons(call: CallbackQuery):
         bot.edit_message_reply_markup(
             call.message.chat.id,
             call.message.id,
-            reply_markup=keys.buttons.message_buttons(keys.buttons.keep_data.data,
-                                                      event_id, keys.buttons.keep_data.row, True)
+            reply_markup=keys.buttons.participant_message_buttons(keys.buttons.keep_data.data,
+                                                                  event_id, keys.buttons.keep_data.row, True)
         )
 
 
@@ -215,9 +215,9 @@ def show_event(call: CallbackQuery):
     bot.send_message(singer_id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
     # Admin can change the record about the event
-    item_type = "event"
 
     if db_singer.is_admin(singer_id):
+        item_type = "event"
         markup = keys.buttons.show_participation(event_id)
 
         for buttons in keys.buttons.change_buttons(item_type, event_id).keyboard:

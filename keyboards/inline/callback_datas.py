@@ -48,6 +48,8 @@ unblock_user_callback = CallbackData("singer_id", prefix="unblock_user")
 # attendance
 attendance_intervals_callback = CallbackData("interval", "singer_id", prefix="attendance_intervals")
 show_participation_callback = CallbackData("event_id", prefix="show_participation")
+add_participant_callback = CallbackData("event_id", prefix="add_participant")
+add_all_participants_callback = CallbackData("event_id", prefix="add_all_participants")
 remove_participation_callback = CallbackData("event_id", prefix="remove_participation")
 singer_attendance_callback = CallbackData("action", "event_id", "singer_id", prefix="singer_attendance")
 
