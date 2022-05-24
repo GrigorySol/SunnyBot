@@ -1,7 +1,7 @@
 import datetime
 from random import randint
 
-from config import VIP
+from config import VIP, VIP2
 from loader import bot
 from database_control import db_singer, db_songs, db_event, db_attendance
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
@@ -211,6 +211,7 @@ def show_event(call: CallbackQuery):
 
     # ask a singer to set the attendance
     singer_id = db_singer.get_singer_id(telegram_id)
+    bot.edit_message_text(location, telegram_id, call.message.id, reply_markup=keys.buttons.close_markup)
     if db_attendance.check_singer_attendance_exists(event_id, singer_id):
         call_config = "singer_attendance"
         data = [
@@ -219,11 +220,11 @@ def show_event(call: CallbackQuery):
         ]
         msg += f"\n{dicts.attends.select_attendance_text}"
 
-        bot.edit_message_text(location, telegram_id, call.message.id, reply_markup=keys.buttons.close_markup)
         bot.send_message(telegram_id, msg, reply_markup=keys.buttons.callback_buttons(data))
-    else:
+    elif telegram_id != int(VIP) and telegram_id != int(VIP2):
         msg += f"\n{dicts.attends.you_not_participate_text}"
-        bot.edit_message_text(location, telegram_id, call.message.id, reply_markup=keys.buttons.close_markup)
+        bot.send_message(telegram_id, msg)
+    else:
         bot.send_message(telegram_id, msg)
 
     # Admin can change the record about the event

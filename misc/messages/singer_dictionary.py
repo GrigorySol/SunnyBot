@@ -35,7 +35,7 @@ choose_filter_text = "Выбери фильтр песен или посмотр
 choose_concert_text = "Выбери концерт:"
 singer_comment_text = "Комментарий об этом певуне:"
 what_to_do_text = "Что хочешь сделать или изменить?"
-show_all_singers_text = "Любуйся:"
+show_all_singers_text = "Все пользователи бота:"
 you_shell_not_pass_text = "Ти сюда нэ ходы, ти туда ходы, а то пэсня в башка пападёт, совсэм глупий станэшь!.. э?"
 
 # add_remove

@@ -15,8 +15,9 @@ def search_by_voice(call: CallbackQuery):
     data = []
     for _, voice in voices:
         data.append((voice, f"{call_config}:{voice}"))
-    bot.send_message(call.message.chat.id, choose_voice_text, reply_markup=callback_buttons(data, row=3))
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+    bot.edit_message_text(
+        choose_voice_text, call.message.chat.id, call.message.id, reply_markup=callback_buttons(data, row=3)
+    )
 
 
 @bot.callback_query_handler(func=None, singer_config=voice_callback.filter())
@@ -26,13 +27,15 @@ def show_voice(call: CallbackQuery):
     voice = call.data.split(":")[1]
     singers = search_singers_by_voice(voice)
     if not singers:
-        bot.send_message(call.message.chat.id, no_singers_text, reply_markup=search_choice_markup)
-        bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+        bot.edit_message_text(
+            no_singers_text, call.message.chat.id, call.message.id, reply_markup=search_choice_markup
+        )
     else:
         msg = f"Вы выбрали {voice}"
         call_config = "show_singer"
         data = []
         for name, singer_id in singers:
             data.append((name, f"{call_config}:{singer_id}"))
-        bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
-        bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+        bot.edit_message_text(
+            msg, call.message.chat.id, call.message.id, reply_markup=callback_buttons(data)
+        )
