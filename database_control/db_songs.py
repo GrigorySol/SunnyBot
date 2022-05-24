@@ -6,7 +6,7 @@ def get_all_songs():
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM songs")
+        cursor.execute("SELECT * FROM songs ORDER BY song_name")
         return cursor.fetchall()
 
 

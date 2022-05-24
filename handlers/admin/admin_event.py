@@ -46,7 +46,7 @@ def calendar_show_event_handler(call: CallbackQuery):
         data.append((f"{event_name} {event_time}", f"{call_config}:{event_id}"))
 
     text = f"{dicts.events.current_events_text} {day} " \
-           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года, брат:"
+           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года:"
     bot.send_message(call.message.chat.id, text, reply_markup=keys.buttons.callback_buttons(data))
 
 
@@ -83,6 +83,10 @@ def add_time_for_event(message: Message):
     """Get time from the input and ask to name the event or set the place"""
 
     time = message.text
+    if '/' in time:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
+
     if ':' in time:
         event_data.time = time
     elif '-' in time:
@@ -94,6 +98,7 @@ def add_time_for_event(message: Message):
     else:
         msg_data = bot.send_message(message.chat.id, dicts.events.wrong_event_time_text)
         bot.register_next_step_handler(msg_data, add_time_for_event)
+        return
 
     if db_event.event_datetime_exists(event_data.date, event_data.time):
         msg_data = bot.send_message(message.chat.id, dicts.events.event_time_exists_text)
@@ -101,7 +106,7 @@ def add_time_for_event(message: Message):
         return
 
     if event_data.event_type == 1:
-        msg = f"{dicts.events.set_event_name_text}{dicts.events.to_add_text_tuple[event_data.event_type]}, брат:"
+        msg = f"{dicts.events.set_event_name_text}{dicts.events.to_add_text_tuple[event_data.event_type]}:"
         msg_data = bot.send_message(message.chat.id, msg)
         bot.register_next_step_handler(msg_data, set_name_for_event)
     else:
@@ -205,7 +210,6 @@ def show_repeat_interval_buttons(call: CallbackQuery):
     bot.send_message(
         call.message.chat.id, dicts.events.choose_period_text, reply_markup=keys.buttons.callback_buttons(data)
     )
-    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.interval_callback.filter())

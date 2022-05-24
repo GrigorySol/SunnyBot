@@ -36,7 +36,7 @@ def display_suits(message, sid):
     elif len(db_singer.get_all_suits()) == len(suits):
         data.pop(0)
 
-    msg = f"{sin_d.available_suits} {', '.join(suit_names)}.\n{misc.messages.changes_dictionary.edit_text}"
+    msg = f"{sin_d.available_suits}\n{', '.join(suit_names)}.\n{misc.messages.changes_dictionary.edit_text}"
 
     bot.send_media_group(message.chat.id, suit_data)
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))

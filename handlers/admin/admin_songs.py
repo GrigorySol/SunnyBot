@@ -138,7 +138,7 @@ def edit_song_options(call: CallbackQuery):
         call_config = "delete_confirmation"
         item_type = "song"
         data = []
-        msg = f"{dicts.changes.delete_confirmation_text} {item_name}, брат?"
+        msg = f"{dicts.changes.delete_confirmation_text} {item_name}?"
 
         for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
             data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))
@@ -185,13 +185,13 @@ def edit_song_materials(call: CallbackQuery):
             call_config = "delete_confirmation"
             item_type = "sheets"
             data = []
-            msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sheets_text} {item_name}, брат?"
+            msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sheets_text} {item_name}?"
 
         else:
             call_config = "delete_confirmation"
             item_type = "sounds"
             data = []
-            msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sounds_text} {item_name}, брат?"
+            msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sounds_text} {item_name}?"
 
         for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
             data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))

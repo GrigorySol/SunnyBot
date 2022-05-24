@@ -69,4 +69,4 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
             print(f"{e}\n{singer_id[0]} not exists")
 
 
-schedule.every().day.at("10:15").do(check_event_date)
+schedule.every().day.at("07:15").do(check_event_date)

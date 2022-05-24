@@ -3,7 +3,7 @@ from random import randint
 
 from config import VIP
 from loader import bot
-from database_control import db_singer, db_songs, db_event
+from database_control import db_singer, db_songs, db_event, db_attendance
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from misc.edit_functions import display_suits, edit_suits
 from misc import dicts, keys
@@ -15,6 +15,11 @@ def rolling_callback_buttons(call: CallbackQuery):
 
     print(f"buttons_rolling {call.data}")
     _, direction, btn_type, index, event_id = call.data.split(":")
+
+    if not keys.buttons.keep_data.row:
+        bot.edit_message_text(dicts.changes.ERROR_text, call.message.chat.id, call.message.id, reply_markup=None)
+        return
+
     if direction == "previous":
         keys.buttons.keep_data.i -= 1
     elif direction == "next":
@@ -178,7 +183,7 @@ def show_event(call: CallbackQuery):
     _, event_id = call.data.split(":")
     _, event_type, event_name, event_date, time, location_id, comment = db_event.search_event_by_id(event_id)
     location_name, url = db_event.search_location_by_id(location_id)
-    singer_id = call.from_user.id
+    telegram_id = call.from_user.id
 
     location = f"{location_name}\n\n{url}"
 
@@ -205,19 +210,24 @@ def show_event(call: CallbackQuery):
         msg += f"{dicts.events.comment_text}\n{comment}\n"
 
     # ask a singer to set the attendance
-    call_config = "singer_attendance"
-    data = [
-        (text, f"{call_config}:edit:{event_id}:{i}")
-        for i, text in enumerate(dicts.attends.set_attendance_text_tuple)
-    ]
-    msg += f"\n{dicts.attends.select_attendance_text}"
+    singer_id = db_singer.get_singer_id(telegram_id)
+    if db_attendance.check_singer_attendance_exists(event_id, singer_id):
+        call_config = "singer_attendance"
+        data = [
+            (text, f"{call_config}:edit:{event_id}:{i}")
+            for i, text in enumerate(dicts.attends.set_attendance_text_tuple)
+        ]
+        msg += f"\n{dicts.attends.select_attendance_text}"
 
-    bot.edit_message_text(location, singer_id, call.message.id, reply_markup=keys.buttons.close_markup)
-    bot.send_message(singer_id, msg, reply_markup=keys.buttons.callback_buttons(data))
+        bot.edit_message_text(location, telegram_id, call.message.id, reply_markup=keys.buttons.close_markup)
+        bot.send_message(telegram_id, msg, reply_markup=keys.buttons.callback_buttons(data))
+    else:
+        msg += f"\n{dicts.attends.you_not_participate_text}"
+        bot.edit_message_text(location, telegram_id, call.message.id, reply_markup=keys.buttons.close_markup)
+        bot.send_message(telegram_id, msg)
 
     # Admin can change the record about the event
-
-    if db_singer.is_admin(singer_id):
+    if db_singer.is_admin(telegram_id):
         item_type = "event"
         markup = keys.buttons.show_participation(event_id)
 
@@ -225,15 +235,13 @@ def show_event(call: CallbackQuery):
             markup.add(*buttons)
 
         msg = f"{dicts.changes.admin_buttons_text}\n{dicts.changes.need_something_text}"
-        bot.send_message(singer_id, msg, reply_markup=markup)
+        bot.send_message(telegram_id, msg, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')
 def close_btn(call: CallbackQuery):
     """Remove a block of the buttons"""
     bot.delete_message(call.message.chat.id, call.message.id)
-    # bot.edit_message_text("----", call.message.chat.id, call.message.id, reply_markup=None)
-    # bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
 
 @bot.message_handler(func=lambda m: "скучно" in m.text.lower())
@@ -248,21 +256,6 @@ def back_btn(message: Message):
 def joking(message: Message):
     msg = randomizer(dicts.jokes.random_jokes_text_tuple)
     bot.send_message(message.chat.id, msg, reply_markup=ReplyKeyboardRemove())
-
-
-@bot.callback_query_handler(func=lambda c: c.data == 'back')
-def back_btn(call: CallbackQuery):
-    pass
-
-
-# @bot.message_handler(content_types=["audio"])
-# def handle_files(message: Message):
-#     """Print and send in message audio file_id"""
-#
-#     audio_file_id = message.audio.file_id
-#     print(message)
-#     print(audio_file_id)
-#     bot.send_message(message.chat.id, audio_file_id)
 
 
 def check_commands(message: Message):

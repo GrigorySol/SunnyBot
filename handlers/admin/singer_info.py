@@ -64,7 +64,7 @@ def singer_menu(call: CallbackQuery):
         item_type = "singer"
         item_name = db_singer.get_singer_fullname(singer_id)
         data = []
-        msg = f"{dicts.changes.delete_confirmation_text} {item_name}, брат?"
+        msg = f"{dicts.changes.delete_confirmation_text} {item_name}?"
 
         for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
             data.append((answer, f"{call_config}:{item_type}:{singer_id}:{i}"))
