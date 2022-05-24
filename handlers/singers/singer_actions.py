@@ -145,9 +145,10 @@ def concert_songs(call: CallbackQuery):
     singer_id = call.from_user.id
 
     if db_singer.is_admin(singer_id):
+        msg = f"{dicts.changes.admin_buttons_text}\n{dicts.songs.wanna_add_text}"
         bot.send_message(
             call.message.chat.id,
-            dicts.songs.wanna_add_text,
+            msg,
             reply_markup=keys.buttons.add_concert_songs_buttons(event_id)
         )
 
@@ -193,7 +194,7 @@ def show_event(call: CallbackQuery):
         if suit:
             msg += f"{dicts.events.suit_for_event_text} {suit[1]}\n"
 
-        msg += f"{dicts.events.repertoire_text}:\n"
+        msg += f"{dicts.events.repertoire_text}\n"
         if songs:
             for _, song, _ in songs:
                 msg += f"{song}\n"
@@ -209,7 +210,7 @@ def show_event(call: CallbackQuery):
         (text, f"{call_config}:edit:{event_id}:{i}")
         for i, text in enumerate(dicts.attends.set_attendance_text_tuple)
     ]
-    msg += f"{dicts.attends.select_attendance_text}"
+    msg += f"\n{dicts.attends.select_attendance_text}"
 
     bot.edit_message_text(location, singer_id, call.message.id, reply_markup=keys.buttons.close_markup)
     bot.send_message(singer_id, msg, reply_markup=keys.buttons.callback_buttons(data))
@@ -223,7 +224,8 @@ def show_event(call: CallbackQuery):
         for buttons in keys.buttons.change_buttons(item_type, event_id).keyboard:
             markup.add(*buttons)
 
-        bot.send_message(singer_id, dicts.changes.need_something_text, reply_markup=markup)
+        msg = f"{dicts.changes.admin_buttons_text}\n{dicts.changes.need_something_text}"
+        bot.send_message(singer_id, msg, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')

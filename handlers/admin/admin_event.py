@@ -45,7 +45,8 @@ def calendar_show_event_handler(call: CallbackQuery):
     for event_id, _, event_name, event_time in events:
         data.append((f"{event_name} {event_time}", f"{call_config}:{event_id}"))
 
-    text = f"{dicts.events.current_events_text} {day} {dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года:"
+    text = f"{dicts.events.current_events_text} {day} " \
+           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года, брат:"
     bot.send_message(call.message.chat.id, text, reply_markup=keys.buttons.callback_buttons(data))
 
 
@@ -100,7 +101,7 @@ def add_time_for_event(message: Message):
         return
 
     if event_data.event_type == 1:
-        msg = f"{dicts.events.set_event_name_text}{dicts.events.to_add_text_tuple[event_data.event_type]}:"
+        msg = f"{dicts.events.set_event_name_text}{dicts.events.to_add_text_tuple[event_data.event_type]}, брат:"
         msg_data = bot.send_message(message.chat.id, msg)
         bot.register_next_step_handler(msg_data, set_name_for_event)
     else:

@@ -1,3 +1,4 @@
+import misc.messages.changes_dictionary
 from loader import bot
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
 from database_control import db_songs, db_singer
@@ -33,7 +34,8 @@ def show_song_info(call: CallbackQuery):
         else:
             bot.send_message(call.message.chat.id, dicts.songs.no_sounds_text)
 
-        edit_song_menu(call.message, song_id, dicts.singers.edit_text)
+        msg = f"{dicts.changes.admin_buttons_text}\n{misc.messages.changes_dictionary.edit_text}"
+        edit_song_menu(call.message, song_id, msg)
 
     else:
         singer_id = db_singer.get_singer_id(call.message.chat.id)
@@ -136,7 +138,7 @@ def edit_song_options(call: CallbackQuery):
         call_config = "delete_confirmation"
         item_type = "song"
         data = []
-        msg = f"{dicts.changes.delete_confirmation_text} {item_name}?"
+        msg = f"{dicts.changes.delete_confirmation_text} {item_name}, брат?"
 
         for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
             data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))
@@ -183,13 +185,13 @@ def edit_song_materials(call: CallbackQuery):
             call_config = "delete_confirmation"
             item_type = "sheets"
             data = []
-            msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sheets_text} {item_name}?"
+            msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sheets_text} {item_name}, брат?"
 
         else:
             call_config = "delete_confirmation"
             item_type = "sounds"
             data = []
-            msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sounds_text} {item_name}?"
+            msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sounds_text} {item_name}, брат?"
 
         for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
             data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))

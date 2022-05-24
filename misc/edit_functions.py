@@ -1,3 +1,4 @@
+import misc.messages.changes_dictionary
 from config import VIP
 from loader import bot
 from telebot.types import InputMediaPhoto, Message
@@ -28,14 +29,14 @@ def display_suits(message, sid):
 
     if not suits:
         data.pop()
-        msg = f"{sin_d.no_suit_text} {sin_d.edit_text}"
+        msg = f"{sin_d.no_suit_text} {misc.messages.changes_dictionary.edit_text}"
         bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
         return
 
     elif len(db_singer.get_all_suits()) == len(suits):
         data.pop(0)
 
-    msg = f"{sin_d.available_suits} {', '.join(suit_names)}.\n{sin_d.edit_text}"
+    msg = f"{sin_d.available_suits} {', '.join(suit_names)}.\n{misc.messages.changes_dictionary.edit_text}"
 
     bot.send_media_group(message.chat.id, suit_data)
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
@@ -52,20 +53,20 @@ def display_voices(message, sid):
 
     if not voices:
         data.pop()
-        msg = f"{sin_d.no_voice_text} {sin_d.edit_text}"
+        msg = f"{sin_d.no_voice_text} {misc.messages.changes_dictionary.edit_text}"
 
     elif len(db_singer.get_all_voices()) == len(voices):
         data.pop(0)
         voice_names = []
         for _, name in voices:
             voice_names.append(name)
-        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{sin_d.too_many_voices}\n{sin_d.edit_text}"
+        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{sin_d.too_many_voices}\n{misc.messages.changes_dictionary.edit_text}"
 
     else:
         voice_names = []
         for _, name in voices:
             voice_names.append(name)
-        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{sin_d.edit_text}"
+        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{misc.messages.changes_dictionary.edit_text}"
 
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
 

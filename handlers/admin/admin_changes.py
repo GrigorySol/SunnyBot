@@ -229,7 +229,7 @@ def delete_event(call: CallbackQuery):
     call_config = "delete_confirmation"
     item_type = "event"
     data = []
-    msg = f"{dicts.changes.delete_confirmation_text} {item_name}?"
+    msg = f"{dicts.changes.delete_confirmation_text} {item_name}, брат?"
 
     for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
         data.append((answer, f"{call_config}:{item_type}:{event_id}:{i}"))
@@ -342,7 +342,7 @@ def add_or_remove_songs(call: CallbackQuery):
     if option == "add":
         if db_event.add_song_to_concert(concert_id, song_id):
             song_name = db_songs.get_song_name(song_id)
-            bot.send_message(call.message.chat.id, f"{dicts.changes.song_added_to_concert_text} {song_name}")
+            bot.send_message(call.message.chat.id, f"{dicts.changes.song_added_to_concert_text} {song_name}, брат")
 
         else:
             bot.send_message(call.message.chat.id, dicts.changes.song_already_added)
@@ -350,7 +350,7 @@ def add_or_remove_songs(call: CallbackQuery):
     else:
         song_name = db_songs.get_song_name(song_id)
         db_event.delete_song_from_concert(concert_id, song_id)
-        bot.send_message(call.message.chat.id, f"{dicts.changes.song_removed_from_concert} {song_name}")
+        bot.send_message(call.message.chat.id, f"{dicts.changes.song_removed_from_concert} {song_name}, брат")
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.select_suit_callback.filter())
@@ -450,7 +450,7 @@ def delete_location(call: CallbackQuery):
     call_config = "delete_confirmation"
     item_type = "location"
     data = []
-    msg = f"{dicts.changes.delete_confirmation_text}\n{item_name}?"
+    msg = f"{dicts.changes.delete_confirmation_text}\n{item_name}, брат?"
 
     for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
         data.append((answer, f"{call_config}:{item_type}:{location_id}:{i}"))
@@ -540,7 +540,7 @@ def edit_suit_name(call: CallbackQuery):
     call_config = "delete_confirmation"
     item_type = "suit"
     data = []
-    msg = f"{dicts.changes.delete_confirmation_text}\n{item_name}?"
+    msg = f"{dicts.changes.delete_confirmation_text}\n{item_name}, брат?"
 
     for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
         data.append((answer, f"{call_config}:{item_type}:{suit_id}:{i}"))
