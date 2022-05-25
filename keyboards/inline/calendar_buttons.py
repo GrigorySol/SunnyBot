@@ -5,7 +5,8 @@ Fork from the pyTelegramBotAPI github example repo
 import calendar
 from datetime import date, timedelta
 
-from database_control.db_event import search_event_by_date
+from database_control import db_singer
+from database_control.db_event import search_event_by_date, search_event_by_date_and_telegram_id
 from keyboards.inline.callback_datas import calendar_factory, calendar_zoom
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from misc.messages.event_dictionary import next_button_text, prev_button_text, zoom_out_text, WEEK_DAYS, MONTHS
@@ -15,7 +16,7 @@ EMTPY_FIELD = 'calendar_button'
 CLOSE_BTN = InlineKeyboardButton("Закрыть", callback_data="close")
 
 
-def generate_calendar_days(year: int, month: int, event_type=0, event_id=0):
+def generate_calendar_days(telegram_id: int, year: int, month: int, event_type=0, event_id=0):
     """
     Generates buttons grid with month + year, weeks, days,
     next, previous, zoom out and close buttons
@@ -53,7 +54,10 @@ def generate_calendar_days(year: int, month: int, event_type=0, event_id=0):
         for day in week:
             day_name = ' '
             current_day = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
-            event = search_event_by_date(f"{current_day}%")
+            if not db_singer.is_admin(telegram_id):
+                event = search_event_by_date_and_telegram_id(f"{current_day}%", telegram_id)
+            else:
+                event = search_event_by_date(f"{current_day}%")
             if current_day == str(today):
                 day_name = '☀️'
             elif day and event:
@@ -81,17 +85,25 @@ def generate_calendar_days(year: int, month: int, event_type=0, event_id=0):
         InlineKeyboardButton(
             text=prev_button_text,
             callback_data=calendar_factory.new(
-                event_type=event_type, event_id=event_id, year=previous_date.year, month=previous_date.month
+                event_type=event_type,
+                event_id=event_id,
+                year=previous_date.year,
+                month=previous_date.month
             )
         ),
         InlineKeyboardButton(
             text=zoom_out_text,
-            callback_data=calendar_zoom.new(event_type=event_type, event_id=event_id, year=year)
+            callback_data=calendar_zoom.new(
+                event_type=event_type, event_id=event_id, year=year
+            )
         ),
         InlineKeyboardButton(
             text=next_button_text,
             callback_data=calendar_factory.new(
-                event_type=event_type, event_id=event_id, year=next_date.year, month=next_date.month
+                event_type=event_type,
+                event_id=event_id,
+                year=next_date.year,
+                month=next_date.month
             )
         ),
     )
@@ -120,7 +132,10 @@ def generate_calendar_months(year: int, event_type=0, event_id=0):
         InlineKeyboardButton(
             text=month,
             callback_data=calendar_factory.new(
-                event_type=event_type, event_id=event_id, year=year, month=month_number + 1
+                event_type=event_type,
+                event_id=event_id,
+                year=year,
+                month=month_number + 1
             )
         )
         for month_number, month in enumerate(MONTHS)
@@ -130,11 +145,15 @@ def generate_calendar_months(year: int, event_type=0, event_id=0):
     keyboard.add(
         InlineKeyboardButton(
             text=prev_button_text,
-            callback_data=calendar_zoom.new(event_type=event_type, event_id=event_id, year=year - 1)
+            callback_data=calendar_zoom.new(
+                event_type=event_type, event_id=event_id, year=year - 1
+            )
         ),
         InlineKeyboardButton(
             text=next_button_text,
-            callback_data=calendar_zoom.new(event_type=event_type, event_id=event_id, year=year + 1)
+            callback_data=calendar_zoom.new(
+                event_type=event_type, event_id=event_id, year=year + 1
+            )
         )
     )
     keyboard.add(CLOSE_BTN)

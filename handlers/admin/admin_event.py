@@ -1,4 +1,6 @@
 from datetime import datetime, date, timedelta
+
+from config import VIP, VIP2
 from loader import bot
 from database_control import db_event, db_attendance, db_singer
 from telebot.types import Message, CallbackQuery
@@ -25,7 +27,9 @@ def calendar_command_handler(message: Message):
     now = date.today()
     event_id = "0"
     bot.send_message(message.chat.id, dicts.events.set_event_date_text,
-                     reply_markup=keys.calendar.generate_calendar_days(now.year, now.month, int(event_id)))
+                     reply_markup=keys.calendar.generate_calendar_days(
+                         message.from_user.id, now.year, now.month, int(event_id))
+                     )
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.calendar_data.filter(event_type="0"))
@@ -42,12 +46,21 @@ def calendar_show_event_handler(call: CallbackQuery):
     if not events:
         bot.send_message(call.message.chat.id, dicts.events.no_event_text)
         return
-    for event_id, _, event_name, event_time in events:
-        data.append((f"{event_name} {event_time}", f"{call_config}:{event_id}"))
 
-    text = f"{dicts.events.current_events_text} {day} " \
-           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года:"
-    bot.send_message(call.message.chat.id, text, reply_markup=keys.buttons.callback_buttons(data))
+    singer_id = db_singer.get_singer_id(call.from_user.id)
+    for event_id, _, event_name, event_time in events:
+        participant = db_attendance.check_singer_attendance_exists(event_id, singer_id)
+        if participant or db_singer.is_admin(call.from_user.id):
+            data.append((f"{event_name} {event_time}", f"{call_config}:{event_id}"))
+
+    if data:
+        msg = f"{dicts.events.current_events_text} {day} " \
+               f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года:"
+    else:
+        msg = dicts.events.no_participation_text
+        bot.send_message(VIP, f"@{call.from_user.username} {call.from_user.first_name}\n"
+                              f"{year} {month} {day}")
+    bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
@@ -411,8 +424,11 @@ def calendar_action_handler(call: CallbackQuery):
 
     _, event_type, event_id, year, month = call.data.split(":")
     bot.edit_message_reply_markup(
-        call.message.chat.id, call.message.id,
-        reply_markup=keys.calendar.generate_calendar_days(int(year), int(month), int(event_type), event_id)
+        call.message.chat.id,
+        call.message.id,
+        reply_markup=keys.calendar.generate_calendar_days(
+            call.from_user.id, int(year), int(month), int(event_type), event_id
+        )
     )
 
 
@@ -421,8 +437,12 @@ def calendar_zoom_out_handler(call: CallbackQuery):
     """Create calendar month buttons"""
 
     _, event_type, event_id, year = call.data.split(":")
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id,
-                                  reply_markup=keys.calendar.generate_calendar_months(int(year), int(event_type), event_id))
+    bot.edit_message_reply_markup(
+        call.message.chat.id,
+        call.message.id,
+        reply_markup=keys.calendar.generate_calendar_months(
+            int(year), int(event_type), event_id)
+    )
 
 
 @bot.callback_query_handler(func=lambda call: call.data == keys.calendar.EMTPY_FIELD)

@@ -148,7 +148,9 @@ def edit_event_date(call: CallbackQuery):
     *_, event_id = call.data.split(":")
     now = date.today()
     event_type = "4"  # edit
-    markup = keys.calendar.generate_calendar_days(now.year, now.month, int(event_type), event_id)
+    markup = keys.calendar.generate_calendar_days(
+        call.from_user.id, now.year, now.month, int(event_type), event_id
+    )
     bot.send_message(call.message.chat.id, dicts.events.set_event_date_text, reply_markup=markup)
     bot.delete_message(call.message.chat.id, call.message.id)
 

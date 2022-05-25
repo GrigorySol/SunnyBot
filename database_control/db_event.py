@@ -70,6 +70,20 @@ def search_event_by_date(date):
         return cursor.fetchall()
 
 
+def search_event_by_date_and_telegram_id(date, telegram_id):
+    """Return (id, event_type, event_name, time) from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT events.id, events.event_type, events.event_name, events.time FROM events "
+                       "JOIN attendance ON attendance.event_id = events.id "
+                       "JOIN singers ON singers.id = attendance.singer_id "
+                       "WHERE date LIKE ? and singers.telegram_id = ? "
+                       "ORDER BY time", (date, telegram_id))
+        return cursor.fetchall()
+
+
 def event_datetime_exists(date, time) -> bool:
     """Return True if date and time exists in the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:

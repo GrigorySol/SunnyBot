@@ -191,7 +191,9 @@ def song_or_event(call: CallbackQuery):
         bot.send_message(
             call.message.chat.id,
             dicts.events.set_event_date_text,
-            reply_markup=keys.calendar.generate_calendar_days(now.year, now.month, int(item_type))
+            reply_markup=keys.calendar.generate_calendar_days(
+                call.from_user.id, now.year, now.month, int(item_type)
+            )
         )
     bot.delete_message(call.message.chat.id, call.message.id)
 
