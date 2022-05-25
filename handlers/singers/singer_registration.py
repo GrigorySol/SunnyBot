@@ -57,12 +57,12 @@ def add_new_singer(call: CallbackQuery):
 def security_control_step(message: Message, singer: SingerRegister):
     """Check the secret phrase and ask for a name."""
 
-    if message.text.lower() == SECRET_PASS_PHRASE:
+    if message.text.lower().strip() == SECRET_PASS_PHRASE:
         singer.is_admin = True
         msg_data = bot.send_message(message.chat.id, sin_d.admin_welcome_text)
         bot.register_next_step_handler(msg_data, singer_name_step, singer)
 
-    elif message.text == PASS_PHRASE:
+    elif message.text.lower().strip() == PASS_PHRASE:
         msg_data = bot.send_message(message.chat.id, sin_d.enter_your_name_text)
         bot.register_next_step_handler(msg_data, singer_name_step, singer)
 
