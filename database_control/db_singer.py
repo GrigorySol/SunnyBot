@@ -253,6 +253,7 @@ def block_user(telegram_id, telegram_name: str):
 
 def add_singer(telegram_id, telegram_name: str, first_name: str = None, last_name: str = None):
     """Add new singer into the database"""
+    print(f"{telegram_id} {telegram_name} {first_name} {last_name}")
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 

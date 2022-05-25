@@ -33,6 +33,7 @@ def user_blocked(message: Message):
 def singer_not_registered(message: Message):
     """Interact with a new user and offer to register"""
 
+    print(f"Registration started for {message.from_user.username}")
     telegram_id = message.from_user.id
     singer_time = datetime.utcfromtimestamp(message.date).hour
 
@@ -57,6 +58,7 @@ def add_new_singer(call: CallbackQuery):
 def security_control_step(message: Message, singer: SingerRegister):
     """Check the secret phrase and ask for a name."""
 
+    print(f"{message.text} from {message.from_user.username} {message.from_user.first_name}")
     if message.text.lower().strip() == SECRET_PASS_PHRASE:
         singer.is_admin = True
         msg_data = bot.send_message(message.chat.id, sin_d.admin_welcome_text)
@@ -93,19 +95,24 @@ def security_control_step(message: Message, singer: SingerRegister):
 def singer_name_step(message: Message, singer: SingerRegister):
     """Save the name and ask to enter a lastname."""
 
+    print(f"{message.text} {len(message.text)}")
     name = message.text
     if "/" in name:
+        print(f"/ in message")
         msg = bot.send_message(message.chat.id, sin_d.name_is_a_command_text)
         bot.register_next_step_handler(msg, singer_name_step, singer)
 
     elif name.isdigit():
+        print("name is digit")
         msg = bot.send_message(message.chat.id, sin_d.name_is_digit_text)
         bot.register_next_step_handler(msg, singer_name_step, singer)
 
     elif " " in name and len(name) > 3:
+        print("name and last name is ok")
         name, lastname = name.split(" ")
         singer.telegram_id = message.from_user.id
         singer.telegram_name = message.from_user.username
+        print(f"singer object = {singer.telegram_id} {singer.telegram_name}")
         bot.send_message(message.chat.id, sin_d.thanks_for_register_text)
         add_singer(singer.telegram_id, singer.telegram_name, name, lastname)
         if singer.is_admin:
@@ -116,6 +123,7 @@ def singer_name_step(message: Message, singer: SingerRegister):
         del singer
 
     elif len(name) < 2 or " " in name:
+        print("name is too short")
         msg = bot.send_message(message.chat.id, sin_d.name_too_short_text)
         bot.register_next_step_handler(msg, singer_name_step, singer)
 
@@ -123,6 +131,7 @@ def singer_name_step(message: Message, singer: SingerRegister):
         singer.telegram_id = message.from_user.id
         singer.telegram_name = message.from_user.username
         singer.name = name
+        print(f"singer object = {singer.telegram_id} {singer.telegram_name} and name is {singer.name}")
         msg = bot.send_message(message.chat.id, sin_d.enter_your_lastname_text)
         bot.register_next_step_handler(msg, singer_lastname_step, singer)
 
@@ -130,12 +139,14 @@ def singer_name_step(message: Message, singer: SingerRegister):
 def singer_lastname_step(message: Message, singer: SingerRegister):
     """Save lastname and finish registration"""
 
+    print(f"{message.text} {len(message.text)}")
     lastname = message.text
     if lastname.isdigit():
         msg = bot.send_message(message.chat.id, sin_d.lastname_is_digit_text)
         bot.register_next_step_handler(msg, singer_lastname_step, singer)
     else:
         singer.lastname = lastname
+        print(f"all data:\n{singer.__dict__}")
         bot.send_message(message.chat.id, sin_d.thanks_for_register_text)
         add_singer(singer.telegram_id, singer.telegram_name, singer.name, singer.lastname)
         if singer.is_admin:
