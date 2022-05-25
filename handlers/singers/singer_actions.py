@@ -31,6 +31,7 @@ def rolling_callback_buttons(call: CallbackQuery):
             call.message.id,
             reply_markup=keys.buttons.callback_buttons(keys.buttons.keep_data.data, keys.buttons.keep_data.row, True)
         )
+
     elif btn_type == "url":
         print(f"url row is {keys.buttons.keep_data.row}")
         bot.edit_message_reply_markup(
@@ -71,6 +72,7 @@ def show_suits(message: Message):
 def edit_suits_buttons(call: CallbackQuery):
     """Display buttons to add or remove suit"""
     edit_suits(call)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.message_handler(commands=["songs"])
@@ -124,6 +126,7 @@ def show_songs(call: CallbackQuery):
     else:
         print("show_songs data is empty")
         bot.send_message(call.message.chat.id, dicts.songs.no_songs_text)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.concert_filter_callback.filter())
@@ -156,6 +159,7 @@ def concert_songs(call: CallbackQuery):
             msg,
             reply_markup=keys.buttons.add_concert_songs_buttons(event_id)
         )
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.message_handler(commands=["events"])
@@ -211,7 +215,8 @@ def show_event(call: CallbackQuery):
 
     # ask a singer to set the attendance
     singer_id = db_singer.get_singer_id(telegram_id)
-    bot.edit_message_text(location, telegram_id, call.message.id, reply_markup=keys.buttons.close_markup)
+    bot.send_message(telegram_id, location, reply_markup=keys.buttons.close_markup)
+
     if db_attendance.check_singer_attendance_exists(event_id, singer_id):
         call_config = "singer_attendance"
         data = [
@@ -237,6 +242,7 @@ def show_event(call: CallbackQuery):
 
         msg = f"{dicts.changes.admin_buttons_text}\n{dicts.changes.need_something_text}"
         bot.send_message(telegram_id, msg, reply_markup=markup)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=lambda c: c.data == 'close')

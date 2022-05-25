@@ -121,6 +121,7 @@ def edit_event_name(call: CallbackQuery):
     *_, event_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_event_name_text)
     bot.register_next_step_handler(msg, enter_new_event_name, event_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def enter_new_event_name(message: Message, event_id):
@@ -149,6 +150,7 @@ def edit_event_date(call: CallbackQuery):
     event_type = "4"  # edit
     markup = keys.calendar.generate_calendar_days(now.year, now.month, int(event_type), event_id)
     bot.send_message(call.message.chat.id, dicts.events.set_event_date_text, reply_markup=markup)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="2"))
@@ -160,6 +162,7 @@ def edit_event_time(call: CallbackQuery):
     event_date = db_event.get_event_date(event_id)
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_event_time_text)
     bot.register_next_step_handler(msg, enter_new_event_time, event_id, event_date)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="3"))
@@ -172,6 +175,7 @@ def edit_event_location(call: CallbackQuery):
         dicts.events.choose_event_location_text,
         reply_markup=keys.buttons.choose_location_markup
     )
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="4"))
@@ -182,6 +186,7 @@ def edit_comment_event(call: CallbackQuery):
     *_, event_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_comment_text)
     bot.register_next_step_handler(msg, enter_new_event_comment, event_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def enter_new_event_comment(message: Message, event_id):
@@ -253,6 +258,7 @@ def edit_concert_songs(call: CallbackQuery):
     bot.send_message(
         call.message.chat.id, dicts.singers.what_to_do_text, reply_markup=keys.buttons.callback_buttons(data)
     )
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="8"))
@@ -273,6 +279,7 @@ def edit_concert_suit(call: CallbackQuery):
 
     else:
         select_suit_for_concert(call, event_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def select_suit_for_concert(call, event_id):
@@ -290,7 +297,6 @@ def select_suit_for_concert(call, event_id):
 
     bot.send_media_group(call.message.chat.id, suit_data)
     bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
-    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.remove_suit_callback.filter())
@@ -301,6 +307,7 @@ def display_suit_options_to_change(call: CallbackQuery):
     _, event_id, suit_id = call.data.split(":")
     db_event.delete_suit_from_concert(event_id, suit_id)
     select_suit_for_concert(call, event_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.change_songs_callback.filter())
@@ -351,6 +358,7 @@ def add_or_remove_songs(call: CallbackQuery):
         song_name = db_songs.get_song_name(song_id)
         db_event.delete_song_from_concert(concert_id, song_id)
         bot.send_message(call.message.chat.id, f"{dicts.changes.song_removed_from_concert} {song_name}")
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.select_suit_callback.filter())
@@ -374,6 +382,7 @@ def edit_location_name(call: CallbackQuery):
     *_, location_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_name_text)
     bot.register_next_step_handler(msg, enter_new_location_name, location_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
     # bot.send_sticker(
     #     call.message.chat.id,
     #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
@@ -403,6 +412,7 @@ def edit_location_url(call: CallbackQuery):
     *_, location_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_url_text)
     bot.register_next_step_handler(msg, enter_new_location_url, location_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
     # bot.send_sticker(
     #     call.message.chat.id,
     #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
@@ -466,6 +476,7 @@ def edit_suit_name(call: CallbackQuery):
     *_, suit_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_suit_name_text)
     bot.register_next_step_handler(msg, enter_new_suit_name, suit_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
     # bot.send_sticker(
     #     call.message.chat.id,
     #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
@@ -496,6 +507,7 @@ def edit_suit_photo(call: CallbackQuery):
     *_, suit_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.drop_new_photo_text)
     bot.register_next_step_handler(msg, drop_new_suit_photo, suit_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
     # bot.send_sticker(
     #     call.message.chat.id,
     #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
@@ -602,3 +614,4 @@ def blacklist_user_remove(call: CallbackQuery):
         bot.send_message(call.message.chat.id, dicts.changes.user_is_free_text)
     else:
         bot.send_message(call.message.chat.id, dicts.changes.ERROR_text)
+    bot.delete_message(call.message.chat.id, call.message.id)

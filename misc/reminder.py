@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 from time import sleep
+
+from config import VIP
 from loader import bot
 import schedule
 
@@ -67,6 +69,13 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
             bot.send_message(singer_id[0], msg, reply_markup=markup)
         except Exception as e:
             print(f"{e}\n{singer_id[0]} not exists")
+
+
+def database_sender():
+    """Send database file to the VIP telegram_id"""
+    
+    file = ""
+    bot.send_document(VIP, )
 
 
 schedule.every().day.at("07:15").do(check_event_date)

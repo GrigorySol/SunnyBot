@@ -29,6 +29,7 @@ def display_singer_info(call: CallbackQuery):
     telegram_name = db_singer.get_singer_telegram_name(singer_id)
     markup = keys.buttons.singer_info_buttons(telegram_name, singer_id, dicts.changes.edit_singer_text_tuple)
     bot.send_message(call.from_user.id, msg, reply_markup=markup)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.info_callback.filter())
@@ -70,10 +71,8 @@ def singer_menu(call: CallbackQuery):
             data.append((answer, f"{call_config}:{item_type}:{singer_id}:{i}"))
 
         bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
-        bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
 
-    else:
-        print(f"singer_menu again !!! {call.data}")
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def enter_new_singer_comment(message: Message, singer_id):
@@ -96,6 +95,7 @@ def enter_new_singer_comment(message: Message, singer_id):
 def edit_voice_buttons(call: CallbackQuery):
     """Display buttons to add or remove voice"""
     edit_voices(call)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.attendance_intervals_callback.filter())
@@ -137,3 +137,4 @@ def display_attendance(call: CallbackQuery):
            f"\n{dicts.attends.attendance_description_text_tuple[2]}: {attendance.count('2')}"
 
     bot.send_message(call.message.chat.id, msg)
+    bot.delete_message(call.message.chat.id, call.message.id)

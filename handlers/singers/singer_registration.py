@@ -51,7 +51,7 @@ def add_new_singer(call: CallbackQuery):
     singer = SingerRegister()
     msg_data = bot.send_message(call.message.chat.id, sin_d.enter_security_phrase_text)
     bot.register_next_step_handler(msg_data, security_control_step, singer)
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def security_control_step(message: Message, singer: SingerRegister):

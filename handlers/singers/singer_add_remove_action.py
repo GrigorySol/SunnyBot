@@ -25,7 +25,7 @@ def add_action(call: CallbackQuery):
     else:
         bot.send_message(call.message.chat.id, add_wrong_text)
 
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=singer_remove_callback.filter())
@@ -46,4 +46,4 @@ def remove_action(call: CallbackQuery):
     else:
         bot.send_message(call.message.chat.id, remove_wrong_text)
 
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+    bot.delete_message(call.message.chat.id, call.message.id)

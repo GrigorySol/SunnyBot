@@ -65,6 +65,8 @@ def show_song_info(call: CallbackQuery):
         else:
             bot.send_message(call.message.chat.id, dicts.songs.no_sounds_text)
 
+    bot.delete_message(call.message.chat.id, call.message.id)
+
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.edit_song_callback.filter())
 def edit_song_options(call: CallbackQuery):
@@ -144,7 +146,8 @@ def edit_song_options(call: CallbackQuery):
             data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))
 
         bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
-        bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
+
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def enter_new_song_name(message: Message, song_id):
@@ -207,6 +210,8 @@ def edit_song_materials(call: CallbackQuery):
     else:
         bot.send_message(call.message.chat.id, dicts.songs.SONG_WRONG_TEXT)
 
+    bot.delete_message(call.message.chat.id, call.message.id)
+
 
 def add_sheets_or_sounds(message: Message, song_id):
     """Manage batch or a single file upload processing"""
@@ -260,5 +265,3 @@ def edit_song_menu(message, song_id, msg):
         data.append((option, f"{call_config}:{song_id}:{i}"))
 
     bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
-
-

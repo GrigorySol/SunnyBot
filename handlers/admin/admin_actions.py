@@ -193,6 +193,7 @@ def song_or_event(call: CallbackQuery):
             dicts.events.set_event_date_text,
             reply_markup=keys.calendar.generate_calendar_days(now.year, now.month, int(item_type))
         )
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def add_song_name(message: Message):

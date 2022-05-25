@@ -60,7 +60,8 @@ def display_voices(message, sid):
         voice_names = []
         for _, name in voices:
             voice_names.append(name)
-        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{sin_d.too_many_voices}\n{misc.messages.changes_dictionary.edit_text}"
+        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{sin_d.too_many_voices}\n" \
+              f"{misc.messages.changes_dictionary.edit_text}"
 
     else:
         voice_names = []
@@ -105,7 +106,6 @@ def edit_suits(call):
             suit_data.append(InputMediaPhoto(photo, name))
         bot.send_media_group(call.message.chat.id, suit_data)
 
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
     bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
 
 
@@ -128,7 +128,6 @@ def edit_voices(call):
                 continue
             data.append((name, f"{call_config}:voice:{sid}:{voice_id}"))
 
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.id, reply_markup=None)
     bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
 
 

@@ -48,6 +48,7 @@ def calendar_show_event_handler(call: CallbackQuery):
     text = f"{dicts.events.current_events_text} {day} " \
            f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года:"
     bot.send_message(call.message.chat.id, text, reply_markup=keys.buttons.callback_buttons(data))
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.calendar_data.filter(event_type="4"))
@@ -59,8 +60,10 @@ def edit_event_date_handler(call: CallbackQuery):
     # Edit event date
     msg = bot.send_message(call.message.chat.id,
                            f"Вы выбрали {dicts.events.to_add_text_tuple[int(event_type)]} на {day} "
-                           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года.\n{dicts.events.set_event_time_text}")
+                           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года.\n"
+                           f"{dicts.events.set_event_time_text}")
     bot.register_next_step_handler(msg, enter_new_event_time, int(event_id), event_data.date)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.calendar_data.filter())
@@ -77,6 +80,7 @@ def add_event_time_handler(call: CallbackQuery):
           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года.\n{dicts.events.set_event_time_text}"
     msg_data = bot.send_message(call.message.chat.id, msg)
     bot.register_next_step_handler(msg_data, add_time_for_event)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def add_time_for_event(message: Message):
@@ -128,6 +132,7 @@ def add_new_location(call: CallbackQuery):
     """Ask to input the URL for a new location"""
     msg_data = bot.send_message(call.message.chat.id, dicts.events.enter_location_url_text)
     bot.register_next_step_handler(msg_data, check_location_url)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def check_location_url(message: Message):
@@ -192,7 +197,6 @@ def save_new_event(location_id, message):
         bot.send_message(message.chat.id, msg, reply_markup=markup)
 
     db_attendance.add_all_singers_attendance(event_data.event_id)
-    bot.delete_message(message.chat.id, message.id)
     event_data.is_in_progress = False
 
 
@@ -210,6 +214,7 @@ def show_repeat_interval_buttons(call: CallbackQuery):
     bot.send_message(
         call.message.chat.id, dicts.events.choose_period_text, reply_markup=keys.buttons.callback_buttons(data)
     )
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.interval_callback.filter())
@@ -219,9 +224,9 @@ def number_of_repeats(call: CallbackQuery):
     print(f"number_of_repeats {call.data}")
     _, event_id, interval = call.data.split(":")
     # Save data to use in the next function set_event_repeating
-    bot.delete_message(call.message.chat.id, call.message.id)
     msg_data = bot.send_message(call.message.chat.id, dicts.events.set_repeat_times_text)
     bot.register_next_step_handler(msg_data, check_data_for_event_repeating, event_id, interval)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def check_data_for_event_repeating(message: Message, event_id, interval):
@@ -264,6 +269,7 @@ def choose_location(call: CallbackQuery):
     bot.send_message(
         call.message.chat.id, dicts.events.choose_location_text, reply_markup=keys.buttons.callback_buttons(data)
     )
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.add_event_location_callback.filter())
@@ -273,6 +279,7 @@ def save_event(call: CallbackQuery):
     _, location_id = call.data.split(":")
     print(f"{event_data.event_type}, {event_data.event_name}, {event_data.date}, {event_data.time}, {location_id}")
     save_new_event(location_id, call.message)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.show_participation_callback.filter())
@@ -299,6 +306,7 @@ def remove_participation(call: CallbackQuery):
 
     _, event_id = call.data.split(":")
     remove_participant_buttons(call, event_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def remove_participant_buttons(call, event_id):
@@ -306,7 +314,6 @@ def remove_participant_buttons(call, event_id):
         (fullname, f"singer_attendance:remove:{event_id}:{singer_id}")
         for singer_id, fullname, *_ in db_attendance.get_attendance_by_event_id(event_id)
     ]
-    bot.delete_message(call.message.chat.id, call.message.id)
     bot.send_message(
         call.message.chat.id,
         dicts.attends.choose_singer_to_remove_text,
@@ -320,6 +327,7 @@ def add_participant(call: CallbackQuery):
 
     _, event_id = call.data.split(":")
     add_participant_buttons(call, event_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def add_participant_buttons(call, event_id):
@@ -327,7 +335,6 @@ def add_participant_buttons(call, event_id):
         (fullname, f"singer_attendance:add:{event_id}:{singer_id}")
         for singer_id, fullname, _ in db_attendance.get_not_participating_by_event_id(event_id)
     ]
-    bot.delete_message(call.message.chat.id, call.message.id)
     bot.send_message(
         call.message.chat.id,
         dicts.attends.choose_singer_to_add_text,
@@ -347,8 +354,8 @@ def add_all_participants(call: CallbackQuery):
     for buttons in keys.buttons.change_buttons(item_type, event_id).keyboard:
         markup.add(*buttons)
     msg = f"{dicts.attends.all_singers_added_text}\n{dicts.changes.need_something_text}"
-    bot.delete_message(call.message.chat.id, call.message.id)
     bot.send_message(call.message.chat.id, msg, reply_markup=markup)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.singer_attendance_callback.filter(action="remove"))
@@ -366,6 +373,7 @@ def remove_singer_attendance(call: CallbackQuery):
     db_attendance.remove_singer_attendance(event_id, singer_id)
     bot.send_message(call.message.chat.id, f"{singer_name} {dicts.attends.singer_removed_text}")
     remove_participant_buttons(call, event_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.singer_attendance_callback.filter(action="add"))
@@ -383,6 +391,7 @@ def add_singer_attendance(call: CallbackQuery):
     db_attendance.add_singer_attendance(event_id, singer_id)
     bot.send_message(call.message.chat.id, f"{singer_name} {dicts.attends.singer_added_text}")
     add_participant_buttons(call, event_id)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.singer_attendance_callback.filter(action="edit"))
@@ -393,6 +402,7 @@ def edit_singer_attendance(call: CallbackQuery):
     print(f"edit_singer_attendance {call.data}")
     db_attendance.edit_singer_attendance(event_id, call.from_user.id, decision)
     bot.send_message(call.message.chat.id, f"{dicts.attends.attendance_changed_text}")
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.calendar_factory.filter())
