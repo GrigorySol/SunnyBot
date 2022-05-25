@@ -33,7 +33,8 @@ def user_blocked(message: Message):
 def singer_not_registered(message: Message):
     """Interact with a new user and offer to register"""
 
-    print(f"Registration started for {message.from_user.username}")
+    print(f"Registration started for {message.from_user.username} "
+          f"{message.from_user.first_name} {message.from_user.last_name}")
     if not message.from_user.username:
         bot.send_message(message.chat.id, dicts.singers.need_telegram_name_text)
         return

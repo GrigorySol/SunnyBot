@@ -73,9 +73,13 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
 
 def database_sender():
     """Send database file to the VIP telegram_id"""
-    
-    file = ""
-    bot.send_document(VIP, )
+
+    print("DATABASE file sent")
+    file = open("database_control/sunny_bot.db", 'rb')
+    bot.send_document(VIP, file)
+    bot.send_message(VIP, "Отправлено?")
+    file.close()
 
 
+schedule.every().day.at("01:27").do(database_sender)
 schedule.every().day.at("07:15").do(check_event_date)
