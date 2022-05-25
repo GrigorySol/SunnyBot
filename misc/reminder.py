@@ -56,7 +56,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
         year, month, day = event_date.split("-")
         msg_date = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
 
-    msg = f"{msg_date} {rem_d.will_be_text} '{event_name}', брат.\n" \
+    msg = f"{msg_date} {rem_d.will_be_text} '{event_name}'.\n" \
           f"{rem_d.info_in_calendar_text}\n" \
           f"{rem_d.select_attendance_text}"
     markup = callback_buttons(data)
@@ -69,4 +69,4 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
             print(f"{e}\n{singer_id[0]} not exists")
 
 
-schedule.every().day.at("07:15").do(check_event_date)
+schedule.every().day.at("10:15").do(check_event_date)
