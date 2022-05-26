@@ -6,5 +6,6 @@ from misc.messages import (
     joke_dictionary as jokes,
     reminder_dictionary as reminds,
     singer_dictionary as singers,
-    song_dictionary as songs
+    song_dictionary as songs,
+    filter_dictionary as filters
 )

@@ -256,25 +256,25 @@ def close_btn(call: CallbackQuery):
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
-@bot.message_handler(text=TextFilter(contains=["событи", "концерт", "репетиц"]))
+@bot.message_handler(text=TextFilter(contains=dicts.filters.calendar_text_list, ignore_case=True))
 def calendar_message(message: Message):
     """Answer to type a command /calendar"""
     bot.send_message(message.chat.id, dicts.singers.calendar_command_text, reply_to_message_id=message.id)
 
 
-@bot.message_handler(text=TextFilter(contains=["песн"], ignore_case=True))
+@bot.message_handler(text=TextFilter(contains=dicts.filters.songs_text_list, ignore_case=True))
 def song_message(message: Message):
     """Answer to type a command /songs"""
     bot.send_message(message.chat.id, dicts.singers.song_command_text, reply_to_message_id=message.id)
 
 
-@bot.message_handler(text=TextFilter(contains=["костюм", "надеть", "одежд"], ignore_case=True))
+@bot.message_handler(text=TextFilter(contains=dicts.filters.suits_text_list, ignore_case=True))
 def suit_message(message: Message):
     """Answer to type a command /suits"""
     bot.send_message(message.chat.id, dicts.singers.suit_command_text, reply_to_message_id=message.id)
 
 
-@bot.message_handler(text=TextFilter(contains=["скучно", "грустно"], ignore_case=True))
+@bot.message_handler(text=TextFilter(contains=dicts.filters.boring_text_list, ignore_case=True))
 def boring_message(message: Message):
     """Send a random joke into the chat"""
 
@@ -283,7 +283,7 @@ def boring_message(message: Message):
                      reply_to_message_id=message.id, reply_markup=keys.buttons.accept_markup)
 
 
-@bot.message_handler(text=TextFilter(contains=["дурак", "глупый", "тупой", "хам"], ignore_case=True))
+@bot.message_handler(text=TextFilter(contains=dicts.filters.fool_text_list, ignore_case=True))
 def fool_message(message: Message):
     """Answer for the fool"""
     msg = randomizer(dicts.jokes.embarrassed_text_tuple)
