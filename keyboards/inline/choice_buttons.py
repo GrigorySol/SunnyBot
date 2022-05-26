@@ -200,6 +200,7 @@ def empty_participant_buttons(event_id, row=2):
     add_all_btn = InlineKeyboardButton(bu_d.event_add_all_btn_text,
                                        callback_data=f"add_all_participants:{event_id}")
 
+    markup.add(add_one_btn)
     markup.add(add_all_btn)
     markup.add(close_btn)
     return markup
