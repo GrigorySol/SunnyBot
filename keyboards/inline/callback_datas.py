@@ -51,6 +51,7 @@ show_participation_callback = CallbackData("event_id", prefix="show_participatio
 add_participant_callback = CallbackData("event_id", prefix="add_participant")
 add_all_participants_callback = CallbackData("event_id", prefix="add_all_participants")
 remove_participation_callback = CallbackData("event_id", prefix="remove_participation")
+remove_all_participants_callback = CallbackData("event_id", prefix="remove_all_participants")
 singer_attendance_callback = CallbackData("action", "event_id", "singer_id", prefix="singer_attendance")
 
 delete_confirmation_callback = CallbackData("item_type", "item_id", "action_id", prefix="delete_confirmation")

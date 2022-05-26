@@ -213,18 +213,32 @@ def enter_new_event_comment(message: Message, event_id):
 def edit_event_participant(call: CallbackQuery):
     """Edit Event participants"""
 
-    print(f"edit_event_participant {call.data}")
+    print(f"admin_changes.py edit_event_participant {call.data}")
     *_, event_id = call.data.split(":")
+    attendance_buttons(call, event_id)
+
+
+@bot.callback_query_handler(func=None, calendar_config=keys.call.show_participation_callback.filter())
+def event_attendance(call: CallbackQuery):
+    """Display singers attendance for an event"""
+
+    print(f"admin_changes.py event_attendance {call.data}")
+    _, event_id = call.data.split(":")
+    attendance_buttons(call, event_id)
+
+
+def attendance_buttons(call, event_id):
     attendance_data = [
         (fullname, telegram_name, dicts.attends.attendance_pics_tuple[int(attendance)])
         for _, fullname, telegram_name, attendance in db_attendance.get_attendance_by_event_id(event_id)
     ]
-    bot.edit_message_text(
-        dicts.attends.attendant_singers_text,
-        call.message.chat.id,
-        call.message.id,
-        reply_markup=keys.buttons.participant_message_buttons(attendance_data, event_id)
-    )
+    if attendance_data:
+        msg = dicts.attends.attendant_singers_text
+        markup = keys.buttons.participant_message_buttons(attendance_data, event_id)
+    else:
+        msg = dicts.attends.empty_attendance_text
+        markup = keys.buttons.empty_participant_buttons(event_id)
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="6"))

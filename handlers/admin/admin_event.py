@@ -311,24 +311,6 @@ def save_event(call: CallbackQuery):
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
-@bot.callback_query_handler(func=None, calendar_config=keys.call.show_participation_callback.filter())
-def event_attendance(call: CallbackQuery):
-    """Display singers attendance for an event"""
-
-    _, event_id = call.data.split(":")
-    print(f"event_attendance {call.data}")
-    attendance_data = [
-        (fullname, telegram_name, dicts.attends.attendance_pics_tuple[int(attendance)])
-        for _, fullname, telegram_name, attendance in db_attendance.get_attendance_by_event_id(event_id)
-    ]
-    bot.edit_message_text(
-        dicts.attends.attendant_singers_text,
-        call.message.chat.id,
-        call.message.id,
-        reply_markup=keys.buttons.participant_message_buttons(attendance_data, event_id)
-    )
-
-
 @bot.callback_query_handler(func=None, calendar_config=keys.call.remove_participation_callback.filter())
 def remove_participation(call: CallbackQuery):
     """Display singers to remove from an event"""
@@ -376,13 +358,29 @@ def add_all_participants(call: CallbackQuery):
     """Add all available singers with voices into an event"""
 
     _, event_id = call.data.split(":")
-    db_attendance.add_all_singers_attendance(int(event_id))
+    db_attendance.add_all_singers_attendance(event_id)
     item_type = "event"
     markup = keys.buttons.show_participation(event_id)
 
     for buttons in keys.buttons.change_buttons(item_type, event_id).keyboard:
         markup.add(*buttons)
     msg = f"{dicts.attends.all_singers_added_text}\n{dicts.changes.need_something_text}"
+    bot.send_message(call.message.chat.id, msg, reply_markup=markup)
+    bot.delete_message(call.message.chat.id, call.message.id)
+
+
+@bot.callback_query_handler(func=None, calendar_config=keys.call.remove_all_participants_callback.filter())
+def remove_all_participants(call: CallbackQuery):
+    """Remove all singers from the event"""
+
+    _, event_id = call.data.split(":")
+    db_attendance.remove_all_singers_attendance(event_id)
+    item_type = "event"
+    markup = keys.buttons.show_participation(event_id)
+
+    for buttons in keys.buttons.change_buttons(item_type, event_id).keyboard:
+        markup.add(*buttons)
+    msg = f"{dicts.attends.all_singers_removed_text}"
     bot.send_message(call.message.chat.id, msg, reply_markup=markup)
     bot.delete_message(call.message.chat.id, call.message.id)
 

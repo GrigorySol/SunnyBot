@@ -39,7 +39,6 @@ def singer_menu(call: CallbackQuery):
     """Edit singer's info or DELETE a singer"""
 
     _, option_id, singer_id = call.data.split(":")
-    singer_id = int(singer_id)
     print(f"singer_menu {call.data}")
 
     if option_id == "0":  # Голос
@@ -51,7 +50,7 @@ def singer_menu(call: CallbackQuery):
     elif option_id == "2":  # Посещаемость
         call_config = "attendance_intervals"
         data = []
-        msg = "Выберите интервал:"
+        msg = dicts.attends.choose_interval_text
 
         for i, interval in enumerate(dicts.attends.attendance_interval_text_tuple):
             data.append((interval, f"{call_config}:{i}:{singer_id}"))
@@ -62,7 +61,15 @@ def singer_menu(call: CallbackQuery):
         msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_comment_text)
         bot.register_next_step_handler(msg, enter_new_singer_comment, singer_id)
 
-    elif option_id == "4":  # УДАЛИТЬ
+    elif option_id == "4":  # Имя/Фамилию
+        text = f"{dicts.changes.first_last_name_text} " \
+               f"{db_singer.get_singer_fullname(singer_id)} " \
+               f"{dicts.changes.would_be_changed_text}\n" \
+               f"{dicts.changes.enter_new_name_text}"
+        msg = bot.send_message(call.message.chat.id, text)
+        bot.register_next_step_handler(msg, enter_new_singer_name, singer_id)
+
+    elif option_id == "5":  # УДАЛИТЬ
         call_config = "delete_confirmation"
         item_type = "singer"
         item_name = db_singer.get_singer_fullname(singer_id)
@@ -75,6 +82,29 @@ def singer_menu(call: CallbackQuery):
         bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
     bot.delete_message(call.message.chat.id, call.message.id)
+
+
+def enter_new_singer_name(message: Message, singer_id):
+    """Update the first and last name for a singer"""
+
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
+
+    if " " in message.text and message.text.count(" ") < 2:
+        first_name, last_name = message.text.split(" ")
+    else:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
+
+    if db_singer.edit_singer_name(singer_id, first_name, last_name):
+        bot.send_message(message.chat.id, dicts.changes.singer_name_changed_text)
+
+    else:
+        msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        bot.register_next_step_handler(msg, enter_new_singer_name, singer_id)
+        vip_msg = f"ERROR in enter_new_event_name\nData: {message.text} {singer_id} "
+        bot.send_message(VIP, vip_msg)
 
 
 def enter_new_singer_comment(message: Message, singer_id):

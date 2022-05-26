@@ -311,6 +311,21 @@ def edit_singer_comment(singer_id, comment):
             return False
 
 
+def edit_singer_name(singer_id, first_name, last_name):
+    """Edit first and last name by singer_id and Return bool to confirm changes"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        try:
+            cursor.execute("UPDATE singers SET first_name = ?, last_name = ? "
+                           "WHERE id = ?", (first_name, last_name, singer_id))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
+
 def edit_suit_name(suit_id, suit_name):
     """Edit suit_name by suit_id and Return bool to confirm changes"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:

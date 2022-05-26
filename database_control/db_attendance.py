@@ -115,6 +115,14 @@ def edit_singer_attendance(event_id, telegram_id, attend):
 
 # DELETE
 
+def remove_all_singers_attendance(event_id):
+    """Remove all singers from an event."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("DELETE FROM attendance WHERE event_id = ?", (event_id,))
+
+
 def remove_singer_attendance(event_id, singer_id):
     """Remove singer attendance check from an event."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
