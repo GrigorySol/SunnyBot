@@ -259,18 +259,26 @@ def close_btn(call: CallbackQuery):
 @bot.message_handler(text=TextFilter(contains=dicts.filters.calendar_text_list, ignore_case=True))
 def calendar_message(message: Message):
     """Answer to type a command /calendar"""
+    if message.via_bot:
+        return
     bot.send_message(message.chat.id, dicts.singers.calendar_command_text, reply_to_message_id=message.id)
 
 
 @bot.message_handler(text=TextFilter(contains=dicts.filters.songs_text_list, ignore_case=True))
 def song_message(message: Message):
     """Answer to type a command /songs"""
+
+    if message.via_bot:
+        return
     bot.send_message(message.chat.id, dicts.singers.song_command_text, reply_to_message_id=message.id)
 
 
 @bot.message_handler(text=TextFilter(contains=dicts.filters.suits_text_list, ignore_case=True))
 def suit_message(message: Message):
     """Answer to type a command /suits"""
+
+    if message.via_bot:
+        return
     bot.send_message(message.chat.id, dicts.singers.suit_command_text, reply_to_message_id=message.id)
 
 
@@ -278,6 +286,8 @@ def suit_message(message: Message):
 def boring_message(message: Message):
     """Send a random joke into the chat"""
 
+    if message.via_bot:
+        return
     bot.register_next_step_handler(message, joking)
     bot.send_message(message.chat.id, dicts.singers.do_you_wanna_my_joke_text,
                      reply_to_message_id=message.id, reply_markup=keys.buttons.accept_markup)
@@ -286,6 +296,9 @@ def boring_message(message: Message):
 @bot.message_handler(text=TextFilter(contains=dicts.filters.fool_text_list, ignore_case=True))
 def fool_message(message: Message):
     """Answer for the fool"""
+
+    if message.via_bot:
+        return
     msg = randomizer(dicts.jokes.embarrassed_text_tuple)
     bot.send_message(message.chat.id, msg, reply_to_message_id=message.id)
 

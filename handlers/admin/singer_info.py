@@ -17,8 +17,8 @@ def display_singer_info(call: CallbackQuery):
 
     if not db_singer.singer_exists_by_id(singer_id):
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
-        bot.send_message(call.message.chat.id, dicts.singers.singer_not_exists_text)
-        bot.send_sticker(call.message.chat.id, sticker_id)
+        bot.send_message(call.from_user.id, dicts.singers.singer_not_exists_text)
+        bot.send_sticker(call.from_user.id, sticker_id)
         return
 
     comment = db_singer.get_singer_comment(singer_id)
@@ -29,7 +29,9 @@ def display_singer_info(call: CallbackQuery):
     telegram_name = db_singer.get_singer_telegram_name(singer_id)
     markup = keys.buttons.singer_info_buttons(telegram_name, singer_id, dicts.changes.edit_singer_text_tuple)
     bot.send_message(call.from_user.id, msg, reply_markup=markup)
-    bot.delete_message(call.message.chat.id, call.message.id)
+
+    if call.message:
+        bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.info_callback.filter())
