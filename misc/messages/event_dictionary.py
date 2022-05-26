@@ -3,6 +3,7 @@ prev_button_text = "⬅️ Назад"
 zoom_out_text = "🔎"
 to_add_text_tuple = ("костыль", "💃 Мероприятие", "🎪 Концерт", "🔔 Репетицию", "🏙 Локацию", "🪗 Песню", "🥋 Костюм")
 to_save_text_tuple = ("костыль", "💃 Мероприятие", "🎪 Концерт", "🔔 Репетиция", "🏙 Локация", "🪗 Песня", "🥋 Костюм")
+event_type_pics_tuple = ("🩹", "💃", "🎪", "🔔")
 
 
 # Events
@@ -26,10 +27,10 @@ choose_period_text = "Выбери период повторений."
 set_repeat_times_text = "Укажи число повторов."
 digits_ERROR_text = "Необходимо указать число цифрами. Напиши ещё раз."
 event_repeated_text = "Повторы сохранены. Не забудь проверить участников!"
-repertoire_text = "Программа:"
-comment_text = "Комментарий:"
+repertoire_text = "📖 Программа:"
+comment_text = "🔖 Комментарий:"
 repertoire_is_empty_text = "На данный момент отсутствует."
-suit_for_event_text = "Концертный костюм:"
+suit_for_event_text = "🥋 Концертный костюм:"
 
 
 # Locations

@@ -150,7 +150,8 @@ def callback_buttons(data: List, row=2, multiple=False):
 
 
 def participant_message_buttons(data: List, event_id, row=2, multiple=None):
-    """Creates markup with url buttons"""
+    """Create markup with url buttons"""
+
     markup = InlineKeyboardMarkup(row_width=row)
     data_amount = len(data)
 
@@ -187,12 +188,14 @@ def participant_message_buttons(data: List, event_id, row=2, multiple=None):
     markup.add(add_one_btn, remove_one_btn)
     markup.add(add_all_btn)
     markup.add(remove_all_btn)
+    markup.add(go_menu_button(event_id, "event"))
     markup.add(close_btn)
     return markup
 
 
 def empty_participant_buttons(event_id, row=2):
-    """Creates markup with url buttons"""
+    """Create markup add one and add all buttons"""
+
     markup = InlineKeyboardMarkup(row_width=row)
 
     add_one_btn = InlineKeyboardButton(bu_d.event_add_singer_btn_text,
@@ -202,8 +205,31 @@ def empty_participant_buttons(event_id, row=2):
 
     markup.add(add_one_btn)
     markup.add(add_all_btn)
+    markup.add(go_menu_button(event_id, "event"))
     markup.add(close_btn)
     return markup
+
+
+def add_remove_participant_buttons(event_id, add=True):
+    """Create add or remove button"""
+
+    if add:
+        button = InlineKeyboardButton(
+            bu_d.event_add_singer_btn_text, callback_data=f"add_participant:{event_id}"
+        )
+    else:
+        button = InlineKeyboardButton(
+            bu_d.event_remove_singer_btn_text, callback_data=f"remove_participation:{event_id}"
+        )
+
+    return button
+
+
+def go_menu_button(item_id, item_type):
+    """Create type menu button"""
+
+    button = InlineKeyboardButton(bu_d.go_menu_btn_text, callback_data=f"change:{item_type}:{item_id}")
+    return button
 
 
 def setup_multiple(data, data_amount, row):

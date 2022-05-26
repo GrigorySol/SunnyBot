@@ -1,3 +1,4 @@
+import misc.messages.buttons_dictionary
 import misc.messages.changes_dictionary
 from loader import bot
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
@@ -34,7 +35,7 @@ def show_song_info(call: CallbackQuery):
         else:
             bot.send_message(call.message.chat.id, dicts.songs.no_sounds_text)
 
-        msg = f"{dicts.changes.admin_buttons_text}\n{misc.messages.changes_dictionary.edit_text}"
+        msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{misc.messages.changes_dictionary.edit_text}"
         edit_song_menu(call.message, song_id, msg)
 
     else:

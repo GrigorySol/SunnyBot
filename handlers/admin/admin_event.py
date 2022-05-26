@@ -1,6 +1,6 @@
 from datetime import datetime, date, timedelta
 
-from config import VIP, VIP2
+from config import VIP
 from loader import bot
 from database_control import db_event, db_attendance, db_singer
 from telebot.types import Message, CallbackQuery
@@ -12,7 +12,7 @@ class EventData:
     def __init__(self):
         self.event_id = None
         self.event_type = None      # 0 - None, 1 - Мероприятие, 2 - Концерт, 3 - Репетиция
-        self.event_name = "Репетиция"
+        self.event_name = None
         self.date = None
         self.time = None
         self.is_in_progress = False
@@ -87,9 +87,9 @@ def add_event_time_handler(call: CallbackQuery):
     event_data.date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
     # Continue to add an event
     event_data.is_in_progress = True
-    event_data.event_type = int(event_type)
+    event_data.event_type = event_type
     event_data.event_name = dicts.events.to_save_text_tuple[event_data.event_type]
-    msg = f"Вы выбрали {dicts.events.to_add_text_tuple[event_data.event_type]} на {day} " \
+    msg = f"Вы выбрали {event_data.event_name} на {day} " \
           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года.\n{dicts.events.set_event_time_text}"
     msg_data = bot.send_message(call.message.chat.id, msg)
     bot.register_next_step_handler(msg_data, add_time_for_event)
@@ -138,7 +138,7 @@ def set_name_for_event(message: Message):
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
-    event_data.event_name = message.text
+    event_data.event_name = f"💃 {message.text}"
     bot.send_message(
         message.chat.id, dicts.events.choose_event_location_text, reply_markup=keys.buttons.choose_location_markup
     )
@@ -308,127 +308,6 @@ def save_event(call: CallbackQuery):
     _, location_id = call.data.split(":")
     print(f"{event_data.event_type}, {event_data.event_name}, {event_data.date}, {event_data.time}, {location_id}")
     save_new_event(location_id, call.message)
-    bot.delete_message(call.message.chat.id, call.message.id)
-
-
-@bot.callback_query_handler(func=None, calendar_config=keys.call.remove_participation_callback.filter())
-def remove_participation(call: CallbackQuery):
-    """Display singers to remove from an event"""
-
-    _, event_id = call.data.split(":")
-    remove_participant_buttons(call, event_id)
-    bot.delete_message(call.message.chat.id, call.message.id)
-
-
-def remove_participant_buttons(call, event_id):
-    remove_data = [
-        (fullname, f"singer_attendance:remove:{event_id}:{singer_id}")
-        for singer_id, fullname, *_ in db_attendance.get_attendance_by_event_id(event_id)
-    ]
-    bot.send_message(
-        call.message.chat.id,
-        dicts.attends.choose_singer_to_remove_text,
-        reply_markup=keys.buttons.callback_buttons(remove_data)
-    )
-
-
-@bot.callback_query_handler(func=None, calendar_config=keys.call.add_participant_callback.filter())
-def add_participant(call: CallbackQuery):
-    """Display singers to add into an event"""
-
-    _, event_id = call.data.split(":")
-    add_participant_buttons(call, event_id)
-    bot.delete_message(call.message.chat.id, call.message.id)
-
-
-def add_participant_buttons(call, event_id):
-    add_data = [
-        (fullname, f"singer_attendance:add:{event_id}:{singer_id}")
-        for singer_id, fullname, _ in db_attendance.get_not_participating_by_event_id(event_id)
-    ]
-    bot.send_message(
-        call.message.chat.id,
-        dicts.attends.choose_singer_to_add_text,
-        reply_markup=keys.buttons.callback_buttons(add_data)
-    )
-
-
-@bot.callback_query_handler(func=None, calendar_config=keys.call.add_all_participants_callback.filter())
-def add_all_participants(call: CallbackQuery):
-    """Add all available singers with voices into an event"""
-
-    _, event_id = call.data.split(":")
-    db_attendance.add_all_singers_attendance(event_id)
-    item_type = "event"
-    markup = keys.buttons.show_participation(event_id)
-
-    for buttons in keys.buttons.change_buttons(item_type, event_id).keyboard:
-        markup.add(*buttons)
-    msg = f"{dicts.attends.all_singers_added_text}\n{dicts.changes.need_something_text}"
-    bot.send_message(call.message.chat.id, msg, reply_markup=markup)
-    bot.delete_message(call.message.chat.id, call.message.id)
-
-
-@bot.callback_query_handler(func=None, calendar_config=keys.call.remove_all_participants_callback.filter())
-def remove_all_participants(call: CallbackQuery):
-    """Remove all singers from the event"""
-
-    _, event_id = call.data.split(":")
-    db_attendance.remove_all_singers_attendance(event_id)
-    item_type = "event"
-    markup = keys.buttons.show_participation(event_id)
-
-    for buttons in keys.buttons.change_buttons(item_type, event_id).keyboard:
-        markup.add(*buttons)
-    msg = f"{dicts.attends.all_singers_removed_text}"
-    bot.send_message(call.message.chat.id, msg, reply_markup=markup)
-    bot.delete_message(call.message.chat.id, call.message.id)
-
-
-@bot.callback_query_handler(func=None, calendar_config=keys.call.singer_attendance_callback.filter(action="remove"))
-def remove_singer_attendance(call: CallbackQuery):
-    """Remove selected singer attendance from an event"""
-
-    *_, event_id, singer_id = call.data.split(":")
-    print(f"remove_singer_attendance {call.data}")
-    singer_name = db_singer.get_singer_fullname(singer_id)
-
-    if not db_attendance.check_singer_attendance_exists(event_id, singer_id):
-        bot.send_message(call.message.chat.id, f"{singer_name} {dicts.attends.singer_already_removed_text}")
-        return
-
-    db_attendance.remove_singer_attendance(event_id, singer_id)
-    bot.send_message(call.message.chat.id, f"{singer_name} {dicts.attends.singer_removed_text}")
-    remove_participant_buttons(call, event_id)
-    bot.delete_message(call.message.chat.id, call.message.id)
-
-
-@bot.callback_query_handler(func=None, calendar_config=keys.call.singer_attendance_callback.filter(action="add"))
-def add_singer_attendance(call: CallbackQuery):
-    """Add selected singer attendance from an event"""
-
-    *_, event_id, singer_id = call.data.split(":")
-    print(f"add_singer_attendance {call.data}")
-    singer_name = db_singer.get_singer_fullname(singer_id)
-
-    if db_attendance.check_singer_attendance_exists(event_id, singer_id):
-        bot.send_message(call.message.chat.id, f"{singer_name} {dicts.attends.singer_already_added_text}")
-        return
-
-    db_attendance.add_singer_attendance(event_id, singer_id)
-    bot.send_message(call.message.chat.id, f"{singer_name} {dicts.attends.singer_added_text}")
-    add_participant_buttons(call, event_id)
-    bot.delete_message(call.message.chat.id, call.message.id)
-
-
-@bot.callback_query_handler(func=None, calendar_config=keys.call.singer_attendance_callback.filter(action="edit"))
-def edit_singer_attendance(call: CallbackQuery):
-    """Edit a singer attendance by a singer for an event"""
-
-    *_, event_id, decision = call.data.split(":")
-    print(f"edit_singer_attendance {call.data}")
-    db_attendance.edit_singer_attendance(event_id, call.from_user.id, decision)
-    bot.send_message(call.message.chat.id, f"{dicts.attends.attendance_changed_text}")
     bot.delete_message(call.message.chat.id, call.message.id)
 
 

@@ -1,6 +1,7 @@
 import datetime
 from random import randint
 
+import misc.messages.buttons_dictionary
 from config import VIP, VIP2
 from loader import bot
 from database_control import db_singer, db_songs, db_event, db_attendance
@@ -65,7 +66,7 @@ def show_suits(message: Message):
     if db_singer.is_admin(message.from_user.id):
         call_config = "show_suits"
         data = [(dicts.changes.button_show_all_suits_text, f"{call_config}")]
-        msg = f"{dicts.changes.admin_buttons_text}\n{dicts.changes.show_all_suits_text}"
+        msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{dicts.changes.show_all_suits_text}"
         bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
 
@@ -154,7 +155,7 @@ def concert_songs(call: CallbackQuery):
     singer_id = call.from_user.id
 
     if db_singer.is_admin(singer_id):
-        msg = f"{dicts.changes.admin_buttons_text}\n{dicts.songs.wanna_add_text}"
+        msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{dicts.songs.wanna_add_text}"
         bot.send_message(
             call.message.chat.id,
             msg,
@@ -205,12 +206,12 @@ def show_event(call: CallbackQuery):
         suit = db_event.get_suit_by_event_id(event_id)
 
         if suit:
-            msg += f"{dicts.events.suit_for_event_text} {suit[1]}\n"
+            msg += f"\n{dicts.events.suit_for_event_text}\n{suit[1]}\n"
 
-        msg += f"{dicts.events.repertoire_text}\n"
+        msg += f"\n{dicts.events.repertoire_text}\n"
         if songs:
             for _, song, _ in songs:
-                msg += f"{song}\n"
+                msg += f"🎵 {song}\n"
         else:
             msg += f"{dicts.events.repertoire_is_empty_text}\n"
 
@@ -244,7 +245,7 @@ def show_event(call: CallbackQuery):
         for buttons in keys.buttons.change_buttons(item_type, event_id).keyboard:
             markup.add(*buttons)
 
-        msg = f"{dicts.changes.admin_buttons_text}\n{dicts.changes.need_something_text}"
+        msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{dicts.changes.need_something_text}"
         bot.send_message(telegram_id, msg, reply_markup=markup)
 
     bot.delete_message(call.message.chat.id, call.message.id)
