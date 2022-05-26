@@ -154,7 +154,7 @@ def enter_new_song_name(message: Message, song_id):
     """UPDATE the song name in the database"""
 
     print(f"enter_new_song_name {song_id}, {message.text}")
-    if "/" in message.text:
+    if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
@@ -237,7 +237,7 @@ def add_sheets_or_sounds(message: Message, song_id):
         bot.register_next_step_handler(msg, add_sheets_or_sounds, song_id)
 
     else:
-        edit_song_menu(message, song_id, dicts.songs.something_else)
+        edit_song_menu(message, song_id, dicts.singers.CANCELED)
 
 
 def voice_detect(file_name):

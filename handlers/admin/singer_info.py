@@ -78,7 +78,8 @@ def singer_menu(call: CallbackQuery):
 def enter_new_singer_comment(message: Message, singer_id):
     """Update the comment for a singer"""
 
-    if message.text and "/" in message.text:
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
     if db_singer.edit_singer_comment(singer_id, message.text):

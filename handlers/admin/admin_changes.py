@@ -127,7 +127,8 @@ def edit_event_name(call: CallbackQuery):
 def enter_new_event_name(message: Message, event_id):
     """Update the name for an event"""
 
-    if message.text and "/" in message.text:
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
     if db_event.edit_event_name(event_id, message.text):
@@ -194,7 +195,8 @@ def edit_comment_event(call: CallbackQuery):
 def enter_new_event_comment(message: Message, event_id):
     """Update the comment for an event"""
 
-    if message.text and "/" in message.text:
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
     if db_event.edit_event_comment(event_id, message.text):
@@ -385,16 +387,13 @@ def edit_location_name(call: CallbackQuery):
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_name_text)
     bot.register_next_step_handler(msg, enter_new_location_name, location_id)
     bot.delete_message(call.message.chat.id, call.message.id)
-    # bot.send_sticker(
-    #     call.message.chat.id,
-    #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
-    # )
 
 
 def enter_new_location_name(message: Message, location_id):
     """Update the name for a location"""
 
-    if message.text and "/" in message.text:
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
     if db_event.edit_location_name(location_id, message.text):
@@ -415,14 +414,14 @@ def edit_location_url(call: CallbackQuery):
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_url_text)
     bot.register_next_step_handler(msg, enter_new_location_url, location_id)
     bot.delete_message(call.message.chat.id, call.message.id)
-    # bot.send_sticker(
-    #     call.message.chat.id,
-    #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
-    # )
 
 
 def enter_new_location_url(message: Message, location_id):
     """Update the name for a location"""
+
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
 
     if message.text and "http" not in message.text:
         msg = bot.send_message(message.chat.id, dicts.events.wrong_location_url_text)
@@ -479,16 +478,13 @@ def edit_suit_name(call: CallbackQuery):
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_suit_name_text)
     bot.register_next_step_handler(msg, enter_new_suit_name, suit_id)
     bot.delete_message(call.message.chat.id, call.message.id)
-    # bot.send_sticker(
-    #     call.message.chat.id,
-    #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
-    # )
 
 
 def enter_new_suit_name(message: Message, suit_id):
     """Update the name for a suit"""
 
-    if message.text and "/" in message.text:
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
     if db_singer.edit_suit_name(suit_id, message.text):
@@ -510,16 +506,13 @@ def edit_suit_photo(call: CallbackQuery):
     msg = bot.send_message(call.message.chat.id, dicts.changes.drop_new_photo_text)
     bot.register_next_step_handler(msg, drop_new_suit_photo, suit_id)
     bot.delete_message(call.message.chat.id, call.message.id)
-    # bot.send_sticker(
-    #     call.message.chat.id,
-    #     "CAACAgIAAxkBAAEUN1RiiCW1_TMceKUYF5oulfjmOXpAYgACFgADa-18CgcoBnIvq3DlJAQ"    # Правильный код
-    # )
 
 
 def drop_new_suit_photo(message: Message, suit_id):
     """Update the photo for a suit"""
 
-    if message.text and "/" in message.text:
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
     if not message.photo:

@@ -94,6 +94,21 @@ def show_blacklist(message: Message):
     )
 
 
+@bot.message_handler(commands=["magic"])
+def show_blacklist(message: Message):
+    """Add participation of all singers with voice"""
+
+    is_admin = db_singer.is_admin(message.from_user.id)
+
+    if not is_admin:
+        bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
+        return
+
+    db_attendance.magic_attendance(date.today())
+    msg = dicts.attends.magic_button_pressed_text
+    bot.send_message(message.chat.id, msg)
+
+
 @bot.callback_query_handler(func=lambda c: c.data == "show_all")
 def show_all_singers(call: CallbackQuery):
     """Displays callback buttons with all singers"""
@@ -201,8 +216,9 @@ def song_or_event(call: CallbackQuery):
 def add_song_name(message: Message):
     """Save the song name to the database and call buttons to edit the song name/sounds/sheets."""
 
-    if "/" in message.text:
+    if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
 
     elif db_songs.song_name_exists(message.text):
         msg = bot.send_message(message.chat.id, dicts.songs.song_name_exists_text)
@@ -217,8 +233,9 @@ def add_song_name(message: Message):
 def add_suit_name(message: Message):
     """Check if the suit name exists and ask to upload an image."""
 
-    if "/" in message.text:
+    if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
 
     elif db_singer.suit_name_exists(message.text):
         msg = bot.send_message(message.chat.id, dicts.singers.suit_name_exists_text)
@@ -232,8 +249,9 @@ def add_suit_name(message: Message):
 def save_new_suit(message: Message, suit_name):
     photo_file_id = message.photo[2].file_id
 
-    if message.text and "/" in message.text:
+    if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
 
     elif not photo_file_id:
         bot.register_next_step_handler(dicts.singers.no_photo_text, save_new_suit, suit_name)

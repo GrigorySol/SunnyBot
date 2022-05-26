@@ -88,6 +88,18 @@ def add_singer_attendance(event_id, singer_id):
         cursor.execute("INSERT INTO attendance (event_id, singer_id) VALUES (?, ?)", (event_id, singer_id))
 
 
+def magic_attendance(date):
+    """Add singers with voices for all events to the attendance table in the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("INSERT INTO attendance (event_id, singer_id) "
+                       "SELECT DISTINCT events.id, singer_voice.singer_id FROM events, singer_voice "
+                       "WHERE events.date > date(?) "
+                       "EXCEPT SELECT event_id, singer_id FROM attendance", (date,))
+
+
 # UPDATE
 
 def edit_singer_attendance(event_id, telegram_id, attend):

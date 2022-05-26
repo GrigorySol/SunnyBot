@@ -100,7 +100,7 @@ def add_time_for_event(message: Message):
     """Get time from the input and ask to name the event or set the place"""
 
     time = message.text
-    if '/' in time:
+    if message.text and "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
@@ -134,6 +134,10 @@ def add_time_for_event(message: Message):
 
 def set_name_for_event(message: Message):
     """Get event name from the input and ask to set the place"""
+    if message.text and "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
+
     event_data.event_name = message.text
     bot.send_message(
         message.chat.id, dicts.events.choose_event_location_text, reply_markup=keys.buttons.choose_location_markup
@@ -150,6 +154,10 @@ def add_new_location(call: CallbackQuery):
 
 def check_location_url(message: Message):
     """Check if URL for the location exists. Ask a name for the Location."""
+
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
 
     text = message.text.split("\n")
     for url in text:
@@ -170,6 +178,10 @@ def check_location_url(message: Message):
 
 def save_location_and_event(message: Message, url):
     """Save location and event"""
+
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
 
     if db_event.location_name_exists(message.text):
         msg_data = bot.send_message(message.chat.id, dicts.events.location_name_exists_text)
@@ -244,6 +256,10 @@ def number_of_repeats(call: CallbackQuery):
 
 def check_data_for_event_repeating(message: Message, event_id, interval):
     """Repeat event № times with defined interval"""
+
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
 
     amount = message.text
 
