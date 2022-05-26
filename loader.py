@@ -1,7 +1,7 @@
 import logging
 
 from config import BOT_TOKEN
-from telebot import TeleBot
+from telebot import TeleBot, custom_filters
 from handlers.singers import filters
 
 logging.basicConfig(level=logging.INFO)
@@ -12,3 +12,4 @@ bot.add_custom_filter(filters.SingerConfigFilter())
 bot.add_custom_filter(filters.NewSingerFilter())
 bot.add_custom_filter(filters.UserBlocked())
 bot.add_custom_filter(filters.CalendarCallbackFilter())
+bot.add_custom_filter(custom_filters.TextMatchFilter())

@@ -4,6 +4,7 @@ from random import randint
 from config import VIP, VIP2
 from loader import bot
 from database_control import db_singer, db_songs, db_event, db_attendance
+from telebot.custom_filters import TextFilter
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from misc.edit_functions import display_suits, edit_suits
 from misc import dicts, keys
@@ -255,13 +256,38 @@ def close_btn(call: CallbackQuery):
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
-@bot.message_handler(func=lambda m: "скучно" in m.text.lower())
-def back_btn(message: Message):
+@bot.message_handler(text=TextFilter(contains=["событи", "концерт", "репетиц"]))
+def calendar_message(message: Message):
+    """Answer to type a command /calendar"""
+    bot.send_message(message.chat.id, dicts.singers.calendar_command_text, reply_to_message_id=message.id)
+
+
+@bot.message_handler(text=TextFilter(contains=["песн"], ignore_case=True))
+def song_message(message: Message):
+    """Answer to type a command /songs"""
+    bot.send_message(message.chat.id, dicts.singers.song_command_text, reply_to_message_id=message.id)
+
+
+@bot.message_handler(text=TextFilter(contains=["костюм", "надеть", "одежд"], ignore_case=True))
+def suit_message(message: Message):
+    """Answer to type a command /suits"""
+    bot.send_message(message.chat.id, dicts.singers.suit_command_text, reply_to_message_id=message.id)
+
+
+@bot.message_handler(text=TextFilter(contains=["скучно", "грустно"], ignore_case=True))
+def boring_message(message: Message):
     """Send a random joke into the chat"""
 
     bot.register_next_step_handler(message, joking)
     bot.send_message(message.chat.id, dicts.singers.do_you_wanna_my_joke_text,
                      reply_to_message_id=message.id, reply_markup=keys.buttons.accept_markup)
+
+
+@bot.message_handler(text=TextFilter(contains=["дурак", "глупый", "тупой", "хам"], ignore_case=True))
+def fool_message(message: Message):
+    """Answer for the fool"""
+    msg = randomizer(dicts.jokes.embarrassed_text_tuple)
+    bot.send_message(message.chat.id, msg, reply_to_message_id=message.id)
 
 
 def joking(message: Message):
