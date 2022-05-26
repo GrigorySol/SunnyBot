@@ -109,6 +109,44 @@ def show_blacklist(message: Message):
     bot.send_message(message.chat.id, msg)
 
 
+@bot.message_handler(commands=["menu_photo"])
+def show_blacklist(message: Message):
+    """Change menu screenshot"""
+
+    is_admin = db_singer.is_admin(message.from_user.id)
+
+    if not is_admin:
+        bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
+        return
+
+    msg = bot.send_message(message.chat.id, dicts.changes.drop_a_menu_photo_text)
+    bot.register_next_step_handler(msg, edit_menu_photo_id)
+
+
+def edit_menu_photo_id(message: Message):
+    """Save photo file_id in the .env file in 'MENU_IMAGE' variable"""
+
+    if not message.photo:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
+    try:
+        file = open(".env")
+        data_list = file.readlines()
+        file.close()
+
+        data_list[-1] = f"MENU_IMAGE={message.photo[-1].file_id}"
+
+        file = open(".env", "w")
+        file.write("".join(data_list))
+        file.close()
+
+        bot.send_message(message.chat.id, dicts.changes.added_menu_photo_text)
+
+    except Exception as e:
+        print(e)
+        bot.send_message(message.chat.id, e)
+
+
 @bot.callback_query_handler(func=lambda c: c.data == "show_all")
 def show_all_singers(call: CallbackQuery):
     """Displays callback buttons with all singers"""

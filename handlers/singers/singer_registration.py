@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from loader import bot
-from config import PASS_PHRASE, SECRET_PASS_PHRASE, VIP
+from config import PASS_PHRASE, SECRET_PASS_PHRASE, VIP, MENU_IMAGE
 from telebot.types import Message, CallbackQuery
 from keyboards.inline.choice_buttons import new_singer_markup
 from keyboards.inline.callback_datas import register_callback
@@ -118,14 +118,18 @@ def singer_name_step(message: Message, singer: SingerRegister):
         name, lastname = name.split(" ")
         singer.telegram_id = message.from_user.id
         singer.telegram_name = message.from_user.username
-        bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEUXldijsMSalTOs3O2M01uwWqKGzVoqwACGwADwDZPE329ioPLRE1qJAQ")
+        # bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEUXldijsMSalTOs3O2M01uwWqKGzVoqwACGwADwDZPE329ioPLRE1qJAQ")
+        if MENU_IMAGE:
+            bot.send_photo(message.chat.id, MENU_IMAGE)
         bot.send_message(message.chat.id, dicts.singers.thanks_for_register_text)
         add_singer(singer.telegram_id, singer.telegram_name, name, lastname)
         if singer.is_admin:
             from handlers.admin.command_rules import admin_command_rules
             admin_command_rules()
             add_admin(singer.telegram_id)
-        print(f"New singer {name} {lastname} registered")
+        print(f"New singer {singer.telegram_name} "
+              f"{message.from_user.first_name} -> {name} "
+              f"{message.from_user.last_name} -> {lastname} registered")
         del singer
 
     elif len(name) < 2 or " " in name:
@@ -155,10 +159,13 @@ def singer_lastname_step(message: Message, singer: SingerRegister):
     else:
         singer.lastname = lastname
         print(f"all data:\n{singer.__dict__}")
-        bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEUXldijsMSalTOs3O2M01uwWqKGzVoqwACGwADwDZPE329ioPLRE1qJAQ")
+        if MENU_IMAGE:
+            bot.send_photo(message.chat.id, MENU_IMAGE)
         bot.send_message(message.chat.id, dicts.singers.thanks_for_register_text)
         add_singer(singer.telegram_id, singer.telegram_name, singer.name, singer.lastname)
         if singer.is_admin:
             add_admin(singer.telegram_id)
-        print(f"New singer {singer.name} {singer.lastname} registered")
+        print(f"New singer {singer.telegram_name} "
+              f"{message.from_user.first_name} -> {singer.name} "
+              f"{message.from_user.last_name} -> {lastname} registered")
         del singer

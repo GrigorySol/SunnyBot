@@ -188,6 +188,9 @@ def show_event(call: CallbackQuery):
     _, event_type, event_name, event_date, time, location_id, comment = db_event.search_event_by_id(event_id)
     location_name, url = db_event.search_location_by_id(location_id)
     telegram_id = call.from_user.id
+    print(f"singer_actions show_event\n"
+          f"{call.from_user.username} {call.from_user.first_name} {call.from_user.last_name} {call.data}\n"
+          f"{event_name} {event_date} {time}\n")
 
     location = f"{location_name}\n\n{url}"
 
@@ -242,6 +245,7 @@ def show_event(call: CallbackQuery):
 
         msg = f"{dicts.changes.admin_buttons_text}\n{dicts.changes.need_something_text}"
         bot.send_message(telegram_id, msg, reply_markup=markup)
+
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
@@ -275,10 +279,9 @@ def check_commands(message: Message):
 def nothing_to_say(message: Message):
     """Random answer on unrecognised message"""
 
-    text = {randomizer(dicts.jokes.random_answer_text_tuple)}
+    text = randomizer(dicts.jokes.random_answer_text_tuple)
     bot.forward_message(VIP, message.chat.id, message.id, disable_notification=True)
-    print(message.text)
-    print(text)
+    bot.send_message(VIP, text, disable_notification=True)
     bot.send_message(message.chat.id, text)
 
 

@@ -1,9 +1,8 @@
 import misc.messages.changes_dictionary
-from config import VIP
 from loader import bot
 from telebot.types import InputMediaPhoto, Message
 from keyboards.inline.choice_buttons import callback_buttons
-from misc.messages import event_dictionary as ev_d, singer_dictionary as sin_d, changes_dictionary as ch_d
+from misc import dicts
 from database_control import db_singer, db_event
 
 
@@ -24,19 +23,21 @@ def display_suits(message, sid):
         suit_data.append(InputMediaPhoto(photo, name))
 
     # add/remove/close buttons
-    for i, text in enumerate(ch_d.add_remove_text_tuple):
+    for i, text in enumerate(dicts.changes.add_remove_text_tuple):
         data.append((text, f"{call_config}:{i}:{sid}"))
 
     if not suits:
         data.pop()
-        msg = f"{sin_d.no_suit_text} {misc.messages.changes_dictionary.edit_text}"
+        msg = f"{dicts.singers.no_suit_text}"
         bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
         return
 
-    elif len(db_singer.get_all_suits()) == len(suits):
+    msg = f"{dicts.singers.available_suits}\n{', '.join(suit_names)}.\n"
+    if len(db_singer.get_all_suits()) == len(suits):
         data.pop(0)
-
-    msg = f"{sin_d.available_suits}\n{', '.join(suit_names)}.\n{misc.messages.changes_dictionary.edit_text}"
+        msg += dicts.changes.remove_text
+    else:
+        msg += dicts.changes.add_remove_text
 
     bot.send_media_group(message.chat.id, suit_data)
     bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
@@ -48,19 +49,19 @@ def display_voices(message, sid):
     call_config = "voice"
     data = []
 
-    for i, text in enumerate(ch_d.add_remove_text_tuple):
+    for i, text in enumerate(dicts.changes.add_remove_text_tuple):
         data.append((text, f"{call_config}:{i}:{sid}"))
 
     if not voices:
         data.pop()
-        msg = f"{sin_d.no_voice_text} {misc.messages.changes_dictionary.edit_text}"
+        msg = f"{dicts.singers.no_voice_text}"
 
     elif len(db_singer.get_all_voices()) == len(voices):
         data.pop(0)
         voice_names = []
         for _, name in voices:
             voice_names.append(name)
-        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{sin_d.too_many_voices}\n" \
+        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{dicts.singers.too_many_voices}\n" \
               f"{misc.messages.changes_dictionary.edit_text}"
 
     else:
@@ -142,16 +143,16 @@ def enter_new_event_time(message: Message, event_id: int, date):
         hours, minutes = time.split(" ")
         time = f"{hours}:{minutes}"
     elif ':' not in time:
-        msg_data = bot.send_message(message.chat.id, ev_d.wrong_event_time_text)
+        msg_data = bot.send_message(message.chat.id, dicts.events.wrong_event_time_text)
         bot.register_next_step_handler(msg_data, enter_new_event_time)
         return
 
     print(f"enter_new_event_time {date} {time}")
     if db_event.event_datetime_exists(date, time):
         print("Time exists")
-        msg_data = bot.send_message(message.chat.id, ch_d.event_time_busy)
+        msg_data = bot.send_message(message.chat.id, dicts.changes.event_time_busy)
         bot.register_next_step_handler(msg_data, enter_new_event_time)
         return
 
     if db_event.edit_event_datetime(event_id, date, time):
-        bot.send_message(message.chat.id, ch_d.event_time_changed_text)
+        bot.send_message(message.chat.id, dicts.changes.event_time_changed_text)
