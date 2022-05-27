@@ -60,12 +60,18 @@ yes_btn = KeyboardButton(bu_d.accept_btn_text_tuple[0])
 of_course_btn = KeyboardButton(bu_d.accept_btn_text_tuple[1])
 accept_markup.add(yes_btn, of_course_btn, close_btn)
 
-# choose old or new location buttons
-choose_location_markup = InlineKeyboardMarkup(row_width=2)
-choose_old = InlineKeyboardButton(bu_d.choose_location_btn_text_tuple[0], callback_data="add_event_location:db")
-get_url = InlineKeyboardButton(bu_d.choose_location_btn_text_tuple[1], callback_data="add_event_location:url")
-choose_location_markup.add(choose_old, get_url)
-choose_location_markup.add(close_btn)
+
+def choose_location(event_id):
+    markup = InlineKeyboardMarkup(row_width=2)
+    choose_old = InlineKeyboardButton(
+        bu_d.choose_location_btn_text_tuple[0], callback_data=f"add_event_location:db:{event_id}"
+    )
+    get_url = InlineKeyboardButton(
+        bu_d.choose_location_btn_text_tuple[1], callback_data=f"add_event_location:url:{event_id}"
+    )
+    markup.add(choose_old, get_url)
+    markup.add(close_btn)
+    return markup
 
 
 def show_participation(event_id) -> InlineKeyboardMarkup:

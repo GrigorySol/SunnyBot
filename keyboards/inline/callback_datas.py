@@ -30,7 +30,7 @@ edit_song_callback = CallbackData("song_id", "option_id", prefix="edit_song")
 edit_song_material_callback = CallbackData("song_id", "option_id", "edit_id", prefix="edit_song_material")
 
 # locations
-add_event_location_callback = CallbackData("type", prefix="add_event_location")
+add_event_location_callback = CallbackData("type", "event_id", prefix="add_event_location")
 edit_location_callback = CallbackData("location_id", prefix="edit_location")
 
 # singer

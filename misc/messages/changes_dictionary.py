@@ -48,6 +48,7 @@ enter_new_event_name_text = "Напиши новое название мероп
 enter_new_event_time_text = "Напиши новое время для мероприятия в формате 23 00, 23:00 или 23-00:"
 event_time_busy = "Указанное время занято другим мероприятием."
 event_time_changed_text = "Событие перенесено на указанное время."
+location_changed_text = "Локация изменена."
 
 enter_new_location_name_text = "Напиши новое название локации:"
 enter_new_location_url_text = "Пришли новую ссылку на карту локации:"

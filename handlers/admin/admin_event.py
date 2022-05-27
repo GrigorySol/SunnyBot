@@ -87,7 +87,7 @@ def add_event_time_handler(call: CallbackQuery):
     event_data.date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
     # Continue to add an event
     event_data.is_in_progress = True
-    event_data.event_type = event_type
+    event_data.event_type = int(event_type)
     event_data.event_name = dicts.events.to_save_text_tuple[event_data.event_type]
     msg = f"Вы выбрали {event_data.event_name} на {day} " \
           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года.\n{dicts.events.set_event_time_text}"
@@ -128,7 +128,9 @@ def add_time_for_event(message: Message):
         bot.register_next_step_handler(msg_data, set_name_for_event)
     else:
         bot.send_message(
-            message.chat.id, dicts.events.choose_event_location_text, reply_markup=keys.buttons.choose_location_markup
+            message.chat.id,
+            dicts.events.choose_event_location_text,
+            reply_markup=keys.buttons.choose_location(event_data.event_id)
         )
 
 
@@ -140,19 +142,24 @@ def set_name_for_event(message: Message):
 
     event_data.event_name = f"💃 {message.text}"
     bot.send_message(
-        message.chat.id, dicts.events.choose_event_location_text, reply_markup=keys.buttons.choose_location_markup
+        message.chat.id,
+        dicts.events.choose_event_location_text,
+        reply_markup=keys.buttons.choose_location(event_data.event_id)
     )
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.add_event_location_callback.filter(type="url"))
 def add_new_location(call: CallbackQuery):
     """Ask to input the URL for a new location"""
+
+    *_, event_id = call.data.split(":")
+    event_data.event_id = event_id
     msg_data = bot.send_message(call.message.chat.id, dicts.events.enter_location_url_text)
-    bot.register_next_step_handler(msg_data, check_location_url)
+    bot.register_next_step_handler(msg_data, check_location_url, event_id)
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
-def check_location_url(message: Message):
+def check_location_url(message: Message, event_id=None):
     """Check if URL for the location exists. Ask a name for the Location."""
 
     if not message.text or "http" not in message.text:
@@ -164,17 +171,17 @@ def check_location_url(message: Message):
             bot.send_message(
                 message.chat.id,
                 dicts.events.location_url_exists_text,
-                reply_markup=keys.buttons.choose_location_markup
+                reply_markup=keys.buttons.choose_location(event_data.event_id)
             )
         else:
             msg_data = bot.send_message(message.chat.id, dicts.events.enter_location_name_text)
-            bot.register_next_step_handler(msg_data, save_location_and_event, message.text)
+            bot.register_next_step_handler(msg_data, save_location_and_event, message.text, event_id)
     else:
         msg_data = bot.send_message(message.chat.id, dicts.events.wrong_location_url_text)
-        bot.register_next_step_handler(msg_data, check_location_url)
+        bot.register_next_step_handler(msg_data, check_location_url, event_id)
 
 
-def save_location_and_event(message: Message, url):
+def save_location_and_event(message: Message, url, event_id):
     """Save location and event"""
 
     if not message.text or "/" in message.text:
@@ -183,14 +190,20 @@ def save_location_and_event(message: Message, url):
 
     if db_event.location_name_exists(message.text):
         msg_data = bot.send_message(message.chat.id, dicts.events.location_name_exists_text)
-        bot.register_next_step_handler(msg_data, save_location_and_event, url)
+        bot.register_next_step_handler(msg_data, save_location_and_event, url, event_id)
         return
     else:
         location_id = db_event.add_location(message.text, url)
         bot.send_message(message.chat.id, f"{dicts.events.new_location_text}{message.text}")
 
     if event_data.is_in_progress:
+        print("Here")
         save_new_event(location_id, message)
+    elif event_id:
+        print("Changing event location")
+        msg = dicts.changes.location_changed_text
+        db_event.edit_event_location(event_id, location_id)
+        bot.send_message(message.chat.id, msg)
 
 
 def save_new_event(location_id, message):
@@ -289,10 +302,11 @@ def choose_location(call: CallbackQuery):
     """Show the location buttons"""
 
     locations = db_event.get_all_locations()
-    call_data, _ = call.data.split(":")
+    call_data, _, event_id = call.data.split(":")
+    event_data.event_id = event_id
     data = []
     for location_id, location_name, url in locations:
-        data.append((location_name, f"{call_data}:{location_id}"))
+        data.append((location_name, f"{call_data}:{location_id}:{event_id}"))
     bot.send_message(
         call.message.chat.id, dicts.events.choose_location_text, reply_markup=keys.buttons.callback_buttons(data)
     )
@@ -303,9 +317,14 @@ def choose_location(call: CallbackQuery):
 def save_event(call: CallbackQuery):
     """Get location from the callback data and save the event"""
 
-    _, location_id = call.data.split(":")
-    print(f"{event_data.event_type}, {event_data.event_name}, {event_data.date}, {event_data.time}, {location_id}")
-    save_new_event(location_id, call.message)
+    _, location_id, _ = call.data.split(":")
+    if event_data.is_in_progress:
+        save_new_event(location_id, call.message)
+    else:
+        msg = dicts.changes.location_changed_text
+        db_event.edit_event_location(event_data.event_id, location_id)
+        bot.send_message(call.message.chat.id, msg)
+
     bot.delete_message(call.message.chat.id, call.message.id)
 
 

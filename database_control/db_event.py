@@ -194,6 +194,20 @@ def edit_event_name(event_id, event_name):
             return False
 
 
+def edit_event_location(event_id, location_id):
+    """Edit location_id by event _id and Return bool to confirm changes"""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        try:
+            cursor.execute("UPDATE events SET location_id = ? WHERE id = ?", (location_id, event_id))
+            return True
+
+        except sqlite3.Error as err:
+            print(err)
+            return False
+
+
 def edit_event_comment(event_id, comment):
     """Edit comment by event_id and Return bool to confirm changes"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -265,7 +279,7 @@ def delete_location_by_id(location_id):
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("DELETE FROM location WHERE id = ?", (location_id,))
+        cursor.execute("DELETE FROM locations WHERE id = ?", (location_id,))
 
 
 def delete_song_from_concert(concert_id, song_id):

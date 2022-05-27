@@ -177,10 +177,11 @@ def edit_event_location(call: CallbackQuery):
     """Edit location for an Event"""
 
     print(f"edit_event_location {call.data}")
+    *_, event_id = call.data.split(":")
     bot.send_message(
         call.message.chat.id,
         dicts.events.choose_event_location_text,
-        reply_markup=keys.buttons.choose_location_markup
+        reply_markup=keys.buttons.choose_location(event_id)
     )
     bot.delete_message(call.message.chat.id, call.message.id)
 

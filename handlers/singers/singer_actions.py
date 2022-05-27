@@ -188,13 +188,11 @@ def show_event(call: CallbackQuery):
 
     _, event_id = call.data.split(":")
     _, event_type, event_name, event_date, time, location_id, comment = db_event.search_event_by_id(event_id)
-    location_name, url = db_event.search_location_by_id(location_id)
+    location_data = db_event.search_location_by_id(location_id)
     telegram_id = call.from_user.id
     print(f"singer_actions show_event\n"
           f"{call.from_user.username} {call.from_user.first_name} {call.from_user.last_name} {call.data}\n"
           f"{event_name} {event_date} {time}\n")
-
-    location = f"{location_name}\n\n{url}"
 
     _, month, day = event_date.split("-")
     event_date_text = f"{int(day)} {dicts.events.chosen_months_text_tuple[int(month) - 1]}"
@@ -218,9 +216,12 @@ def show_event(call: CallbackQuery):
     if comment:
         msg += f"{dicts.events.comment_text}\n{comment}\n"
 
+    if location_data:
+        location = f"{location_data[0]}\n\n{location_data[1]}"
+        bot.send_message(telegram_id, location, reply_markup=keys.buttons.close_markup)
+
     # ask a singer to set the attendance
     singer_id = db_singer.get_singer_id(telegram_id)
-    bot.send_message(telegram_id, location, reply_markup=keys.buttons.close_markup)
 
     attendance = db_attendance.get_singer_attendance_for_event(event_id, singer_id)
     if attendance:
