@@ -223,7 +223,6 @@ def show_event(call: CallbackQuery):
     bot.send_message(telegram_id, location, reply_markup=keys.buttons.close_markup)
 
     attendance = db_attendance.get_singer_attendance_for_event(event_id, singer_id)
-    print(type(attendance[0]))
     if attendance:
         call_config = "singer_attendance"
         data = [

@@ -155,25 +155,23 @@ def add_new_location(call: CallbackQuery):
 def check_location_url(message: Message):
     """Check if URL for the location exists. Ask a name for the Location."""
 
-    if not message.text or "/" in message.text:
+    if not message.text or "http" not in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
-    text = message.text.split("\n")
-    for url in text:
-        if "http" in url:
-            if db_event.location_url_exists(url):
-                bot.send_message(
-                    message.chat.id,
-                    dicts.events.location_url_exists_text,
-                    reply_markup=keys.buttons.choose_location_markup
-                )
-            else:
-                msg_data = bot.send_message(message.chat.id, dicts.events.enter_location_name_text)
-                bot.register_next_step_handler(msg_data, save_location_and_event, url)
+    if "http" in message.text:
+        if db_event.location_url_exists(message.text):
+            bot.send_message(
+                message.chat.id,
+                dicts.events.location_url_exists_text,
+                reply_markup=keys.buttons.choose_location_markup
+            )
         else:
-            msg_data = bot.send_message(message.chat.id, dicts.events.wrong_location_url_text)
-            bot.register_next_step_handler(msg_data, check_location_url)
+            msg_data = bot.send_message(message.chat.id, dicts.events.enter_location_name_text)
+            bot.register_next_step_handler(msg_data, save_location_and_event, message.text)
+    else:
+        msg_data = bot.send_message(message.chat.id, dicts.events.wrong_location_url_text)
+        bot.register_next_step_handler(msg_data, check_location_url)
 
 
 def save_location_and_event(message: Message, url):

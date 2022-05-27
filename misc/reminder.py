@@ -8,6 +8,7 @@ import schedule
 from database_control.db_singer import get_singers_id_by_event
 from database_control.db_event import search_event_by_date
 from keyboards.inline.choice_buttons import callback_buttons
+from misc import dicts
 from misc.messages import attendance_dictionary as at_d, event_dictionary as ev_d, reminder_dictionary as rem_d
 
 
@@ -59,13 +60,17 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
         msg_date = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
 
     msg = f"{msg_date} {rem_d.will_be_text} '{event_name}'.\n" \
-          f"{rem_d.info_in_calendar_text}\n" \
-          f"{rem_d.select_attendance_text}"
+          f"{rem_d.info_in_calendar_text}\n"
     markup = callback_buttons(data)
 
-    for singer_id in get_singers_id_by_event(event_id):
+    for singer_id, attendance in get_singers_id_by_event(event_id):
         try:
-            print(f"Message for singer id {singer_id[0]}")
+            if attendance == 1:
+                msg += f"\n{dicts.attends.chosen_attendance_text}\n" \
+                       f"{dicts.attends.set_attendance_text_tuple[1]}\n" \
+                       f"\n{dicts.attends.wanna_change_text}"
+            elif attendance == 2:
+                msg += f"{rem_d.select_attendance_text}"
             bot.send_message(singer_id[0], msg, reply_markup=markup)
         except Exception as e:
             print(f"{e}\n{singer_id[0]} not exists")

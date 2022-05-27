@@ -80,12 +80,12 @@ def get_all_admins():
 
 
 def get_singers_id_by_event(event_id):
-    """Return (telegram_id) from singers for event_id from the database."""
+    """Return (telegram_id, attend) from singers for event_id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
         # language=SQLITE-SQL
-        cursor.execute("SELECT singers.telegram_id FROM singers "
+        cursor.execute("SELECT singers.telegram_id, attendance.attend FROM singers "
                        "JOIN attendance ON attendance.singer_id = singers.id "
                        "WHERE attendance.event_id = ? AND attendance.attend IS NOT '0'", (event_id,))
         return cursor.fetchall()
