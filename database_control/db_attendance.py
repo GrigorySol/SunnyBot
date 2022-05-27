@@ -45,13 +45,13 @@ def get_attendance_by_interval(singer_id, start_date, end_date):
         return cursor.fetchone()[0]
 
 
-def check_singer_attendance_exists(event_id, singer_id):
-    """Return True if attendance record exists in the database."""
+def get_singer_attendance_for_event(event_id, singer_id):
+    """Return str 0, 1 or 2 if attendance record exists in the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM attendance WHERE event_id = ? AND singer_id = ?", (event_id, singer_id))
-        return bool(cursor.fetchone())
+        cursor.execute("SELECT attend FROM attendance WHERE event_id = ? AND singer_id = ?", (event_id, singer_id))
+        return cursor.fetchone()
 
 
 def get_all_telegram_singer_id_by_event_id(event_id):

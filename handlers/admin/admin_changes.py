@@ -721,7 +721,7 @@ def remove_singer_attendance(call: CallbackQuery):
     print(f"remove_singer_attendance {call.data}")
     singer_name = db_singer.get_singer_fullname(singer_id)
 
-    if not db_attendance.check_singer_attendance_exists(event_id, singer_id):
+    if not db_attendance.get_singer_attendance_for_event(event_id, singer_id):
         bot.send_message(call.message.chat.id, f"{singer_name} {dicts.attends.singer_already_removed_text}")
         return
 
@@ -739,7 +739,7 @@ def add_singer_attendance(call: CallbackQuery):
     print(f"add_singer_attendance {call.data}")
     singer_name = db_singer.get_singer_fullname(singer_id)
 
-    if db_attendance.check_singer_attendance_exists(event_id, singer_id):
+    if db_attendance.get_singer_attendance_for_event(event_id, singer_id):
         bot.send_message(call.message.chat.id, f"{singer_name} {dicts.attends.singer_already_added_text}")
         return
 

@@ -137,12 +137,13 @@ def display_attendance(call: CallbackQuery):
 
     print(f"display_attendance {call.data}")
     _, interval, singer_id = call.data.split(":")
-    start_date = db_singer.get_singer_join_date(int(singer_id))
+    start_date = db_singer.get_singer_join_date(singer_id)
+    singer_name = db_singer.get_singer_fullname(singer_id)
     end_date = date.today()
-    msg = dicts.attends.attendance_interval_text_tuple[2]
+    msg = f"{dicts.attends.interval_for_singer} {singer_name} "
 
     if interval == "0":
-        msg = dicts.attends.attendance_interval_text_tuple[0]
+        msg += f"{dicts.attends.attendance_interval_text_tuple[0]}:\n"
         month = str(end_date.month - 1).zfill(2)
         day = str(end_date.day).zfill(2)
         new_date = f"{end_date.year}-{month}-{day}"
@@ -150,12 +151,14 @@ def display_attendance(call: CallbackQuery):
             start_date = new_date
 
     elif interval == "1":
-        msg = dicts.attends.attendance_interval_text_tuple[0]
+        msg += f"{dicts.attends.attendance_interval_text_tuple[1]}:\n"
         month = str(end_date.month).zfill(2)
         day = str(end_date.day).zfill(2)
         new_date = f"{end_date.year - 1}-{month}-{day}"
         if start_date < new_date:
             start_date = new_date
+    else:
+        msg += f"{dicts.attends.attendance_interval_text_tuple[2]}:\n"
 
     attendance = db_attendance.get_attendance_by_interval(int(singer_id), start_date,
                                                           end_date.strftime('%Y-%m-%d'))
@@ -165,9 +168,9 @@ def display_attendance(call: CallbackQuery):
         bot.send_message(call.message.chat.id, dicts.attends.no_attendance_text)
         return
 
-    msg += f"\n{dicts.attends.attendance_description_text_tuple[0]}: {attendance.count('0')}" \
-           f"\n{dicts.attends.attendance_description_text_tuple[1]}: {attendance.count('1')}" \
-           f"\n{dicts.attends.attendance_description_text_tuple[2]}: {attendance.count('2')}"
+    msg += f"{dicts.attends.attendance_description_text_tuple[0]}: {attendance.count('0')}\n" \
+           f"{dicts.attends.attendance_description_text_tuple[1]}: {attendance.count('1')}\n" \
+           f"{dicts.attends.attendance_description_text_tuple[2]}: {attendance.count('2')}"
 
     bot.send_message(call.message.chat.id, msg)
     bot.delete_message(call.message.chat.id, call.message.id)

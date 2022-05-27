@@ -49,7 +49,7 @@ def calendar_show_event_handler(call: CallbackQuery):
 
     singer_id = db_singer.get_singer_id(call.from_user.id)
     for event_id, _, event_name, event_time in events:
-        participant = db_attendance.check_singer_attendance_exists(event_id, singer_id)
+        participant = db_attendance.get_singer_attendance_for_event(event_id, singer_id)
         if participant or db_singer.is_admin(call.from_user.id):
             data.append((f"{event_name} {event_time}", f"{call_config}:{event_id}"))
 
