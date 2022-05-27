@@ -163,7 +163,7 @@ def enter_new_song_name(message: Message, song_id):
         bot.send_message(message.chat.id, dicts.songs.song_name_changed_text)
 
     else:
-        bot.send_message(message.chat.id, dicts.songs.SONG_WRONG_TEXT)
+        bot.send_message(message.chat.id, dicts.songs.WRONG_TEXT)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.edit_song_material_callback.filter())
@@ -209,7 +209,7 @@ def edit_song_materials(call: CallbackQuery):
         _delete()
 
     else:
-        bot.send_message(call.message.chat.id, dicts.songs.SONG_WRONG_TEXT)
+        bot.send_message(call.message.chat.id, dicts.songs.WRONG_TEXT)
 
     bot.delete_message(call.message.chat.id, call.message.id)
 

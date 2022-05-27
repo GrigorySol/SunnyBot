@@ -87,7 +87,7 @@ def get_singers_id_by_event(event_id):
         # language=SQLITE-SQL
         cursor.execute("SELECT singers.telegram_id FROM singers "
                        "JOIN attendance ON attendance.singer_id = singers.id "
-                       "WHERE attendance.event_id = ?", (event_id,))
+                       "WHERE attendance.event_id = ? AND attendance.attend IS NOT '0'", (event_id,))
         return cursor.fetchall()
 
 

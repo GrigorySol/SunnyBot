@@ -10,7 +10,7 @@ choose_interval_text = "Выбери интервал участия:"
 
 select_attendance_text = "⏰ Ты придёшь?"
 you_not_participate_text = "Похоже, ты не участвуешь."
-attendance_changed_text = "Отметил. Но всегда можно передумать!"
+attendance_changed_text = "Отметил. Поменять отметку можно через /calendar!"
 
 no_attendance_text = "Этот певун ещё нигде не участвовал."
 
