@@ -307,14 +307,18 @@ def edit_concert_suit(call: CallbackQuery):
 def select_suit_for_concert(call, event_id):
     """Display all suits to choose for a concert"""
 
-    suits = db_singer.get_all_suits()
+    suits = db_singer.get_suits_and_amount()
+    singers_amount = db_singer.count_singers()
+    if not singers_amount:
+        singers_amount = 0
+
     msg = dicts.changes.choose_suit_text
     call_config = "select_suit"
     data = []
     suit_data = []
 
-    for suit_id, suit_name, photo in suits:
-        data.append((suit_name, f"{call_config}:{event_id}:{suit_id}"))
+    for suit_id, suit_name, photo, amount in suits:
+        data.append((f"{suit_name} {amount}/{singers_amount}", f"{call_config}:{event_id}:{suit_id}"))
         suit_data.append(InputMediaPhoto(photo, suit_name))
 
     bot.send_media_group(call.message.chat.id, suit_data)
@@ -528,7 +532,7 @@ def edit_suit_photo(call: CallbackQuery):
 def drop_new_suit_photo(message: Message, suit_id):
     """Update the photo for a suit"""
 
-    if not message.text or "/" in message.text:
+    if message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
@@ -542,9 +546,7 @@ def drop_new_suit_photo(message: Message, suit_id):
         bot.register_next_step_handler(msg, drop_new_suit_photo, suit_id)
         return
 
-    photo_file_id = message.photo[2].file_id
-
-    if db_singer.edit_suit_photo(suit_id, photo_file_id):
+    if db_singer.edit_suit_photo(suit_id, message.photo[2].file_id):
         bot.send_message(message.chat.id, dicts.changes.photo_saved_text)
 
     else:

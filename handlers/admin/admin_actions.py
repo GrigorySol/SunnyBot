@@ -285,16 +285,21 @@ def add_suit_name(message: Message):
 
 
 def save_new_suit(message: Message, suit_name):
-    photo_file_id = message.photo[2].file_id
 
-    if not message.text or "/" in message.text:
+    if message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
-    elif not photo_file_id:
-        bot.register_next_step_handler(dicts.singers.no_photo_text, save_new_suit, suit_name)
+    if not message.photo:
+        msg = bot.send_message(message.chat.id, dicts.singers.no_photo_text)
+        bot.register_next_step_handler(msg, save_new_suit, suit_name)
+        return
+
+    if len(message.photo) < 3:
+        msg = bot.send_message(message.chat.id, dicts.changes.wrong_photo_format_text)
+        bot.register_next_step_handler(msg, save_new_suit, suit_name)
+        return
 
     else:
-        assert isinstance(photo_file_id, str)
-        db_singer.add_suit(suit_name, photo_file_id)
+        db_singer.add_suit(suit_name, message.photo[2].file_id)
         bot.send_message(message.chat.id, dicts.singers.new_suit_added_text)

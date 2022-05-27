@@ -127,7 +127,7 @@ def get_singer_voices(singer_id):
 
         # language=SQLITE-SQL
         cursor.execute("SELECT id, voice FROM voices "
-                       "INNER JOIN singer_voice ON singer_voice.voice_id = voices.id "
+                       "JOIN singer_voice ON singer_voice.voice_id = voices.id "
                        "WHERE singer_voice.singer_id = ? ORDER BY singer_voice.voice_id", (singer_id,))
         return cursor.fetchall()
 
@@ -139,7 +139,7 @@ def get_singer_suits(singer_id):
 
         # language=SQLITE-SQL
         cursor.execute("SELECT id, suit_name, photo FROM suits "
-                       "INNER JOIN singer_suit ON singer_suit.suit_id = suits.id "
+                       "JOIN singer_suit ON singer_suit.suit_id = suits.id "
                        "WHERE singer_suit.singer_id = ?", (singer_id,))
         return cursor.fetchall()
 
@@ -159,6 +159,19 @@ def get_all_suits():
         cursor = db.cursor()
 
         cursor.execute("SELECT * FROM suits ")
+        return cursor.fetchall()
+
+
+def get_suits_and_amount():
+    """Return all (id, suit_name, photo, amount) from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT suits.id, suits.suit_name, suits.photo, "
+                       "(SELECT COUNT(singer_suit.singer_id) FROM singer_suit "
+                       "WHERE singer_suit.suit_id = suits.id) "
+                       "FROM suits")
         return cursor.fetchall()
 
 
@@ -186,15 +199,6 @@ def get_all_voices():
         cursor = db.cursor()
 
         cursor.execute("SELECT * FROM voices ")
-        return cursor.fetchall()
-
-
-def get_voice_list():
-    """Return all available voices from the database."""
-    with sqlite3.connect("database_control/sunny_bot.db") as db:
-        cursor = db.cursor()
-
-        cursor.execute("SELECT voice FROM voices")
         return cursor.fetchall()
 
 
