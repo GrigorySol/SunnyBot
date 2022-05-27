@@ -223,15 +223,16 @@ def show_event(call: CallbackQuery):
     bot.send_message(telegram_id, location, reply_markup=keys.buttons.close_markup)
 
     attendance = db_attendance.get_singer_attendance_for_event(event_id, singer_id)
+    print(type(attendance[0]))
     if attendance:
         call_config = "singer_attendance"
         data = [
             (text, f"{call_config}:edit:{event_id}:{i}")
             for i, text in enumerate(dicts.attends.set_attendance_text_tuple)
         ]
-        if attendance == "0" or attendance == "1":
+        if attendance[0] == 0 or attendance[0] == 1:
             msg += f"\n{dicts.attends.chosen_attendance_text}\n" \
-                   f"{dicts.attends.set_attendance_text_tuple[int(attendance)]}\n" \
+                   f"{dicts.attends.set_attendance_text_tuple[attendance[0]]}\n" \
                    f"\n{dicts.attends.wanna_change_text}"
         else:
             msg += f"\n{dicts.attends.select_attendance_text}"
