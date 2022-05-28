@@ -71,9 +71,9 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
                        f"\n{dicts.attends.wanna_change_text}"
             elif attendance == 2:
                 msg += f"{rem_d.select_attendance_text}"
-            bot.send_message(singer_id[0], msg, reply_markup=markup)
+            bot.send_message(singer_id, msg, reply_markup=markup)
         except Exception as e:
-            print(f"{e}\n{singer_id[0]} not exists")
+            print(f"{e}\n{singer_id} not exists")
 
 
 def database_sender():

@@ -35,7 +35,6 @@ def rolling_callback_buttons(call: CallbackQuery):
         )
 
     elif btn_type == "url":
-        print(f"url row is {keys.buttons.keep_data.row}")
         bot.edit_message_reply_markup(
             call.message.chat.id,
             call.message.id,
@@ -126,7 +125,6 @@ def show_songs(call: CallbackQuery):
             call.message.chat.id, dicts.songs.which_song_text, reply_markup=keys.buttons.callback_buttons(data)
         )
     else:
-        print("show_songs data is empty")
         bot.send_message(call.message.chat.id, dicts.songs.no_songs_text)
     bot.delete_message(call.message.chat.id, call.message.id)
 

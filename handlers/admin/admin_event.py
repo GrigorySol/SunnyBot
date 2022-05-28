@@ -197,10 +197,8 @@ def save_location_and_event(message: Message, url, event_id):
         bot.send_message(message.chat.id, f"{dicts.events.new_location_text}{message.text}")
 
     if event_data.is_in_progress:
-        print("Here")
         save_new_event(location_id, message)
     elif event_id:
-        print("Changing event location")
         msg = dicts.changes.location_changed_text
         db_event.edit_event_location(event_id, location_id)
         bot.send_message(message.chat.id, msg)
@@ -240,7 +238,6 @@ def save_new_event(location_id, message):
 def show_repeat_interval_buttons(call: CallbackQuery):
     """Show buttons to choose interval"""
 
-    print(f"show_repeat_event_buttons {call.data}")
     _, event_id = call.data.split(":")
     call_config = "interval"
     data = []
@@ -257,7 +254,6 @@ def show_repeat_interval_buttons(call: CallbackQuery):
 def number_of_repeats(call: CallbackQuery):
     """Ask to enter the number"""
 
-    print(f"number_of_repeats {call.data}")
     _, event_id, interval = call.data.split(":")
     # Save data to use in the next function set_event_repeating
     msg_data = bot.send_message(call.message.chat.id, dicts.events.set_repeat_times_text)

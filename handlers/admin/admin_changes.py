@@ -330,7 +330,6 @@ def select_suit_for_concert(call, event_id):
 def display_suit_options_to_change(call: CallbackQuery):
     """Remove current concert suit and display suit options to change"""
 
-    print(f"We are in display_suit_options_to_change CALL DATA = {call.data}\n")
     _, event_id, suit_id = call.data.split(":")
     db_event.delete_suit_from_concert(event_id, suit_id)
     select_suit_for_concert(call, event_id)
@@ -341,7 +340,6 @@ def display_suit_options_to_change(call: CallbackQuery):
 def edit_songs_for_concert(call: CallbackQuery):
     """List of songs to edit"""
 
-    print(f"edit_songs_for_concert {call.data}")
     _, concert_id, option_id = call.data.split(":")
 
     call_config = "concert_songs"
@@ -370,7 +368,6 @@ def edit_songs_for_concert(call: CallbackQuery):
 def add_or_remove_songs(call: CallbackQuery):
     """Add or remove songs in concert program"""
 
-    print(f"edit_songs_for_concert {call.data}")
     _, option, concert_id, song_id = call.data.split(":")
 
     if option == "add":
@@ -391,7 +388,6 @@ def add_or_remove_songs(call: CallbackQuery):
 def edit_suit_for_concert(call: CallbackQuery):
     """Add a suit for a concert"""
 
-    print(f"admin_changes.py edit_suit_for_concert {call.data}")
     _, concert_id, suit_id = call.data.split(":")
     if db_event.add_suit_to_concert(concert_id, suit_id):
         bot.edit_message_text(dicts.changes.suit_added_text, call.message.chat.id, call.message.id, reply_markup=None)
@@ -404,7 +400,6 @@ def edit_suit_for_concert(call: CallbackQuery):
 def edit_location_name(call: CallbackQuery):
     """Edit location name"""
 
-    print(f"We are in edit_location_name CALL DATA = {call.data}\n")
     *_, location_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_name_text)
     bot.register_next_step_handler(msg, enter_new_location_name, location_id)
@@ -431,7 +426,6 @@ def enter_new_location_name(message: Message, location_id):
 def edit_location_url(call: CallbackQuery):
     """Edit location URL"""
 
-    print(f"We are in edit_location_url CALL DATA = {call.data}\n")
     *_, location_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_url_text)
     bot.register_next_step_handler(msg, enter_new_location_url, location_id)
@@ -463,7 +457,6 @@ def enter_new_location_url(message: Message, location_id):
 def edit_location_none(call: CallbackQuery):
     """Edit location none"""
 
-    print(f"We are in edit_location_none CALL DATA = {call.data}\n")
     *_, location_id = call.data.split(":")
     bot.send_sticker(
         call.message.chat.id,
@@ -476,7 +469,6 @@ def edit_location_none(call: CallbackQuery):
 def delete_location(call: CallbackQuery):
     """DELETE location"""
 
-    print(f"delete_location {call.data}")
     *_, location_id = call.data.split(":")
 
     item_name = db_event.search_location_by_id(location_id)[0]
@@ -495,7 +487,6 @@ def delete_location(call: CallbackQuery):
 def edit_suit_name(call: CallbackQuery):
     """Edit suit name"""
 
-    print(f"We are in edit_suit_name CALL DATA = {call.data}\n")
     *_, suit_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_suit_name_text)
     bot.register_next_step_handler(msg, enter_new_suit_name, suit_id)
@@ -523,7 +514,6 @@ def enter_new_suit_name(message: Message, suit_id):
 def edit_suit_photo(call: CallbackQuery):
     """Edit suit photo"""
 
-    print(f"We are in edit_suit_name CALL DATA = {call.data}\n")
     *_, suit_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.drop_new_photo_text)
     bot.register_next_step_handler(msg, drop_new_suit_photo, suit_id)
@@ -721,7 +711,6 @@ def remove_singer_attendance(call: CallbackQuery):
     """Remove selected singer attendance from an event"""
 
     *_, event_id, singer_id = call.data.split(":")
-    print(f"remove_singer_attendance {call.data}")
     singer_name = db_singer.get_singer_fullname(singer_id)
 
     if not db_attendance.get_singer_attendance_for_event(event_id, singer_id):
@@ -739,7 +728,6 @@ def add_singer_attendance(call: CallbackQuery):
     """Add selected singer attendance from an event"""
 
     *_, event_id, singer_id = call.data.split(":")
-    print(f"add_singer_attendance {call.data}")
     singer_name = db_singer.get_singer_fullname(singer_id)
 
     if db_attendance.get_singer_attendance_for_event(event_id, singer_id):
@@ -757,7 +745,6 @@ def edit_singer_attendance(call: CallbackQuery):
     """Edit a singer attendance by a singer for an event"""
 
     *_, event_id, decision = call.data.split(":")
-    print(f"edit_singer_attendance {call.data}")
     db_attendance.edit_singer_attendance(event_id, call.from_user.id, decision)
     bot.send_message(call.message.chat.id, f"{dicts.attends.attendance_changed_text}")
     bot.delete_message(call.message.chat.id, call.message.id)
