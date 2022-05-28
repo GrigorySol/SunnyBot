@@ -59,12 +59,12 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
         year, month, day = event_date.split("-")
         msg_date = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
 
-    msg = f"{msg_date} {rem_d.will_be_text} '{event_name}'.\n" \
-          f"{rem_d.info_in_calendar_text}\n"
     markup = callback_buttons(data)
 
     for singer_id, attendance in get_singers_id_by_event(event_id):
         try:
+            msg = f"{msg_date} {rem_d.will_be_text} '{event_name}'.\n" \
+                  f"{rem_d.info_in_calendar_text}\n"
             if attendance == 1:
                 msg += f"\n{dicts.attends.chosen_attendance_text}\n" \
                        f"{dicts.attends.set_attendance_text_tuple[1]}\n" \
@@ -72,6 +72,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
             elif attendance == 2:
                 msg += f"{rem_d.select_attendance_text}"
             bot.send_message(singer_id, msg, reply_markup=markup)
+
         except Exception as e:
             print(f"{e}\n{singer_id} not exists")
 
