@@ -192,8 +192,7 @@ def participant_message_buttons(data: List, event_id, row=2, multiple=None):
                                           callback_data=f"remove_all_participants:{event_id}")
 
     markup.add(add_one_btn, remove_one_btn)
-    markup.add(add_all_btn)
-    markup.add(remove_all_btn)
+    markup.add(add_all_btn, remove_all_btn)
     markup.add(go_menu_button(event_id, "event"))
     markup.add(close_btn)
     return markup

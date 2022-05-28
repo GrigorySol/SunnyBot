@@ -233,12 +233,17 @@ def event_attendance(call: CallbackQuery):
 
 
 def attendance_buttons(call, event_id):
-    attendance_data = [
-        (fullname, telegram_name, dicts.attends.attendance_pics_tuple[int(attendance)])
-        for _, fullname, telegram_name, attendance in db_attendance.get_attendance_by_event_id(event_id)
-    ]
+    attendance_data = []
+    attendance_to_count = []
+    for _, fullname, telegram_name, attendance in db_attendance.get_attendance_by_event_id(event_id):
+        attendance_data.append((fullname, telegram_name, dicts.attends.attendance_pics_tuple[int(attendance)]))
+        attendance_to_count.append(attendance)
+
     if attendance_data:
-        msg = dicts.attends.attendant_singers_text
+        statistic = f"{dicts.attends.attendance_text_tuple[0]} - {attendance_to_count.count(0)}\n" \
+                    f"{dicts.attends.attendance_text_tuple[1]} - {attendance_to_count.count(1)}\n" \
+                    f"{dicts.attends.attendance_text_tuple[2]} - {attendance_to_count.count(2)}"
+        msg = f"{dicts.attends.attendant_singers_text}{statistic}"
         markup = keys.buttons.participant_message_buttons(attendance_data, event_id)
     else:
         msg = dicts.attends.empty_attendance_text
