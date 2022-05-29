@@ -12,8 +12,8 @@ def show_song_info(call: CallbackQuery):
     Show song info and allow admin to edit.
     """
 
-    print(f"show_song_info {print(call.data)}")
-    song_id = int(call.data.split(":")[1])
+    print(f"show_song_info {call.data} {call.from_user.full_name}")
+    song_id = call.data.split(":")[1]
     sheets = db_songs.get_sheets_by_song_id(song_id)
     sounds = db_songs.get_sound_by_song_id(song_id)
     media_sheets = []
@@ -77,13 +77,11 @@ def edit_song_options(call: CallbackQuery):
 
     # change name
     if option_id == "0":
-        print(f"edit_song_options {option_id}")
         msg = bot.send_message(call.message.chat.id, dicts.songs.enter_new_name_text)
         bot.register_next_step_handler(msg, enter_new_song_name, song_id)
 
     # add/delete sheets
     elif option_id == "1":
-        print(f"edit_song_options {option_id}")
         sheets = db_songs.get_sheets_by_song_id(song_id)
         call_config = "edit_song_material"
         data = []
@@ -107,7 +105,6 @@ def edit_song_options(call: CallbackQuery):
 
     # add/delete sounds
     elif option_id == "2":
-        print(f"edit_song_options {option_id}")
         sounds = db_songs.get_sound_by_song_id(song_id)
         call_config = "edit_song_material"
         data = []
@@ -220,9 +217,6 @@ def add_sheets_or_sounds(message: Message, song_id):
     if message.document:        # sheets
         doc_file_id = message.document.file_id
         voice_id = voice_detect(message.document.file_name)
-        print(f"add_sheets_or_sounds voice id {voice_id} {message.document.file_name}")
-
-        print(f"add_sheets_or_sounds file_id {doc_file_id}")
         db_songs.add_sheets(song_id, voice_id, doc_file_id)
         msg = bot.send_message(message.chat.id, dicts.songs.sheets_added_text)
         bot.register_next_step_handler(msg, add_sheets_or_sounds, song_id)
@@ -230,9 +224,6 @@ def add_sheets_or_sounds(message: Message, song_id):
     elif message.audio:      # sounds
         audio_file_id = message.audio.file_id
         voice_id = voice_detect(message.audio.file_name)
-        print(f"add_sheets_or_sounds for sounds voice id {voice_id} {message.audio.file_name}")
-
-        print(f"add_sheets_or_sounds file_id {audio_file_id}")
         db_songs.add_sound(song_id, voice_id, audio_file_id)
         msg = bot.send_message(message.chat.id, dicts.songs.audio_added_text)
         bot.register_next_step_handler(msg, add_sheets_or_sounds, song_id)
@@ -251,7 +242,6 @@ def voice_detect(file_name):
 
 def edit_song_menu(message, song_id, msg):
     """Display buttons to edit song name, sheets or sounds"""
-    print(f"edit_song_menu {bool(db_songs.song_exists(song_id))}")
 
     if not db_songs.song_exists(song_id):
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
