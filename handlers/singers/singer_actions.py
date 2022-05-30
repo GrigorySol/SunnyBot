@@ -197,6 +197,10 @@ def show_event(call: CallbackQuery):
 
     msg = f"{event_name} {event_date_text} в {time}\n"
 
+    if location_data:
+        msg += f"{dicts.events.location_text} {location_data[0]}"
+        bot.send_message(telegram_id, location_data[1], reply_markup=keys.buttons.close_markup)
+
     if event_type == 2:
         songs = db_songs.get_songs_by_event_id(event_id)
         suit = db_event.get_suit_by_event_id(event_id)
@@ -213,10 +217,6 @@ def show_event(call: CallbackQuery):
 
     if comment:
         msg += f"{dicts.events.comment_text}\n{comment}\n"
-
-    if location_data:
-        location = f"{location_data[0]}\n\n{location_data[1]}"
-        bot.send_message(telegram_id, location, reply_markup=keys.buttons.close_markup)
 
     # ask a singer to set the attendance
     singer_id = db_singer.get_singer_id(telegram_id)
