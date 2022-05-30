@@ -198,7 +198,7 @@ def show_event(call: CallbackQuery):
     msg = f"{event_name} {event_date_text} в {time}\n"
 
     if location_data:
-        msg += f"{dicts.events.location_text} {location_data[0]}"
+        msg += f"{dicts.events.location_text} {location_data[0]}\n"
         bot.send_message(telegram_id, location_data[1], reply_markup=keys.buttons.close_markup)
 
     if event_type == 2:
