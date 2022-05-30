@@ -440,11 +440,11 @@ def edit_location_url(call: CallbackQuery):
 def enter_new_location_url(message: Message, location_id):
     """Update the name for a location"""
 
-    if not message.text or "/" in message.text:
+    if not message.text or "отмена" in message.text.lower():
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
-    if message.text and "http" not in message.text:
+    if "http" not in message.text:
         msg = bot.send_message(message.chat.id, dicts.events.wrong_location_url_text)
         bot.register_next_step_handler(msg, enter_new_location_url, location_id)
 

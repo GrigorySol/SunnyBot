@@ -162,7 +162,7 @@ def add_new_location(call: CallbackQuery):
 def check_location_url(message: Message, event_id=None):
     """Check if URL for the location exists. Ask a name for the Location."""
 
-    if not message.text or "http" not in message.text:
+    if not message.text or "отмена" in message.text.lower():
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
 
