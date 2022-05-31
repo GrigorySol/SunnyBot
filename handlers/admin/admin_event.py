@@ -328,6 +328,8 @@ def save_event(call: CallbackQuery):
 def calendar_action_handler(call: CallbackQuery):
     """Create calendar day buttons"""
 
+    print(f"❗️ admin_event.py calendar_action_handler "
+          f"{call.from_user.username} {call.from_user.full_name} {call.data}")
     _, event_type, event_id, year, month = call.data.split(":")
     bot.edit_message_reply_markup(
         call.message.chat.id,

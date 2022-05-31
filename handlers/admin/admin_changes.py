@@ -749,6 +749,8 @@ def add_singer_attendance(call: CallbackQuery):
 def edit_singer_attendance(call: CallbackQuery):
     """Edit a singer attendance by a singer for an event"""
 
+    print(f"❗️ admin_changes.py edit_singer_attendance "
+          f"{call.from_user.username} {call.from_user.full_name} {call.data}")
     *_, event_id, decision = call.data.split(":")
     db_attendance.edit_singer_attendance(event_id, call.from_user.id, decision)
     bot.send_message(call.message.chat.id, f"{dicts.attends.attendance_changed_text}")
