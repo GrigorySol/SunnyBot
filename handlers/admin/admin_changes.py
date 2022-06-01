@@ -42,10 +42,10 @@ def display_event_options_to_change(call: CallbackQuery):
     """Display event options to change"""
 
     print(f"We are in display_event_options_to_change CALL DATA = {call.data}\n")
-    _, name, item_id = call.data.split(":")
+    *_, item_id = call.data.split(":")
 
     # "Название", "Дату", "Время", "Место", "Комментарий", "УДАЛИТЬ"
-    event = db_event.search_event_by_id(int(item_id))
+    event = db_event.search_event_by_id(item_id)
 
     if not event:
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
@@ -107,12 +107,12 @@ def create_option_buttons(message: Message, call_config, item_id, options):
     for option_id, option in enumerate(options):
         data.append((option, f"{call_config}:{option_id}:{item_id}"))
 
-    bot.edit_message_text(
-        dicts.changes.select_option_to_change_text,
+    bot.send_message(
         message.chat.id,
-        message.id,
+        dicts.changes.select_option_to_change_text,
         reply_markup=keys.buttons.callback_buttons(data)
     )
+    bot.delete_message(message.chat.id, message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="0"))
@@ -324,7 +324,7 @@ def select_suit_for_concert(call, event_id):
     suit_data = []
 
     for suit_id, suit_name, photo, amount in suits:
-        data.append((f"{suit_name} {amount}/{singers_amount}", f"{call_config}:{event_id}:{suit_id}"))
+        data.append((f"{amount}/{singers_amount} {suit_name}", f"{call_config}:{event_id}:{suit_id}"))
         suit_data.append(InputMediaPhoto(photo, suit_name))
 
     bot.send_media_group(call.message.chat.id, suit_data)
@@ -390,12 +390,17 @@ def add_or_remove_songs(call: CallbackQuery):
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.select_suit_callback.filter())
-def edit_suit_for_concert(call: CallbackQuery):
+def change_suit_for_concert(call: CallbackQuery):
     """Add a suit for a concert"""
 
     _, concert_id, suit_id = call.data.split(":")
     if db_event.add_suit_to_concert(concert_id, suit_id):
-        bot.edit_message_text(dicts.changes.suit_added_text, call.message.chat.id, call.message.id, reply_markup=None)
+        bot.send_message(call.message.chat.id, dicts.changes.suit_added_text)
+
+        call_config = "selected"
+        options = dicts.changes.edit_concert_text_tuple
+        create_option_buttons(call.message, call_config, concert_id, options)
+
     else:
         bot.send_message(call.message.chat.id, dicts.changes.ERROR_text)
         bot.send_message(VIP, f"ERROR in {__name__}\nedit_suit_for_concert {call.data}")
