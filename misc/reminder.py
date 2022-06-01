@@ -65,14 +65,18 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
         try:
             msg = f"{msg_date} {rem_d.will_be_text} '{event_name}'.\n" \
                   f"{rem_d.info_in_calendar_text}\n"
+
             if attendance == 1:
                 msg += f"\n{dicts.attends.chosen_attendance_text}\n" \
                        f"{dicts.attends.set_attendance_text_tuple[1]}\n" \
                        f"\n{dicts.attends.wanna_change_text}"
+                bot.send_message(telegram_id, msg)
+
             elif attendance == 2:
                 msg += f"{rem_d.select_attendance_text}"
+                bot.send_message(telegram_id, msg, reply_markup=markup)
+
             print(f"❗️ For {telegram_id} with {attendance}\n{msg}")
-            bot.send_message(telegram_id, msg, reply_markup=markup)
 
         except Exception as e:
             print(f"{e}\n{telegram_id} not exists")
