@@ -84,17 +84,12 @@ def edit_song_options(call: CallbackQuery):
     elif option_id == "1":
         sheets = db_songs.get_sheets_by_song_id(song_id)
         call_config = "edit_song_material"
-        data = []
-        sheets_data = []
-
-        # add/remove/close buttons
-        for edit_id, text in enumerate(dicts.changes.add_remove_text_tuple):
-            data.append((text, f"{call_config}:{song_id}:{option_id}:{edit_id}"))
+        data = [
+            (text, f"{call_config}:{song_id}:{option_id}:{edit_id}")
+            for edit_id, text in enumerate(dicts.changes.add_remove_text_tuple)
+        ]
 
         if sheets:
-            for sh in sheets:
-                sheets_data.append(InputMediaDocument(sh[3]))
-            bot.send_media_group(call.message.chat.id, sheets_data)
             msg = dicts.songs.add_or_delete_text
 
         else:
@@ -107,17 +102,12 @@ def edit_song_options(call: CallbackQuery):
     elif option_id == "2":
         sounds = db_songs.get_sound_by_song_id(song_id)
         call_config = "edit_song_material"
-        data = []
-        sheets_data = []
-
-        # add/remove/close buttons
-        for edit_id, text in enumerate(dicts.changes.add_remove_text_tuple):
-            data.append((text, f"{call_config}:{song_id}:{option_id}:{edit_id}"))
+        data = [
+            (text, f"{call_config}:{song_id}:{option_id}:{edit_id}")
+            for edit_id, text in enumerate(dicts.changes.add_remove_text_tuple)
+        ]
 
         if sounds:
-            for sound in sounds:
-                sheets_data.append(InputMediaAudio(sound[3]))
-            bot.send_media_group(call.message.chat.id, sheets_data)
             msg = dicts.songs.add_or_delete_text
 
         else:

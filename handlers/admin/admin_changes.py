@@ -586,6 +586,13 @@ def delete_item(call: CallbackQuery):
         bot.delete_message(call.message.chat.id, call.message.id)
         return
 
+    bot.send_message(call.message.chat.id, dicts.changes.DELETED_text)
+    bot.send_sticker(
+        call.message.chat.id,
+        "CAACAgIAAxkBAAET3TFielLLC-xjt4t8w12Gju8HUNrC-gACpgAD9wLID6sM5POpKsZYJAQ"       # Ha-ha-ha
+    )
+    bot.delete_message(call.message.chat.id, call.message.id)
+
     if item_type == "singer":
         db_singer.delete_singer(item_id)
 
@@ -600,19 +607,16 @@ def delete_item(call: CallbackQuery):
 
     elif item_type == "sheets":
         db_songs.delete_sheets_by_song_id(item_id)
+        from handlers.admin.admin_songs import edit_song_menu
+        edit_song_menu(call.message, item_id, misc.dicts.changes.edit_text)
 
     elif item_type == "sounds":
         db_songs.delete_sound_by_song_id(item_id)
+        from handlers.admin.admin_songs import edit_song_menu
+        edit_song_menu(call.message, item_id, misc.dicts.changes.edit_text)
 
     elif item_type == "suit":
         db_singer.delete_suit(item_id)
-
-    bot.send_message(call.message.chat.id, dicts.changes.DELETED_text)
-    bot.send_sticker(
-        call.message.chat.id,
-        "CAACAgIAAxkBAAET3TFielLLC-xjt4t8w12Gju8HUNrC-gACpgAD9wLID6sM5POpKsZYJAQ"       # Ha-ha-ha
-    )
-    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.unblock_user_callback.filter())
