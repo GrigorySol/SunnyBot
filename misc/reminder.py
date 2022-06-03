@@ -6,7 +6,7 @@ from loader import bot
 import schedule
 
 from database_control.db_singer import get_singers_id_by_event
-from database_control.db_event import search_event_by_date
+from database_control.db_event import search_event_by_date, search_location_by_event_id
 from keyboards.inline.choice_buttons import callback_buttons
 from misc import dicts
 from misc.messages import attendance_dictionary as at_d, event_dictionary as ev_d, reminder_dictionary as rem_d
@@ -47,6 +47,9 @@ def check_event_date():
 def event_reminder(event_id: int, event_name: str, event_date: str, event_time: str):
     """Create and send a message to all participating singers."""
 
+    location = search_location_by_event_id(event_id)
+    location_name = "Не определена." if not location else location[0]
+
     call_config = "singer_attendance"
     data = [
         (text, f"{call_config}:edit:{event_id}:{i}")
@@ -63,7 +66,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
 
     for telegram_id, attendance in get_singers_id_by_event(event_id):
         try:
-            msg = f"{msg_date} {rem_d.will_be_text} '{event_name}'.\n" \
+            msg = f"{msg_date}:\n{event_name}\nЛокация: {location_name}\n" \
                   f"{rem_d.info_in_calendar_text}\n"
 
             if attendance == 1:

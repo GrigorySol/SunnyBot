@@ -111,6 +111,16 @@ def search_location_by_id(location_id):
         return cursor.fetchone()
 
 
+def search_location_by_event_id(event_id):
+    """Return location_name, url from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT location_name, url FROM locations WHERE id = "
+                       "(SELECT location_id FROM events WHERE id = ?)", (event_id,))
+        return cursor.fetchone()
+
+
 def location_url_exists(url):
     """Return True if a location exists."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
