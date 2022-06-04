@@ -1,3 +1,4 @@
+import timeit
 from datetime import datetime, date, timedelta
 
 from config import VIP
@@ -26,10 +27,13 @@ def calendar_command_handler(message: Message):
     """Show calendar buttons"""
     now = date.today()
     event_id = "0"
+    start = timeit.default_timer()
     bot.send_message(message.chat.id, dicts.events.set_event_date_text,
                      reply_markup=keys.calendar.generate_calendar_days(
                          message.from_user.id, now.year, now.month, int(event_id))
                      )
+    stop = timeit.default_timer()
+    print(f"Time admin_event calendar_command_handler: {stop-start}")
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.calendar_data.filter(event_type="0"))

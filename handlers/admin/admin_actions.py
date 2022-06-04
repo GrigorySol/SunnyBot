@@ -1,4 +1,5 @@
 import datetime
+import timeit
 
 from loader import bot
 from datetime import date
@@ -241,6 +242,7 @@ def song_or_event(call: CallbackQuery):
     else:
         """For events show calendar buttons"""
         now = date.today()
+        start = timeit.default_timer()
         bot.send_message(
             call.message.chat.id,
             dicts.events.set_event_date_text,
@@ -248,6 +250,8 @@ def song_or_event(call: CallbackQuery):
                 call.from_user.id, now.year, now.month, int(item_type)
             )
         )
+        stop = timeit.default_timer()
+        print(f"Time admin_actions song_or_event: {stop-start}")
     bot.delete_message(call.message.chat.id, call.message.id)
 
 

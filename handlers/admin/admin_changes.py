@@ -1,4 +1,5 @@
 import datetime
+import timeit
 from datetime import date
 
 import misc.messages.buttons_dictionary
@@ -149,14 +150,17 @@ def enter_new_event_name(message: Message, event_id):
 def edit_event_date(call: CallbackQuery):
     """Edit date for an Event"""
 
-    print(f"edit_event_date {call.data}")
+    print(f"admin_changes edit_event_date {call.data}")
     *_, event_id = call.data.split(":")
     now = date.today()
     event_type = "4"  # edit
+    start = timeit.default_timer()
     markup = keys.calendar.generate_calendar_days(
         call.from_user.id, now.year, now.month, int(event_type), event_id
     )
     bot.send_message(call.message.chat.id, dicts.events.set_event_date_text, reply_markup=markup)
+    stop = timeit.default_timer()
+    print(f"Time admin_changes edit_event_date: {stop-start}")
     bot.delete_message(call.message.chat.id, call.message.id)
 
 

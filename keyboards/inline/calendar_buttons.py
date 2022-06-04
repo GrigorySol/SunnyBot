@@ -4,6 +4,7 @@ Fork from the pyTelegramBotAPI github example repo
 
 import calendar
 from datetime import date, timedelta
+from functools import lru_cache
 
 from database_control import db_singer
 from database_control.db_event import search_event_by_date, search_event_by_date_and_telegram_id
@@ -16,6 +17,7 @@ EMTPY_FIELD = 'calendar_button'
 CLOSE_BTN = InlineKeyboardButton("Закрыть", callback_data="close")
 
 
+@lru_cache()
 def generate_calendar_days(telegram_id: int, year: int, month: int, event_type=0, event_id=0):
     """
     Generates buttons grid with month + year, weeks, days,
@@ -112,6 +114,7 @@ def generate_calendar_days(telegram_id: int, year: int, month: int, event_type=0
     return keyboard
 
 
+@lru_cache(maxsize=128)
 def generate_calendar_months(year: int, event_type=0, event_id=0):
     """
     Generates buttons grid with year, months,
