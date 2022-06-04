@@ -1,4 +1,5 @@
 import sqlite3
+from functools import lru_cache
 
 """
 Add/edit/delete singers, set admins right.
@@ -36,6 +37,7 @@ def get_singer_id(telegram_id):
         return cursor.fetchone()[0]
 
 
+@lru_cache()
 def is_admin(telegram_id) -> bool:
     """Check if the singer is admin of the bot."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -56,6 +58,7 @@ def count_singers():
         return cursor.fetchone()[0]
 
 
+@lru_cache()
 def get_all_singers():
     """Return (firstname lastname, id) of the all singers from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -79,6 +82,7 @@ def get_all_admins():
         return cursor.fetchall()
 
 
+@lru_cache()
 def get_singers_id_by_event(event_id):
     """Return (telegram_id, attend) from singers for event_id from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -120,6 +124,7 @@ def get_singer_join_date(singer_id):
         return cursor.fetchone()[0]
 
 
+@lru_cache()
 def get_singer_voices(singer_id):
     """Return (voice_id, voice) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -132,6 +137,7 @@ def get_singer_voices(singer_id):
         return cursor.fetchall()
 
 
+@lru_cache()
 def get_singer_suits(singer_id):
     """Return the singer (id, suit_name, photo) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -153,6 +159,7 @@ def get_singer_comment(singer_id):
         return cursor.fetchone()[0]
 
 
+@lru_cache()
 def get_all_suits():
     """Return all (id, suit_name, photo) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:

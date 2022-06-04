@@ -1,4 +1,5 @@
 import sqlite3
+from functools import lru_cache
 
 
 def get_event_by_id(event_id):
@@ -60,6 +61,7 @@ def search_events_by_event_type(event_type):
         return cursor.fetchall()
 
 
+@lru_cache()
 def search_event_by_date(date):
     """Return (id, event_type, event_name, time) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -70,6 +72,7 @@ def search_event_by_date(date):
         return cursor.fetchall()
 
 
+@lru_cache()
 def search_event_by_date_and_telegram_id(date, telegram_id):
     """Return (id, event_type, event_name, time) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -111,6 +114,7 @@ def search_location_by_id(location_id):
         return cursor.fetchone()
 
 
+@lru_cache()
 def search_location_by_event_id(event_id):
     """Return location_name, url from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:

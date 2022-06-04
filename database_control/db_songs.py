@@ -1,6 +1,8 @@
 import sqlite3
+from functools import lru_cache
 
 
+@lru_cache()
 def get_all_songs():
     """Return all (id, song_name, comment) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -19,6 +21,7 @@ def get_song_name(_id):
         return cursor.fetchone()[0]
 
 
+@lru_cache()
 def get_songs_in_work(event_type: int, start_date, end_date):
     """Return songs (id, song_name, comment) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -33,6 +36,7 @@ def get_songs_in_work(event_type: int, start_date, end_date):
         return cursor.fetchall()
 
 
+@lru_cache()
 def get_songs_by_event_id(event_id):
     """Return songs (id, song_name, comment) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -62,6 +66,7 @@ def song_name_exists(song_name):
         return bool(cursor.fetchone())
 
 
+@lru_cache()
 def get_sound_by_song_id(song_id):
     """Return (id, song_id, voice_id, file_id) for each SOUND for the song from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -71,6 +76,7 @@ def get_sound_by_song_id(song_id):
         return cursor.fetchall()
 
 
+@lru_cache()
 def get_sheets_by_song_id(song_id):
     """Return (id, song_id, voice_id, file_id) for each SHEETS for the song from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -80,6 +86,7 @@ def get_sheets_by_song_id(song_id):
         return cursor.fetchall()
 
 
+@lru_cache()
 def get_sound_by_voice_id(voice_id):
     """Return (id, song_id, voice_id, file_id) for each SOUND for the song from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -89,6 +96,7 @@ def get_sound_by_voice_id(voice_id):
         return cursor.fetchall()
 
 
+@lru_cache()
 def get_sheets_by_voice_id(voice_id):
     """Return (id, song_id, voice_id, file_id) for each SHEETS for the song from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
