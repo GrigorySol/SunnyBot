@@ -14,7 +14,6 @@ from misc.messages import attendance_dictionary as at_d, event_dictionary as ev_
 
 def schedule_pending():
     while True:
-        print(f"schedule pending {datetime.now()}")
         schedule.run_pending()
         sleep(50)
 
@@ -22,6 +21,7 @@ def schedule_pending():
 def check_event_date():
     """Check if there is an event in one week, one day or day to day in the database."""
 
+    print(f"reminder.py check_event_date started {datetime.now()}")
     current_date = datetime.now().date()
     before_week = current_date + timedelta(weeks=1)
     before_day = current_date + timedelta(days=1)
@@ -47,6 +47,7 @@ def check_event_date():
 def event_reminder(event_id: int, event_name: str, event_date: str, event_time: str):
     """Create and send a message to all participating singers."""
 
+    print(f"reminder.py event_reminder started {datetime.now()}")
     location = search_location_by_event_id(event_id)
     location_name = "Не определена." if not location else location[0]
 
@@ -79,7 +80,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
                 msg += f"{rem_d.select_attendance_text}"
                 bot.send_message(telegram_id, msg, reply_markup=markup)
 
-            print(f"❗️ For {telegram_id} with {attendance}\n{msg}")
+            print(f"❗️ Message sent for {telegram_id} with {attendance}\n{msg}")
 
         except Exception as e:
             print(f"{e}\n{telegram_id} not exists")
@@ -88,10 +89,10 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
 def database_sender():
     """Send database file to the VIP telegram_id"""
 
-    print("DATABASE file sent")
+    print(f"DATABASE file sent at {datetime.now()}")
     file = open("database_control/sunny_bot.db", 'rb')
     bot.send_document(VIP, file)
-    bot.send_message(VIP, "Отправлено?")
+    bot.send_message(VIP, f"database backup {datetime.now()}")
     file.close()
 
 
