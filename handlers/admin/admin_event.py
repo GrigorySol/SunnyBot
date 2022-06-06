@@ -76,7 +76,7 @@ def edit_event_date_handler(call: CallbackQuery):
     event_data.date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
     # Edit event date
     msg = bot.send_message(call.message.chat.id,
-                           f"Вы выбрали {dicts.events.to_add_text_tuple[int(event_type)]} на {day} "
+                           f"{dicts.events.to_add_text_tuple[int(event_type)]} на {day} "
                            f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года.\n"
                            f"{dicts.events.set_event_time_text}")
     bot.register_next_step_handler(msg, enter_new_event_time, int(event_id), event_data.date)
@@ -93,7 +93,7 @@ def add_event_time_handler(call: CallbackQuery):
     event_data.is_in_progress = True
     event_data.event_type = int(event_type)
     event_data.event_name = dicts.events.to_save_text_tuple[event_data.event_type]
-    msg = f"Вы выбрали {event_data.event_name} на {day} " \
+    msg = f"{event_data.event_name} на {day} " \
           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года.\n{dicts.events.set_event_time_text}"
     msg_data = bot.send_message(call.message.chat.id, msg)
     bot.register_next_step_handler(msg_data, add_time_for_event)

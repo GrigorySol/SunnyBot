@@ -58,6 +58,9 @@ def singer_menu(call: CallbackQuery):
         bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
     elif option_id == "3":  # Комментарий
+        comment = db_singer.get_singer_comment(singer_id)
+        if comment:
+            bot.send_message(call.message.chat.id, comment)
         msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_comment_text)
         bot.register_next_step_handler(msg, enter_new_singer_comment, singer_id)
 
@@ -115,7 +118,9 @@ def enter_new_singer_comment(message: Message, singer_id):
         return
 
     if db_singer.edit_singer_comment(singer_id, message.text):
-        bot.send_message(message.chat.id, dicts.changes.comment_changed_text)
+        telegram_name = db_singer.get_singer_telegram_name(singer_id)
+        markup = keys.buttons.singer_info_buttons(telegram_name, singer_id, dicts.changes.edit_singer_text_tuple)
+        bot.send_message(message.chat.id, dicts.changes.comment_changed_text, reply_markup=markup)
 
     else:
         msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)

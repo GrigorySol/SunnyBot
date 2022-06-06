@@ -1,5 +1,6 @@
 import misc.messages.buttons_dictionary
 import misc.messages.changes_dictionary
+from config import VIP
 from loader import bot
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
 from database_control import db_songs, db_singer
@@ -16,6 +17,7 @@ def show_song_info(call: CallbackQuery):
     song_id = call.data.split(":")[1]
     sheets = db_songs.get_sheets_by_song_id(song_id)
     sounds = db_songs.get_sound_by_song_id(song_id)
+    comment = db_songs.get_song_comment(song_id)
     media_sheets = []
     media_sounds = []
 
@@ -34,6 +36,10 @@ def show_song_info(call: CallbackQuery):
             bot.send_media_group(call.message.chat.id, media_sounds)
         else:
             bot.send_message(call.message.chat.id, dicts.songs.no_sounds_text)
+
+        if comment:
+            msg = f"{dicts.changes.edit_song_text_tuple[3]}:\n{comment}"
+            bot.send_message(call.message.chat.id, msg)
 
         msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{misc.messages.changes_dictionary.edit_text}"
         edit_song_menu(call.message, song_id, msg)
@@ -65,6 +71,10 @@ def show_song_info(call: CallbackQuery):
             bot.send_media_group(call.message.chat.id, media_sounds)
         else:
             bot.send_message(call.message.chat.id, dicts.songs.no_sounds_text)
+
+        if comment:
+            msg = f"{dicts.changes.edit_song_text_tuple[3]}:\n{comment}"
+            bot.send_message(call.message.chat.id, msg)
 
     bot.delete_message(call.message.chat.id, call.message.id)
 
@@ -116,6 +126,14 @@ def edit_song_options(call: CallbackQuery):
 
         bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
+    # change comment
+    if option_id == "3":
+        comment = db_songs.get_song_comment(song_id)
+        if comment:
+            bot.send_message(call.message.chat.id, comment)
+        msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_comment_text)
+        bot.register_next_step_handler(msg, enter_new_song_comment, song_id)
+
     # delete song
     else:
         if not db_songs.song_exists(song_id):
@@ -151,6 +169,24 @@ def enter_new_song_name(message: Message, song_id):
 
     else:
         bot.send_message(message.chat.id, dicts.songs.WRONG_TEXT)
+
+
+def enter_new_song_comment(message: Message, song_id):
+    """Update the comment for a song"""
+
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
+
+    if db_songs.edit_song_comment(song_id, message.text):
+        edit_song_menu(message, song_id, dicts.changes.comment_changed_text)
+
+
+    else:
+        msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        bot.register_next_step_handler(msg, enter_new_song_comment, song_id)
+        vip_msg = f"ERROR in enter_new_event_name\nData: {message.text} {song_id} "
+        bot.send_message(VIP, vip_msg)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.edit_song_material_callback.filter())

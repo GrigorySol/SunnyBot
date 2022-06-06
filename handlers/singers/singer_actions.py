@@ -216,7 +216,7 @@ def show_event(call: CallbackQuery):
             msg += f"{dicts.events.repertoire_is_empty_text}\n"
 
     if comment:
-        msg += f"{dicts.events.comment_text}\n{comment}\n"
+        msg += f"\n{dicts.events.comment_text}\n{comment}\n"
 
     # ask a singer to set the attendance
     singer_id = db_singer.get_singer_id(telegram_id)

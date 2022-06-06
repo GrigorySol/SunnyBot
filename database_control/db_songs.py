@@ -12,12 +12,21 @@ def get_all_songs():
         return cursor.fetchall()
 
 
-def get_song_name(_id):
+def get_song_name(song_id):
     """Return the song_name from the database"""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT song_name FROM songs WHERE id = ?", (_id,))
+        cursor.execute("SELECT song_name FROM songs WHERE id = ?", (song_id,))
+        return cursor.fetchone()[0]
+
+
+def get_song_comment(song_id):
+    """Return comment about a song from the database."""
+    with sqlite3.connect("database_control/sunny_bot.db") as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT comment FROM songs WHERE id = ?", (song_id,))
         return cursor.fetchone()[0]
 
 

@@ -196,6 +196,9 @@ def edit_comment_event(call: CallbackQuery):
 
     print(f"edit_comment_event {call.data}")
     *_, event_id = call.data.split(":")
+    comment = db_event.get_event_by_id(event_id)[6]
+    if comment:
+        bot.send_message(call.message.chat.id, comment)
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_comment_text)
     bot.register_next_step_handler(msg, enter_new_event_comment, event_id)
     bot.delete_message(call.message.chat.id, call.message.id)
@@ -209,7 +212,15 @@ def enter_new_event_comment(message: Message, event_id):
         return
 
     if db_event.edit_event_comment(event_id, message.text):
+        event = db_event.get_event_by_id(event_id)
         bot.send_message(message.chat.id, dicts.changes.comment_changed_text)
+        call_config = "selected"
+        if event[1] == 2:
+            options = dicts.changes.edit_concert_text_tuple
+        else:
+            options = dicts.changes.edit_event_text_tuple
+
+        create_option_buttons(message, call_config, event_id, options)
 
     else:
         msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
