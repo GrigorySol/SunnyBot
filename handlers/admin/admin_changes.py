@@ -351,7 +351,7 @@ def display_suit_options_to_change(call: CallbackQuery):
     """Remove current concert suit and display suit options to change"""
 
     _, event_id, suit_id = call.data.split(":")
-    db_event.delete_suit_from_concert(event_id, suit_id)
+    db_event.remove_suit_from_concert(event_id, suit_id)
     select_suit_for_concert(call, event_id)
     bot.delete_message(call.message.chat.id, call.message.id)
 
@@ -400,7 +400,7 @@ def add_or_remove_songs(call: CallbackQuery):
 
     else:
         song_name = db_songs.get_song_name(song_id)
-        db_event.delete_song_from_concert(concert_id, song_id)
+        db_event.remove_song_from_concert(concert_id, song_id)
         bot.send_message(call.message.chat.id, f"{dicts.changes.song_removed_from_concert} {song_name}")
 
 

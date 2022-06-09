@@ -1,5 +1,4 @@
 import sqlite3
-from functools import lru_cache
 
 
 def get_event_by_id(event_id):
@@ -61,7 +60,6 @@ def search_events_by_event_type(event_type):
         return cursor.fetchall()
 
 
-@lru_cache()
 def search_event_by_date(date):
     """Return (id, event_type, event_name, time) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -72,7 +70,6 @@ def search_event_by_date(date):
         return cursor.fetchall()
 
 
-@lru_cache()
 def search_event_by_date_and_telegram_id(date, telegram_id):
     """Return (id, event_type, event_name, time) from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -114,7 +111,6 @@ def search_location_by_id(location_id):
         return cursor.fetchone()
 
 
-@lru_cache()
 def search_location_by_event_id(event_id):
     """Return location_name, url from the database."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
@@ -296,15 +292,15 @@ def delete_location_by_id(location_id):
         cursor.execute("DELETE FROM locations WHERE id = ?", (location_id,))
 
 
-def delete_song_from_concert(concert_id, song_id):
+def remove_song_from_concert(concert_id, song_id):
     """DELETE song from event_song."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
 
-        cursor.execute("DELETE FROM event_song WHERE concert_id = ? and song_id = ?", (concert_id, song_id))
+        cursor.execute("DELETE FROM event_song WHERE event_id = ? and song_id = ?", (concert_id, song_id))
 
 
-def delete_suit_from_concert(concert_id, suit_id):
+def remove_suit_from_concert(concert_id, suit_id):
     """DELETE suit from event_suit."""
     with sqlite3.connect("database_control/sunny_bot.db") as db:
         cursor = db.cursor()
