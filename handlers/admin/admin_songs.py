@@ -83,6 +83,7 @@ def show_song_info(call: CallbackQuery):
 def edit_song_options(call: CallbackQuery):
     """Manage song edit options: Name, Sheets, Sound or DELETE"""
 
+    print()
     _, song_id, option_id = call.data.split(":")
 
     # change name
@@ -127,7 +128,7 @@ def edit_song_options(call: CallbackQuery):
         bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
 
     # change comment
-    if option_id == "3":
+    elif option_id == "3":
         comment = db_songs.get_song_comment(song_id)
         if comment:
             bot.send_message(call.message.chat.id, comment)
