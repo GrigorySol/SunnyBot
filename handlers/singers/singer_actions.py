@@ -86,7 +86,7 @@ def chose_song_filter(message: Message):
         data.append((text, f"{call_config}:{filter_id}"))
 
     bot.send_message(
-        message.chat.id, dicts.singers.choose_filter_text, reply_markup=keys.buttons.callback_buttons(data, row=3)
+        message.chat.id, dicts.singers.choose_filter_text, reply_markup=keys.buttons.callback_buttons(data)
     )
 
 
@@ -116,6 +116,7 @@ def show_songs(call: CallbackQuery):
         bot.send_message(
             call.message.chat.id, dicts.singers.choose_concert_text, reply_markup=keys.buttons.callback_buttons(data)
         )
+        bot.delete_message(call.message.chat.id, call.message.id)
         return
 
     if songs:

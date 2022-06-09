@@ -23,8 +23,8 @@ def check_event_date():
 
     print(f"reminder.py check_event_date started {datetime.now()}")
     current_date = datetime.now().date()
-    before_week = current_date + timedelta(weeks=1)
     before_day = current_date + timedelta(days=1)
+    before_week = current_date + timedelta(weeks=1)
 
     today_events = search_event_by_date(current_date)
     day_events = search_event_by_date(before_day)
@@ -33,7 +33,7 @@ def check_event_date():
     if today_events:
         for event_id, _, event_name, event_time in today_events:
             print(f"Events for today:\n{event_name}")
-            event_reminder(event_id, event_name, "Cегодня", event_time)
+            event_reminder(event_id, event_name, "❗️ Cегодня", event_time)
     if day_events:
         for event_id, _, event_name, event_time in day_events:
             print(f"Events in one day:\n{event_name}")
@@ -59,7 +59,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
 
     msg_date = f"{event_date} в {event_time}"
 
-    if event_date != "Cегодня":
+    if event_date != "❗️ Cегодня":
         year, month, day = event_date.split("-")
         msg_date = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
 
