@@ -1,9 +1,10 @@
 import sqlite3
+from config import BOT_DB
 
 
 def create_database():
     """Create database tables."""
-    with sqlite3.connect("database_control/sunny_bot.db") as db:
+    with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()
 
         cursor.execute("CREATE TABLE singers "
