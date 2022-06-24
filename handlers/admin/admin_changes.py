@@ -8,17 +8,17 @@ from keyboards.inline.choice_buttons import add_remove_participant_buttons, go_m
 from loader import bot
 from telebot.types import CallbackQuery, Message, InputMediaPhoto
 from misc.edit_functions import enter_new_event_time
-from misc import dicts, keys, bot_speech
+from misc import dicts, keys, bot_speech, callback_dict as cd
 from database_control import db_songs, db_singer, db_event, db_attendance
 
 
-@bot.callback_query_handler(func=lambda c: c.data == 'show_suits')
+@bot.callback_query_handler(func=lambda c: c.data == cd.display_suits_text)
 def show_suits(call: CallbackQuery):
     """Display all suits and buttons with suit names"""
     suits = db_singer.get_all_suits()
 
     if suits:
-        call_config = "change"
+        call_config = cd.change_item_text
         item_type = "suit"
         data = []
         suit_data = []
@@ -54,7 +54,7 @@ def display_event_options_to_change(call: CallbackQuery):
         bot.send_sticker(call.message.chat.id, sticker_id)
         return
 
-    call_config = "selected"
+    call_config = cd.selected_text
     if event[1] == 2:
         options = dicts.changes.edit_concert_text_tuple
     else:
@@ -79,7 +79,7 @@ def display_location_options_to_change(call: CallbackQuery):
         return
 
     # "location" - "Название", "Ссылку на карту", "Ничего", "УДАЛИТЬ
-    call_config = "selected_location"
+    call_config = cd.selected_location_text
     create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_location_text_tuple)
 
 
@@ -98,7 +98,7 @@ def display_suit_options_to_change(call: CallbackQuery):
         bot.send_sticker(call.message.chat.id, sticker_id)
         return
 
-    call_config = "selected_suit"
+    call_config = cd.select_suit_text
     create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_suit_text_tuple)
 
 
@@ -214,7 +214,7 @@ def enter_new_event_comment(message: Message, event_id):
     if db_event.edit_event_comment(event_id, message.text):
         event = db_event.get_event_by_id(event_id)
         bot.send_message(message.chat.id, dicts.changes.comment_changed_text)
-        call_config = "selected"
+        call_config = cd.selected_text
         if event[1] == 2:
             options = dicts.changes.edit_concert_text_tuple
         else:
@@ -274,14 +274,16 @@ def delete_event(call: CallbackQuery):
     *_, event_id = call.data.split(":")
 
     item_name = db_event.get_event_name(event_id)
-    call_config = "delete_confirmation"
     item_type = "event"
+    delete_confirmation_buttons(call, event_id, item_name, item_type)
+
+
+def delete_confirmation_buttons(call, item_id, item_name, item_type):
     data = []
+    call_config = cd.delete_confirmation_text
     msg = f"{dicts.changes.delete_confirmation_text} {item_name}?"
-
     for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
-        data.append((answer, f"{call_config}:{item_type}:{event_id}:{i}"))
-
+        data.append((answer, f"{call_config}:{item_type}:{item_id}:{i}"))
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.callback_buttons(data))
 
 
@@ -292,7 +294,7 @@ def edit_concert_songs(call: CallbackQuery):
     print(f"edit_event_songs {call.data}")
     *_, event_id = call.data.split(":")
 
-    call_config = "change_songs"
+    call_config = cd.change_songs_text
     data = []
 
     for option_id, option_name in enumerate(dicts.changes.add_remove_text_tuple):
@@ -313,7 +315,7 @@ def edit_concert_suit(call: CallbackQuery):
     suit = db_event.get_suit_by_event_id(event_id)
 
     if suit:
-        call_config = "remove_suit"
+        call_config = cd.remove_suit_text
         msg = dicts.changes.concert_suit_change_text
         markup = keys.buttons.callback_buttons([(misc.messages.buttons_dictionary.suit_change_btn_text,
                                                  f"{call_config}:{event_id}:{suit[0]}")])
@@ -334,7 +336,7 @@ def select_suit_for_concert(call, event_id):
         singers_amount = 0
 
     msg = dicts.changes.choose_suit_text
-    call_config = "select_suit"
+    call_config = cd.select_suit_text
     data = []
     suit_data = []
 
@@ -362,7 +364,7 @@ def edit_songs_for_concert(call: CallbackQuery):
 
     _, concert_id, option_id = call.data.split(":")
 
-    call_config = "concert_songs"
+    call_config = cd.concert_songs_text
     data = []
 
     if option_id == "0":
@@ -412,7 +414,7 @@ def change_suit_for_concert(call: CallbackQuery):
     if db_event.add_suit_to_concert(concert_id, suit_id):
         bot.send_message(call.message.chat.id, dicts.changes.suit_added_text)
 
-        call_config = "selected"
+        call_config = cd.selected_text
         options = dicts.changes.edit_concert_text_tuple
         create_option_buttons(call.message, call_config, concert_id, options)
 
@@ -497,15 +499,8 @@ def delete_location(call: CallbackQuery):
     *_, location_id = call.data.split(":")
 
     item_name = db_event.search_location_by_id(location_id)[0]
-    call_config = "delete_confirmation"
     item_type = "location"
-    data = []
-    msg = f"{dicts.changes.delete_confirmation_text}\n{item_name}?"
-
-    for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
-        data.append((answer, f"{call_config}:{item_type}:{location_id}:{i}"))
-
-    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.callback_buttons(data))
+    delete_confirmation_buttons(call, location_id, item_name, item_type)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_suit_callback.filter(option_id="0"))
@@ -579,15 +574,8 @@ def edit_suit_name(call: CallbackQuery):
     *_, suit_id = call.data.split(":")
 
     item_name = db_singer.search_suits_by_id(suit_id)[0]
-    call_config = "delete_confirmation"
     item_type = "suit"
-    data = []
-    msg = f"{dicts.changes.delete_confirmation_text}\n{item_name}?"
-
-    for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
-        data.append((answer, f"{call_config}:{item_type}:{suit_id}:{i}"))
-
-    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.callback_buttons(data))
+    delete_confirmation_buttons(call, suit_id, item_name, item_type)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.delete_confirmation_callback.filter())

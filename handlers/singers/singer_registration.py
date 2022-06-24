@@ -42,11 +42,7 @@ def singer_not_registered(message: Message):
     telegram_id = message.from_user.id
     singer_time = datetime.utcfromtimestamp(message.date).hour
 
-    if message.from_user.username == "Alex_3owls":
-        text = f"{greetings(singer_time)}, Сашенька\n"
-    else:
-        text = f"{greetings(singer_time)}\n"
-    text += dicts.singers.not_registered_text
+    text = f"{greetings(singer_time)}\n{dicts.singers.not_registered_text}"
     bot.send_message(telegram_id, text, reply_markup=new_singer_markup)
 
 
@@ -127,14 +123,7 @@ def singer_name_step(message: Message, singer: SingerRegister):
             from handlers.admin.command_rules import admin_command_rules
             admin_command_rules()
             add_admin(singer.telegram_id)
-        msg = f"New singer @{singer.telegram_name} " \
-              f"{message.from_user.first_name} -> {singer.name} " \
-              f"{message.from_user.last_name} -> {lastname} registered"
-        print(msg)
-        singer_id = get_singer_id(singer.telegram_id)
-        markup = keys.buttons.singer_info_buttons(singer.telegram_name, singer_id, dicts.changes.edit_singer_text_tuple)
-        bot.send_message(VIP, msg, reply_markup=markup)
-        del singer
+        finalize_registration(lastname, message, singer)
 
     elif len(name) < 2 or " " in name:
         msg = bot.send_message(message.chat.id, dicts.singers.name_too_short_text)
@@ -146,6 +135,17 @@ def singer_name_step(message: Message, singer: SingerRegister):
         singer.name = name
         msg = bot.send_message(message.chat.id, dicts.singers.enter_your_lastname_text)
         bot.register_next_step_handler(msg, singer_lastname_step, singer)
+
+
+def finalize_registration(lastname, message, singer):
+    msg = f"New singer @{singer.telegram_name} " \
+          f"{message.from_user.first_name} -> {singer.name} " \
+          f"{message.from_user.last_name} -> {lastname} registered"
+    print(msg)
+    singer_id = get_singer_id(singer.telegram_id)
+    markup = keys.buttons.singer_info_buttons(singer.telegram_name, singer_id, dicts.changes.edit_singer_text_tuple)
+    bot.send_message(VIP, msg, reply_markup=markup)
+    del singer
 
 
 def singer_lastname_step(message: Message, singer: SingerRegister):
@@ -169,11 +169,4 @@ def singer_lastname_step(message: Message, singer: SingerRegister):
         add_singer(singer.telegram_id, singer.telegram_name, singer.name, singer.lastname)
         if singer.is_admin:
             add_admin(singer.telegram_id)
-        msg = f"New singer @{singer.telegram_name} " \
-              f"{message.from_user.first_name} -> {singer.name} " \
-              f"{message.from_user.last_name} -> {lastname} registered"
-        print(msg)
-        singer_id = get_singer_id(singer.telegram_id)
-        markup = keys.buttons.singer_info_buttons(singer.telegram_name, singer_id, dicts.changes.edit_singer_text_tuple)
-        bot.send_message(VIP, msg, reply_markup=markup)
-        del singer
+        finalize_registration(lastname, message, singer)

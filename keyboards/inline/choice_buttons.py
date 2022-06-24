@@ -2,6 +2,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 from typing import List
 from misc.messages.event_dictionary import next_button_text, prev_button_text
 from misc.messages import buttons_dictionary as bu_d
+from misc import callback_dict as cd
 
 EMTPY_FIELD = 'calendar_button'
 
@@ -35,22 +36,23 @@ keep_data = DataKeeper()
 
 # Regular buttons
 
-close_btn = InlineKeyboardButton(bu_d.close_btn_text, callback_data="close")
+close_btn = InlineKeyboardButton(bu_d.close_btn_text, callback_data=cd.close_text)
 
 close_markup = InlineKeyboardMarkup()
 close_markup.add(close_btn)
 
 # New singer buttons
 new_singer_markup = InlineKeyboardMarkup(row_width=2)
-add_singer = InlineKeyboardButton(bu_d.register_btn_text, callback_data="registration")
+add_singer = InlineKeyboardButton(bu_d.register_btn_text, callback_data=cd.singer_registration_text)
 new_singer_markup.add(add_singer)
 new_singer_markup.add(close_btn)
 
 # Singer search choice buttons
 search_choice_markup = InlineKeyboardMarkup(row_width=2)
 search_by_name = InlineKeyboardButton(bu_d.singer_filter_btn_text_tuple[0], switch_inline_query_current_chat="а")
-search_by_voice = InlineKeyboardButton(bu_d.singer_filter_btn_text_tuple[1], callback_data="search:voice")
-show_all_btn = InlineKeyboardButton(bu_d.singer_filter_btn_text_tuple[2], callback_data="show_all")
+search_by_voice = InlineKeyboardButton(bu_d.singer_filter_btn_text_tuple[1],
+                                       callback_data=f"{cd.singer_search_text}:voice")
+show_all_btn = InlineKeyboardButton(bu_d.singer_filter_btn_text_tuple[2], callback_data=cd.singer_show_all_text)
 search_choice_markup.add(search_by_name, search_by_voice, show_all_btn)
 search_choice_markup.add(close_btn)
 
@@ -64,10 +66,10 @@ accept_markup.add(yes_btn, of_course_btn, close_btn)
 def choose_location(event_id):
     markup = InlineKeyboardMarkup(row_width=2)
     choose_old = InlineKeyboardButton(
-        bu_d.choose_location_btn_text_tuple[0], callback_data=f"add_event_location:db:{event_id}"
+        bu_d.choose_location_btn_text_tuple[0], callback_data=f"{cd.add_event_location_text}:db:{event_id}"
     )
     get_url = InlineKeyboardButton(
-        bu_d.choose_location_btn_text_tuple[1], callback_data=f"add_event_location:url:{event_id}"
+        bu_d.choose_location_btn_text_tuple[1], callback_data=f"{cd.add_event_location_text}:url:{event_id}"
     )
     markup.add(choose_old, get_url)
     markup.add(close_btn)
@@ -77,7 +79,7 @@ def choose_location(event_id):
 def show_participation(event_id) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup(row_width=1)
     singers_button = InlineKeyboardButton(
-        bu_d.show_participation_btn_text, callback_data=f"show_participation:{event_id}"
+        bu_d.show_participation_btn_text, callback_data=f"{cd.show_participation_text}:{event_id}"
     )
     markup.add(singers_button)
     return markup
@@ -86,7 +88,7 @@ def show_participation(event_id) -> InlineKeyboardMarkup:
 def add_concert_songs_buttons(concert_id):
     concert_markup = InlineKeyboardMarkup(row_width=1)
     add_songs_button = InlineKeyboardButton(
-        bu_d.add_songs_btn_text, callback_data=f"change_songs:{concert_id}:0"
+        bu_d.add_songs_btn_text, callback_data=f"{cd.change_songs_text}:{concert_id}:0"
     )
     concert_markup.add(add_songs_button)
     concert_markup.add(close_btn)
@@ -96,7 +98,7 @@ def add_concert_songs_buttons(concert_id):
 def repeat_buttons(event_id):
     repeat_markup = InlineKeyboardMarkup(row_width=1)
     repeat_button = InlineKeyboardButton(
-        bu_d.repeat_btn_text, callback_data=f"repeat:{event_id}"
+        bu_d.repeat_btn_text, callback_data=f"{cd.event_repeat_text}:{event_id}"
     )
     repeat_markup.add(repeat_button)
     repeat_markup.add(close_btn)
@@ -106,7 +108,7 @@ def repeat_buttons(event_id):
 def change_buttons(item_type, item_id):
     change_markup = InlineKeyboardMarkup(row_width=1)
     change_button = InlineKeyboardButton(
-        bu_d.event_change_btn_text, callback_data=f"change:{item_type}:{item_id}"
+        bu_d.event_change_btn_text, callback_data=f"{cd.change_item_text}:{item_type}:{item_id}"
     )
     change_markup.add(change_button)
     change_markup.add(close_btn)
@@ -183,13 +185,13 @@ def participant_message_buttons(data: List, event_id, row=2, multiple=None):
         markup.add(*buttons)
 
     add_one_btn = InlineKeyboardButton(bu_d.event_add_singer_btn_text,
-                                       callback_data=f"add_participant:{event_id}")
+                                       callback_data=f"{cd.add_participant_text}:{event_id}")
     remove_one_btn = InlineKeyboardButton(bu_d.event_remove_singer_btn_text,
-                                          callback_data=f"remove_participation:{event_id}")
+                                          callback_data=f"{cd.remove_participation_text}:{event_id}")
     add_all_btn = InlineKeyboardButton(bu_d.event_add_all_btn_text,
-                                       callback_data=f"add_all_participants:{event_id}")
+                                       callback_data=f"{cd.add_all_participants_text}:{event_id}")
     remove_all_btn = InlineKeyboardButton(bu_d.event_remove_all_btn_text,
-                                          callback_data=f"remove_all_participants:{event_id}")
+                                          callback_data=f"{cd.remove_all_participants_text}:{event_id}")
 
     markup.add(add_one_btn, remove_one_btn)
     markup.add(add_all_btn, remove_all_btn)
@@ -204,9 +206,9 @@ def empty_participant_buttons(event_id, row=2):
     markup = InlineKeyboardMarkup(row_width=row)
 
     add_one_btn = InlineKeyboardButton(bu_d.event_add_singer_btn_text,
-                                       callback_data=f"add_participant:{event_id}")
+                                       callback_data=f"{cd.add_participant_text}:{event_id}")
     add_all_btn = InlineKeyboardButton(bu_d.event_add_all_btn_text,
-                                       callback_data=f"add_all_participants:{event_id}")
+                                       callback_data=f"{cd.add_all_participants_text}:{event_id}")
 
     markup.add(add_one_btn)
     markup.add(add_all_btn)
@@ -220,11 +222,11 @@ def add_remove_participant_buttons(event_id, add=True):
 
     if add:
         button = InlineKeyboardButton(
-            bu_d.event_add_singer_btn_text, callback_data=f"add_participant:{event_id}"
+            bu_d.event_add_singer_btn_text, callback_data=f"{cd.add_participant_text}:{event_id}"
         )
     else:
         button = InlineKeyboardButton(
-            bu_d.event_remove_singer_btn_text, callback_data=f"remove_participation:{event_id}"
+            bu_d.event_remove_singer_btn_text, callback_data=f"{cd.remove_participation_text}:{event_id}"
         )
 
     return button
@@ -233,7 +235,7 @@ def add_remove_participant_buttons(event_id, add=True):
 def go_menu_button(item_id, item_type):
     """Create type menu button"""
 
-    button = InlineKeyboardButton(bu_d.go_menu_btn_text, callback_data=f"change:{item_type}:{item_id}")
+    button = InlineKeyboardButton(bu_d.go_menu_btn_text, callback_data=f"{cd.change_item_text}:{item_type}:{item_id}")
     return button
 
 
@@ -250,7 +252,7 @@ def setup_multiple(data, data_amount, row):
 def rolling_buttons(btn_type, event_id):
     previous_btn = InlineKeyboardButton(" ", callback_data=EMTPY_FIELD)
     next_btn = InlineKeyboardButton(" ", callback_data=EMTPY_FIELD)
-    call_config = "buttons_roll"
+    call_config = cd.buttons_roll_text
 
     if keep_data.get_index():
         previous_btn = InlineKeyboardButton(
@@ -272,7 +274,7 @@ def singer_info_buttons(telegram_name, singer_id, btn_names):
     send_msg_btn = InlineKeyboardButton(bu_d.send_msg_btn_text, url=f"t.me/{telegram_name}")
     buttons = [send_msg_btn]
     for i, text in enumerate(btn_names):
-        btn = InlineKeyboardButton(text, callback_data=f"info:{i}:{singer_id}")
+        btn = InlineKeyboardButton(text, callback_data=f"{cd.singer_info_text}:{i}:{singer_id}")
         buttons.append(btn)
     markup.add(*buttons)
     markup.add(close_btn)

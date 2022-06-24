@@ -6,7 +6,7 @@ from loader import bot
 from database_control import db_event, db_attendance, db_singer
 from telebot.types import Message, CallbackQuery
 from misc.edit_functions import enter_new_event_time
-from misc import dicts, keys
+from misc import dicts, keys, callback_dict as cd
 
 
 class EventData:
@@ -44,7 +44,7 @@ def calendar_show_event_handler(call: CallbackQuery):
     # Show all events for this day
     event_data.date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
     events = db_event.search_event_by_date(event_data.date)
-    call_config = "show_event"
+    call_config = cd.event_display_text
     data = []
 
     if not events:
@@ -243,7 +243,7 @@ def show_repeat_interval_buttons(call: CallbackQuery):
     """Show buttons to choose interval"""
 
     _, event_id = call.data.split(":")
-    call_config = "interval"
+    call_config = cd.event_interval_text
     data = []
     for i, interval in enumerate(dicts.events.event_repeat_text_tuple):
         data.append((interval, f"{call_config}:{event_id}:{i}"))

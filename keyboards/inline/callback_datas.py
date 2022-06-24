@@ -1,59 +1,60 @@
 from telebot.callback_data import CallbackData
+from misc import callback_dict as cd
 
 # calendar
-calendar_data = CallbackData("event_type", "event_id", "year", "month", "day", prefix="calendar_data")
-calendar_factory = CallbackData("event_type", "event_id", "year", "month", prefix="calendar_factory")
-calendar_zoom = CallbackData("event_type", "event_id", "year", prefix="calendar_zoom")
+calendar_data = CallbackData("event_type", "event_id", "year", "month", "day", prefix=cd.calendar_data_text)
+calendar_factory = CallbackData("event_type", "event_id", "year", "month", prefix=cd.calendar_factory_text)
+calendar_zoom = CallbackData("event_type", "event_id", "year", prefix=cd.calendar_zoom_text)
 
 # event
-show_event_callback = CallbackData("event_id", prefix="show_event")
-repeat_callback = CallbackData("event_id", prefix="repeat")
-interval_callback = CallbackData("event_id", "repeat_id", prefix="interval")
+show_event_callback = CallbackData("event_id", prefix=cd.event_display_text)
+repeat_callback = CallbackData("event_id", prefix=cd.event_repeat_text)
+interval_callback = CallbackData("event_id", "repeat_id", prefix=cd.event_interval_text)
 
 # changes
-add_new_callback = CallbackData("type", prefix="add_new")
-change_callback = CallbackData("type", "item_id", prefix="change")
-selected_callback = CallbackData("option_id", "event_id", prefix="selected")
-selected_location_callback = CallbackData("option_id", "location_id", prefix="selected_location")
-selected_suit_callback = CallbackData("option_id", "suit_id", prefix="selected_suit")
+add_new_callback = CallbackData("type", prefix=cd.add_new_text)
+change_callback = CallbackData("type", "item_id", prefix=cd.change_item_text)
+selected_callback = CallbackData("option_id", "event_id", prefix=cd.selected_text)
+selected_location_callback = CallbackData("option_id", "location_id", prefix=cd.selected_location_text)
+selected_suit_callback = CallbackData("option_id", "suit_id", prefix=cd.selected_suit_text)
 
-change_songs_callback = CallbackData("concert_id", "option_id", prefix="change_songs")
-concert_songs_callback = CallbackData("option", "concert_id", "song_id", prefix="concert_songs")
-remove_suit_callback = CallbackData("concert_id", "option_id", prefix="remove_suit")
-select_suit_callback = CallbackData("concert_id", "option_id", prefix="select_suit")
+change_songs_callback = CallbackData("concert_id", "option_id", prefix=cd.change_songs_text)
+concert_songs_callback = CallbackData("option", "concert_id", "song_id", prefix=cd.concert_songs_text)
+remove_suit_callback = CallbackData("concert_id", "option_id", prefix=cd.remove_suit_text)
+select_suit_callback = CallbackData("concert_id", "option_id", prefix=cd.select_suit_text)
 
 # songs
-song_filter_callback = CallbackData("filter_id", prefix="song_filter")
-concert_filter_callback = CallbackData("filter_id", prefix="concert_filter")
-song_info_callback = CallbackData("song_id", prefix="song_info")
-edit_song_callback = CallbackData("song_id", "option_id", prefix="edit_song")
-edit_song_material_callback = CallbackData("song_id", "option_id", "edit_id", prefix="edit_song_material")
+song_filter_callback = CallbackData("filter_id", prefix=cd.song_filter_text)
+concert_filter_callback = CallbackData("filter_id", prefix=cd.concert_filter_text)
+song_info_callback = CallbackData("song_id", prefix=cd.song_info_text)
+edit_song_callback = CallbackData("song_id", "option_id", prefix=cd.edit_song_text)
+edit_song_material_callback = CallbackData("song_id", "option_id", "edit_id", prefix=cd.edit_song_material_text)
 
 # locations
-add_event_location_callback = CallbackData("type", "event_id", prefix="add_event_location")
-edit_location_callback = CallbackData("location_id", prefix="edit_location")
+add_event_location_callback = CallbackData("type", "event_id", prefix=cd.add_event_location_text)
+edit_location_callback = CallbackData("location_id", prefix=cd.edit_location_text)
 
 # singer
-register_callback = CallbackData(prefix="registration")
-search_callback = CallbackData("type", prefix="search")
-show_singer_callback = CallbackData("singer_id", prefix="show_singer")
-voice_callback = CallbackData("voice_id", prefix="voice")
-edit_voice_callback = CallbackData("action", "voice_id", prefix="voice")
-suit_edit_callback = CallbackData("action", "suit_id", prefix="suit")
-info_callback = CallbackData("name", "singer_id", prefix="info")
-singer_add_callback = CallbackData("type", "singer_id", "item_id", prefix="singer_add")
-singer_remove_callback = CallbackData("type", "singer_id", "item_id", prefix="singer_remove")
-unblock_user_callback = CallbackData("singer_id", prefix="unblock_user")
+register_callback = CallbackData(prefix=cd.singer_registration_text)
+search_callback = CallbackData("type", prefix=cd.singer_search_text)
+show_singer_callback = CallbackData("singer_id", prefix=cd.singer_display_text)
+voice_callback = CallbackData("voice_id", prefix=cd.singer_voice_text)
+edit_voice_callback = CallbackData("action", "voice_id", prefix=cd.singer_edit_voice_text)
+suit_edit_callback = CallbackData("action", "suit_id", prefix=cd.singer_edit_suit_text)
+info_callback = CallbackData("name", "singer_id", prefix=cd.singer_info_text)
+singer_add_callback = CallbackData("type", "singer_id", "item_id", prefix=cd.singer_add_action_text)
+singer_remove_callback = CallbackData("type", "singer_id", "item_id", prefix=cd.singer_remove_action_text)
+unblock_user_callback = CallbackData("singer_id", prefix=cd.unblock_user_text)
 
 # attendance
-attendance_intervals_callback = CallbackData("interval", "singer_id", prefix="attendance_intervals")
-show_participation_callback = CallbackData("event_id", prefix="show_participation")
-add_participant_callback = CallbackData("event_id", prefix="add_participant")
-add_all_participants_callback = CallbackData("event_id", prefix="add_all_participants")
-remove_participation_callback = CallbackData("event_id", prefix="remove_participation")
-remove_all_participants_callback = CallbackData("event_id", prefix="remove_all_participants")
-singer_attendance_callback = CallbackData("action", "event_id", "singer_id", prefix="singer_attendance")
+attendance_intervals_callback = CallbackData("interval", "singer_id", prefix=cd.attendance_intervals_text)
+show_participation_callback = CallbackData("event_id", prefix=cd.show_participation_text)
+add_participant_callback = CallbackData("event_id", prefix=cd.add_participant_text)
+add_all_participants_callback = CallbackData("event_id", prefix=cd.add_all_participants_text)
+remove_participation_callback = CallbackData("event_id", prefix=cd.remove_participation_text)
+remove_all_participants_callback = CallbackData("event_id", prefix=cd.remove_all_participants_text)
+singer_attendance_callback = CallbackData("action", "event_id", "singer_id", prefix=cd.singer_attendance_text)
 
-delete_confirmation_callback = CallbackData("item_type", "item_id", "action_id", prefix="delete_confirmation")
+delete_confirmation_callback = CallbackData("item_type", "item_id", "action_id", prefix=cd.delete_confirmation_text)
 
-buttons_roll_callback = CallbackData("direction", "type", "index", "event_id", prefix="buttons_roll")
+buttons_roll_callback = CallbackData("direction", "type", "index", "event_id", prefix=cd.buttons_roll_text)

@@ -8,7 +8,7 @@ from database_control import db_singer, db_songs, db_event, db_attendance
 from telebot.custom_filters import TextFilter
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from misc.edit_functions import display_suits, edit_suits
-from misc import dicts, keys
+from misc import dicts, keys, callback_dict as cd
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.buttons_roll_callback.filter())
@@ -63,7 +63,7 @@ def show_suits(message: Message):
     display_suits(message, singer_id)
 
     if db_singer.is_admin(message.from_user.id):
-        call_config = "show_suits"
+        call_config = cd.display_suits_text
         data = [(dicts.changes.button_show_all_suits_text, f"{call_config}")]
         msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{dicts.changes.show_all_suits_text}"
         bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
@@ -80,7 +80,7 @@ def edit_suits_buttons(call: CallbackQuery):
 def chose_song_filter(message: Message):
     """Display buttons for selecting the output of all songs, in work or concert program."""
 
-    call_config = "song_filter"
+    call_config = cd.song_filter_text
     data = []
     for filter_id, text in enumerate(dicts.singers.song_filter_text_tuple):
         data.append((text, f"{call_config}:{filter_id}"))
@@ -96,7 +96,7 @@ def show_songs(call: CallbackQuery):
 
     _, filter_id = call.data.split(":")
     data = []
-    call_config = "song_info"
+    call_config = cd.song_info_text
 
     if filter_id == "0":
         songs = db_songs.get_all_songs()
@@ -108,7 +108,7 @@ def show_songs(call: CallbackQuery):
 
     else:
         concerts = db_event.search_events_by_event_type(2)
-        call_config = "concert_filter"
+        call_config = cd.concert_filter_text
         for concert_id, concert_name, date, _ in concerts:
             _, month, day = date.split("-")
             name = f"{concert_name} {int(day)} {dicts.events.chosen_months_text_tuple[int(month) - 1]}"
@@ -137,7 +137,7 @@ def concert_songs(call: CallbackQuery):
     _, event_id = call.data.split(":")
     data = []
     songs = db_songs.get_songs_by_event_id(event_id)
-    call_config = "song_info"
+    call_config = cd.song_info_text
 
     if songs:
         for song_id, song_name, _ in songs:
@@ -224,7 +224,7 @@ def show_event(call: CallbackQuery):
 
     attendance = db_attendance.get_singer_attendance_for_event(event_id, singer_id)
     if attendance:
-        call_config = "singer_attendance"
+        call_config = cd.singer_attendance_text
         data = [
             (text, f"{call_config}:edit:{event_id}:{i}")
             for i, text in enumerate(dicts.attends.set_attendance_text_tuple)
@@ -259,7 +259,7 @@ def show_event(call: CallbackQuery):
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
-@bot.callback_query_handler(func=lambda c: c.data == 'close')
+@bot.callback_query_handler(func=lambda c: c.data == cd.close_text)
 def close_btn(call: CallbackQuery):
     """Remove a block of the buttons"""
     bot.delete_message(call.message.chat.id, call.message.id)

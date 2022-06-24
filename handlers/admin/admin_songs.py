@@ -4,7 +4,7 @@ from config import VIP
 from loader import bot
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
 from database_control import db_songs, db_singer
-from misc import dicts, keys
+from misc import dicts, keys, callback_dict as cd
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.song_info_callback.filter())
@@ -94,7 +94,7 @@ def edit_song_options(call: CallbackQuery):
     # add/delete sheets
     elif option_id == "1":
         sheets = db_songs.get_sheets_by_song_id(song_id)
-        call_config = "edit_song_material"
+        call_config = cd.edit_song_material_text
         data = [
             (text, f"{call_config}:{song_id}:{option_id}:{edit_id}")
             for edit_id, text in enumerate(dicts.changes.add_remove_text_tuple)
@@ -112,7 +112,7 @@ def edit_song_options(call: CallbackQuery):
     # add/delete sounds
     elif option_id == "2":
         sounds = db_songs.get_sound_by_song_id(song_id)
-        call_config = "edit_song_material"
+        call_config = cd.edit_song_material_text
         data = [
             (text, f"{call_config}:{song_id}:{option_id}:{edit_id}")
             for edit_id, text in enumerate(dicts.changes.add_remove_text_tuple)
@@ -144,7 +144,7 @@ def edit_song_options(call: CallbackQuery):
             return
 
         item_name = db_songs.get_song_name(song_id)
-        call_config = "delete_confirmation"
+        call_config = cd.delete_confirmation_text
         item_type = "song"
         data = []
         msg = f"{dicts.changes.delete_confirmation_text} {item_name}?"
@@ -210,13 +210,13 @@ def edit_song_materials(call: CallbackQuery):
             return
 
         if option_id == "1":
-            call_config = "delete_confirmation"
+            call_config = cd.delete_confirmation_text
             item_type = "sheets"
             data = []
             msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sheets_text} {item_name}?"
 
         else:
-            call_config = "delete_confirmation"
+            call_config = cd.delete_confirmation_text
             item_type = "sounds"
             data = []
             msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sounds_text} {item_name}?"
@@ -276,7 +276,7 @@ def edit_song_menu(message, song_id, msg):
         bot.send_sticker(message.chat.id, sticker_id)
         return
 
-    call_config = "edit_song"
+    call_config = cd.edit_song_text
     data = []
 
     for i, option in enumerate(dicts.changes.edit_song_text_tuple):

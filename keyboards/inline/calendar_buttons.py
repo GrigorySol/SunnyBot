@@ -1,5 +1,5 @@
 """
-Fork from the pyTelegramBotAPI github example repo
+Fork from the pyTelegramBotAPI GitHub example repo
 """
 
 import calendar
@@ -10,10 +10,11 @@ from database_control.db_event import search_event_by_date, search_event_by_date
 from keyboards.inline.callback_datas import calendar_factory, calendar_zoom
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from misc.messages.event_dictionary import next_button_text, prev_button_text, zoom_out_text, WEEK_DAYS, MONTHS
+from misc import callback_dict as cd
 
 EMTPY_FIELD = 'calendar_button'
 
-CLOSE_BTN = InlineKeyboardButton("Закрыть", callback_data="close")
+CLOSE_BTN = InlineKeyboardButton("Закрыть", callback_data=cd.close_text)
 
 
 def generate_calendar_days(telegram_id: int, year: int, month: int, event_type=0, event_id=0):
@@ -72,7 +73,7 @@ def generate_calendar_days(telegram_id: int, year: int, month: int, event_type=0
             week_buttons.append(
                 InlineKeyboardButton(
                     text=day_name,
-                    callback_data=f"calendar_data:{event_type}:{event_id}:{year}:{month}:{day}"
+                    callback_data=f"{cd.calendar_data_text}:{event_type}:{event_id}:{year}:{month}:{day}"
                 )
             )
         keyboard.add(*week_buttons)

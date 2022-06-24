@@ -5,7 +5,7 @@ from loader import bot
 from telebot.types import CallbackQuery, Message
 from misc.edit_functions import display_suits, display_voices, edit_voices
 from database_control import db_singer, db_attendance
-from misc import dicts, keys
+from misc import dicts, keys, callback_dict as cd
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.show_singer_callback.filter())
@@ -48,7 +48,7 @@ def singer_menu(call: CallbackQuery):
         display_suits(call.message, singer_id)
 
     elif option_id == "2":  # Посещаемость
-        call_config = "attendance_intervals"
+        call_config = cd.attendance_intervals_text
         data = []
         msg = dicts.attends.choose_interval_text
 
@@ -73,7 +73,7 @@ def singer_menu(call: CallbackQuery):
         bot.register_next_step_handler(msg, enter_new_singer_name, singer_id)
 
     elif option_id == "5":  # УДАЛИТЬ
-        call_config = "delete_confirmation"
+        call_config = cd.delete_confirmation_text
         item_type = "singer"
         item_name = db_singer.get_singer_fullname(singer_id)
         data = []

@@ -5,7 +5,7 @@ from loader import bot
 from datetime import date
 from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from handlers.admin.admin_songs import add_sheets_or_sounds
-from misc import dicts, keys
+from misc import dicts, keys, callback_dict as cd
 from database_control import db_singer, db_songs, db_event, db_attendance
 
 
@@ -26,7 +26,7 @@ def show_singers_search(message: Message):
 
 @bot.message_handler(commands=['add'])
 def add_menu_handler(message: Message):
-    """Show buttons to choose song or events"""
+    """Show buttons to choose event, song or suit to add"""
 
     print(f"calendar_command_handler")
     is_admin = db_singer.is_admin(message.from_user.id)
@@ -34,7 +34,7 @@ def add_menu_handler(message: Message):
         bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
         return
 
-    call_config = "add_new"
+    call_config = cd.add_new_text
     data = []
     for item_type, event in enumerate(dicts.events.to_add_text_tuple):
         if not item_type:
@@ -56,7 +56,7 @@ def location_buttons_handler(message: Message):
         return
 
     locations = db_event.get_all_locations()
-    call_config = "change"
+    call_config = cd.change_item_text
     item_type = "location"
     data = []
 
@@ -84,7 +84,7 @@ def show_blacklist(message: Message):
         bot.send_message(message.chat.id, dicts.changes.empty_blacklist_text)
         return
 
-    call_config = "unblock_user"
+    call_config = cd.unblock_user_text
     data = []
 
     for telegram_id, telegram_name in blocked_users:
@@ -148,12 +148,12 @@ def edit_menu_photo_id(message: Message):
         bot.send_message(message.chat.id, e)
 
 
-@bot.callback_query_handler(func=lambda c: c.data == "show_all")
+@bot.callback_query_handler(func=lambda c: c.data == cd.singer_show_all_text)
 def show_all_singers(call: CallbackQuery):
     """Displays callback buttons with all singers"""
 
     singers = db_singer.get_all_singers()
-    call_config = "show_singer"
+    call_config = cd.singer_display_text
     data = []
 
     for name, singer_id in singers:
@@ -195,7 +195,7 @@ def location_query(query: InlineQuery):
     """Inline User Search"""
 
     singers = db_singer.get_all_singers()
-    call_config = "show_singer"
+    call_config = cd.singer_display_text
     data = []
 
     for i, (name, singer_id) in enumerate(singers):

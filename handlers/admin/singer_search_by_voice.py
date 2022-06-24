@@ -1,6 +1,7 @@
 from loader import bot
 from telebot.types import CallbackQuery
 from keyboards.inline.callback_datas import search_callback, voice_callback
+from misc import callback_dict as cd
 from misc.messages.singer_dictionary import choose_voice_text, no_singers_text
 from keyboards.inline.choice_buttons import callback_buttons, search_choice_markup
 from database_control.db_singer import get_all_voices, search_singers_by_voice
@@ -11,7 +12,7 @@ def search_by_voice(call: CallbackQuery):
     """Display available voices."""
     print(f"search_by_voice {call.data}")
     voices = get_all_voices()
-    call_config = "voice"
+    call_config = cd.singer_voice_text
     data = []
     for _, voice in voices:
         data.append((voice, f"{call_config}:{voice}"))
@@ -32,7 +33,7 @@ def show_voice(call: CallbackQuery):
         )
     else:
         msg = f"Вы выбрали {voice}"
-        call_config = "show_singer"
+        call_config = cd.singer_display_text
         data = []
         for name, singer_id in singers:
             data.append((name, f"{call_config}:{singer_id}"))
