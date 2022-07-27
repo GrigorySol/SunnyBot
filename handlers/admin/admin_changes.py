@@ -369,7 +369,7 @@ def edit_songs_for_concert(call: CallbackQuery):
 
     if option_id == "0":
         option = "add"
-        songs = db_songs.get_all_songs()
+        songs = db_songs.get_remain_songs(concert_id)
 
     else:
         option = "remove"

@@ -11,6 +11,18 @@ def get_all_songs():
         return cursor.fetchall()
 
 
+def get_remain_songs(event_id):
+    """Return remain (id, song_name, comment) for an event from the database."""
+    with sqlite3.connect(BOT_DB) as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT * FROM songs EXCEPT "
+                       "SELECT id, song_name, comment FROM songs "
+                       "JOIN event_song ON event_song.song_id = songs.id "
+                       "WHERE event_song.event_id = ? ORDER BY song_name", (event_id,))
+        return cursor.fetchall()
+
+
 def get_song_name(song_id):
     """Return the song_name from the database"""
     with sqlite3.connect(BOT_DB) as db:
