@@ -292,14 +292,12 @@ def edit_concert_songs(call: CallbackQuery):
     """Edit songs for a concert"""
 
     print(f"edit_event_songs {call.data}")
-    *_, event_id = call.data.split(":")
-
+    *_, concert_id = call.data.split(":")
     call_config = cd.change_songs_text
     data = []
 
     for option_id, option_name in enumerate(dicts.changes.add_remove_text_tuple):
-        data.append((option_name, f"{call_config}:{event_id}:{option_id}"))
-
+        data.append((option_name, f"{call_config}:{concert_id}:{option_id}"))
     bot.send_message(
         call.message.chat.id, dicts.singers.what_to_do_text, reply_markup=keys.buttons.callback_buttons(data)
     )
@@ -364,6 +362,10 @@ def edit_songs_for_concert(call: CallbackQuery):
 
     _, concert_id, option_id = call.data.split(":")
 
+    show_songs_for_concert(call.message, concert_id, option_id)
+
+
+def show_songs_for_concert(message, concert_id, option_id):
     call_config = cd.concert_songs_text
     data = []
 
@@ -374,14 +376,13 @@ def edit_songs_for_concert(call: CallbackQuery):
     else:
         option = "remove"
         songs = db_songs.get_songs_by_event_id(concert_id)
-
     for song_id, song_name, _ in songs:
         data.append((song_name, f"{call_config}:{option}:{concert_id}:{song_id}"))
 
     bot.edit_message_text(
         dicts.changes.add_remove_text_tuple[int(option_id)],
-        call.message.chat.id,
-        call.message.id,
+        message.chat.id,
+        message.id,
         reply_markup=keys.buttons.callback_buttons(data)
     )
 
@@ -393,6 +394,7 @@ def add_or_remove_songs(call: CallbackQuery):
     _, option, concert_id, song_id = call.data.split(":")
 
     if option == "add":
+        option_id = "0"
         if db_event.add_song_to_concert(concert_id, song_id):
             song_name = db_songs.get_song_name(song_id)
             bot.send_message(call.message.chat.id, f"{dicts.changes.song_added_to_concert_text} {song_name}")
@@ -401,9 +403,12 @@ def add_or_remove_songs(call: CallbackQuery):
             bot.send_message(call.message.chat.id, dicts.changes.song_already_added)
 
     else:
+        option_id = "1"
         song_name = db_songs.get_song_name(song_id)
         db_event.remove_song_from_concert(concert_id, song_id)
         bot.send_message(call.message.chat.id, f"{dicts.changes.song_removed_from_concert} {song_name}")
+
+    show_songs_for_concert(call.message, concert_id, option_id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.select_suit_callback.filter())
