@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from handlers.admin.singer_info import singer_markup
 from loader import bot
 from config import PASS_PHRASE, SECRET_PASS_PHRASE, VIP, MENU_IMAGE
 from telebot.types import Message, CallbackQuery
@@ -143,7 +144,7 @@ def finalize_registration(lastname, message, singer):
           f"{message.from_user.last_name} -> {lastname} registered"
     print(msg)
     singer_id = get_singer_id(singer.telegram_id)
-    markup = keys.buttons.singer_info_buttons(singer.telegram_name, singer_id, dicts.changes.edit_singer_text_tuple)
+    markup = singer_markup(message, singer_id)
     bot.send_message(VIP, msg, reply_markup=markup)
     del singer
 

@@ -16,40 +16,36 @@ from misc import dicts, keys, callback_dict as cd
 def rolling_callback_buttons(call: CallbackQuery):
     """Roll a page with buttons"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
-    _, direction, btn_type, index, event_id = call.data.split(":")
+    _, direction, index, event_id = call.data.split(":")
 
-    if not keys.buttons.keep_data.row:
+    if not keys.buttons.ButtonsKeeper.data_exists(call.message.id):
         bot.edit_message_text(dicts.changes.ERROR_text, call.message.chat.id, call.message.id, reply_markup=None)
         return
 
+    btn_keeper = keys.buttons.ButtonsKeeper(call.message.id)
+
     if direction == "previous":
-        keys.buttons.keep_data.i -= 1
+        btn_keeper.i -= 1
     elif direction == "next":
-        keys.buttons.keep_data.i += 1
+        btn_keeper.i += 1
 
-    if btn_type == "call":
-        bot.edit_message_reply_markup(
-            call.message.chat.id,
-            call.message.id,
-            reply_markup=keys.buttons.callback_buttons(keys.buttons.keep_data.data, keys.buttons.keep_data.row, True)
-        )
-
-    elif btn_type == "url":
-        bot.edit_message_reply_markup(
-            call.message.chat.id,
-            call.message.id,
-            reply_markup=keys.buttons.participant_message_buttons(keys.buttons.keep_data.data,
-                                                                  event_id, keys.buttons.keep_data.row, True)
-        )
+    bot.edit_message_reply_markup(
+        call.message.chat.id,
+        call.message.id,
+        reply_markup=keys.buttons.buttons_markup(data=btn_keeper.data, message_id=call.message.id, multiple=True,
+                                                 row=btn_keeper.row)
+    )
 
 
 @bot.message_handler(commands=["voice"])
 def show_voice(message: Message):
     """Display singer voices"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -66,6 +62,7 @@ def show_voice(message: Message):
 def show_suits(message: Message):
     """Display singer suits and buttons to add or remove"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -74,15 +71,16 @@ def show_suits(message: Message):
 
     if db_singer.is_admin(message.from_user.id):
         call_config = cd.display_suits_text
-        data = [(dicts.changes.button_show_all_suits_text, f"{call_config}")]
+        data = [{"text": dicts.changes.button_show_all_suits_text, "callback_data": f"{call_config}"}]
         msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{dicts.changes.show_all_suits_text}"
-        bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
+        bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, message.id))
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.suit_edit_callback.filter())
 def edit_suits_buttons(call: CallbackQuery):
     """Display buttons to add or remove suit"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
@@ -94,16 +92,18 @@ def edit_suits_buttons(call: CallbackQuery):
 def chose_song_filter(message: Message):
     """Display buttons for selecting the output of all songs, in work or concert program."""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     call_config = cd.song_filter_text
     data = []
     for filter_id, text in enumerate(dicts.singers.song_filter_text_tuple):
-        data.append((text, f"{call_config}:{filter_id}"))
+        data.append({"text": text, "callback_data": f"{call_config}:{filter_id}"})
 
     bot.send_message(
-        message.chat.id, dicts.singers.choose_filter_text, reply_markup=keys.buttons.callback_buttons(data)
+        message.chat.id, dicts.singers.choose_filter_text,
+        reply_markup=keys.buttons.buttons_markup(data, message.id)
     )
 
 
@@ -111,6 +111,7 @@ def chose_song_filter(message: Message):
 def show_songs(call: CallbackQuery):
     """Display buttons with all song names, songs in work or upcoming concerts."""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
@@ -134,29 +135,28 @@ def show_songs(call: CallbackQuery):
             return
         for concert_id, concert_name, date, _ in actual_concerts:
             _, month, day = date.split("-")
-            name = f"{concert_name} {int(day)} {dicts.events.chosen_months_text_tuple[int(month) - 1]}"
-            data.append((name, f"{call_config}:{concert_id}"))
-        bot.send_message(
-            call.message.chat.id, dicts.singers.choose_concert_text, reply_markup=keys.buttons.callback_buttons(data)
-        )
-        bot.delete_message(call.message.chat.id, call.message.id)
+            text = f"{concert_name} {int(day)} {dicts.events.chosen_months_text_tuple[int(month) - 1]}"
+            data.append({"text": text, "callback_data": f"{call_config}:{concert_id}"})
+        msg = dicts.singers.choose_concert_text
+        markup = keys.buttons.buttons_markup(data, call.message.id)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
         return
 
     if songs:
-        for song_id, song_name, _ in songs:
-            data.append((song_name, f"{call_config}:{song_id}"))
-        bot.send_message(
-            call.message.chat.id, dicts.songs.which_song_text, reply_markup=keys.buttons.callback_buttons(data)
-        )
+        for song_id, text, _ in songs:
+            data.append({"text": text, "callback_data": f"{call_config}:{song_id}"})
+        msg = dicts.songs.which_song_text
+        markup = keys.buttons.buttons_markup(data, call.message.id)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
     else:
-        bot.send_message(call.message.chat.id, dicts.songs.no_songs_text)
-    bot.delete_message(call.message.chat.id, call.message.id)
+        bot.edit_message_text(dicts.songs.no_songs_text, call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.concert_filter_callback.filter())
 def concert_songs(call: CallbackQuery):
     """Display buttons with song names for a concert program."""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
@@ -166,12 +166,12 @@ def concert_songs(call: CallbackQuery):
     call_config = cd.song_info_text
 
     if songs:
-        for song_id, song_name, _ in songs:
-            data.append((song_name, f"{call_config}:{song_id}"))
+        for song_id, text, _ in songs:
+            data.append({"text": text, "callback_data": f"{call_config}:{song_id}"})
 
-        bot.send_message(
-            call.message.chat.id, dicts.songs.which_song_text, reply_markup=keys.buttons.callback_buttons(data)
-        )
+        msg = dicts.songs.which_song_text
+        markup = keys.buttons.buttons_markup(data, call.message.id, event_id=event_id, menu_btn=True)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
     else:
         bot.send_message(call.message.chat.id, dicts.songs.no_songs_text)
@@ -184,14 +184,14 @@ def concert_songs(call: CallbackQuery):
         bot.send_message(
             call.message.chat.id,
             msg,
-            reply_markup=keys.buttons.add_concert_songs_buttons(event_id)
+            reply_markup=keys.buttons.add_songs_to_concert_buttons(event_id)
         )
-    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.message_handler(commands=["events"])
 def nothing_to_say(message: Message):
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -212,6 +212,7 @@ def nothing_to_say(message: Message):
 @bot.message_handler(commands=["concerts"])
 def nothing_to_say(message: Message):
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -223,6 +224,7 @@ def nothing_to_say(message: Message):
 def show_event(call: CallbackQuery):
     """Display info about the chosen event"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
@@ -230,9 +232,6 @@ def show_event(call: CallbackQuery):
     _, event_type, event_name, event_date, time, location_id, comment = db_event.search_event_by_id(event_id)
     location_data = db_event.search_location_by_id(location_id)
     telegram_id = call.from_user.id
-    print(f"singer_actions show_event\n"
-          f"{call.from_user.username} {call.from_user.first_name} {call.from_user.last_name} {call.data}\n"
-          f"{event_name} {event_date} {time}\n")
 
     _, month, day = event_date.split("-")
     event_date_text = f"{int(day)} {dicts.events.chosen_months_text_tuple[int(month) - 1]}"
@@ -267,7 +266,7 @@ def show_event(call: CallbackQuery):
     if attendance:
         call_config = cd.singer_attendance_text
         data = [
-            (text, f"{call_config}:edit:{event_id}:{i}")
+            {"text": text, "callback_data": f"{call_config}:edit:{event_id}:{i}"}
             for i, text in enumerate(dicts.attends.set_attendance_text_tuple)
         ]
         if attendance[0] == 0 or attendance[0] == 1:
@@ -277,7 +276,8 @@ def show_event(call: CallbackQuery):
         else:
             msg += f"\n{dicts.attends.select_attendance_text}"
 
-        bot.send_message(telegram_id, msg, reply_markup=keys.buttons.callback_buttons(data))
+        markup = keys.buttons.buttons_markup(data, call.message.id)
+        bot.send_message(telegram_id, msg, reply_markup=markup)
 
     elif telegram_id != int(VIP) and telegram_id != int(VIP2):
         msg += f"\n{dicts.attends.you_not_participate_text}"
@@ -297,15 +297,17 @@ def show_event(call: CallbackQuery):
         msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{dicts.changes.need_something_text}"
         bot.send_message(telegram_id, msg, reply_markup=markup)
 
-    bot.delete_message(call.message.chat.id, call.message.id)
-
 
 @bot.callback_query_handler(func=lambda c: c.data == cd.close_text)
 def close_btn(call: CallbackQuery):
     """Remove a block of the buttons"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
+    if keys.buttons.ButtonsKeeper.data_exists(call.message.id):
+        keys.buttons.ButtonsKeeper.delete_btn(call.message.id)
 
     bot.delete_message(call.message.chat.id, call.message.id)
 
@@ -314,6 +316,7 @@ def close_btn(call: CallbackQuery):
 def calendar_message(message: Message):
     """Answer to type a command /calendar"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -326,6 +329,7 @@ def calendar_message(message: Message):
 def song_message(message: Message):
     """Answer to type a command /songs"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -338,6 +342,7 @@ def song_message(message: Message):
 def suit_message(message: Message):
     """Answer to type a command /suits"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -350,6 +355,7 @@ def suit_message(message: Message):
 def boring_message(message: Message):
     """Send a random joke into the chat"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -364,6 +370,7 @@ def boring_message(message: Message):
 def fool_message(message: Message):
     """Answer for the fool"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -371,11 +378,6 @@ def fool_message(message: Message):
         return
     msg = randomizer(dicts.jokes.embarrassed_text_tuple)
     bot.send_message(message.chat.id, msg, reply_to_message_id=message.id)
-
-
-def joking(message: Message):
-    msg = randomizer(dicts.jokes.random_jokes_text_tuple)
-    bot.send_message(message.chat.id, msg, reply_markup=ReplyKeyboardRemove())
 
 
 def check_commands(message: Message):
@@ -388,6 +390,7 @@ def check_commands(message: Message):
 def nothing_to_say(message: Message):
     """Random answer on unrecognised message"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -395,6 +398,11 @@ def nothing_to_say(message: Message):
     bot.forward_message(VIP, message.chat.id, message.id, disable_notification=True)
     bot.send_message(VIP, text, disable_notification=True)
     bot.send_message(message.chat.id, text)
+
+
+def joking(message: Message):
+    msg = randomizer(dicts.jokes.random_jokes_text_tuple)
+    bot.send_message(message.chat.id, msg, reply_markup=ReplyKeyboardRemove())
 
 
 def randomizer(items):

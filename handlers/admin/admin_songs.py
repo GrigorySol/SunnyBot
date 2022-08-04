@@ -15,6 +15,7 @@ def show_song_info(call: CallbackQuery):
     Show song info and allow admin to edit.
     """
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
@@ -24,69 +25,51 @@ def show_song_info(call: CallbackQuery):
     comment = db_songs.get_song_comment(song_id)
     media_sheets = []
     media_sounds = []
+    telegram_id = call.from_user.id
 
-    is_admin = db_singer.is_admin(call.message.chat.id)
-    if is_admin:
-        if sheets:
-            for _, _, _, sheet_id in sheets:
+    is_admin = db_singer.is_admin(telegram_id)
+    singer_id = db_singer.get_singer_id(telegram_id)
+    singer_voices = db_singer.get_singer_voice_id(singer_id)
+
+    if sheets:
+        for _, _, sheet_voice_id, sheet_id in sheets:
+            if not sheet_voice_id:
                 media_sheets.append(InputMediaDocument(sheet_id))
-            bot.send_media_group(call.message.chat.id, media_sheets)
-        else:
-            bot.send_message(call.message.chat.id, dicts.songs.no_sheets_text)
-
-        if sounds:
-            for _, _, _, sound_id in sounds:
-                media_sounds.append(InputMediaAudio(sound_id))
-            bot.send_media_group(call.message.chat.id, media_sounds)
-        else:
-            bot.send_message(call.message.chat.id, dicts.songs.no_sounds_text)
-
-        if comment:
-            msg = f"{dicts.changes.edit_song_text_tuple[3]}:\n{comment}"
-            bot.send_message(call.message.chat.id, msg)
-
-        msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{misc.messages.changes_dictionary.edit_text}"
-        edit_song_menu(call.message, song_id, msg)
-
+                continue
+            if sheet_voice_id in singer_voices or is_admin:
+                media_sheets.append(InputMediaDocument(sheet_id))
+        bot.send_media_group(telegram_id, media_sheets)
     else:
-        singer_id = db_singer.get_singer_id(call.message.chat.id)
-        singer_voices = db_singer.get_singer_voices(singer_id)
+        bot.send_message(telegram_id, dicts.songs.no_sheets_text)
 
-        if sheets:
-            for _, _, sheet_voice_id, sheet_id in sheets:
-                if not sheet_voice_id:
-                    media_sheets.append(InputMediaDocument(sheet_id))
-                    continue
-                for singer_voice_id, _ in singer_voices:
-                    if singer_voice_id == sheet_voice_id:
-                        media_sheets.append(InputMediaDocument(sheet_id))
-            bot.send_media_group(call.message.chat.id, media_sheets)
-        else:
-            bot.send_message(call.message.chat.id, dicts.songs.no_sheets_text)
+    if sounds:
+        for _, _, sound_voice_id, sound_id in sounds:
+            if not sound_voice_id:
+                media_sounds.append(InputMediaAudio(sound_id))
+                continue
+            if sound_voice_id in singer_voices or is_admin:
+                media_sounds.append(InputMediaAudio(sound_id))
+        bot.send_media_group(telegram_id, media_sounds)
+    else:
+        bot.send_message(telegram_id, dicts.songs.no_sounds_text)
 
-        if sounds:
-            for _, _, sound_voice_id, sound_id in sounds:
-                if not sound_voice_id:
-                    media_sounds.append(InputMediaAudio(sound_id))
-                    continue
-                for singer_voice_id, _ in singer_voices:
-                    if singer_voice_id == sound_voice_id:
-                        media_sounds.append(InputMediaAudio(sound_id))
-            bot.send_media_group(call.message.chat.id, media_sounds)
-        else:
-            bot.send_message(call.message.chat.id, dicts.songs.no_sounds_text)
+    if comment:
+        msg = f"{dicts.changes.edit_song_text_tuple[3]}:\n{comment}"
+        bot.send_message(telegram_id, msg)
 
-        if comment:
-            msg = f"{dicts.changes.edit_song_text_tuple[3]}:\n{comment}"
-            bot.send_message(call.message.chat.id, msg)
+    if call.message:
+        if is_admin:
+            msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{misc.messages.changes_dictionary.edit_text}"
+            edit_song_menu(call.message, song_id, msg)
 
-    bot.delete_message(call.message.chat.id, call.message.id)
+        bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.edit_song_callback.filter())
 def edit_song_options(call: CallbackQuery):
     """Manage song edit options: Name, Sheets, Sound or DELETE"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
@@ -102,7 +85,7 @@ def edit_song_options(call: CallbackQuery):
         sheets = db_songs.get_sheets_by_song_id(song_id)
         call_config = cd.edit_song_material_text
         data = [
-            (text, f"{call_config}:{song_id}:{option_id}:{edit_id}")
+            {"text": text, "callback_data": f"{call_config}:{song_id}:{option_id}:{edit_id}"}
             for edit_id, text in enumerate(dicts.changes.add_remove_text_tuple)
         ]
 
@@ -113,14 +96,14 @@ def edit_song_options(call: CallbackQuery):
             data.pop()
             msg = f"{dicts.songs.no_sheets_text}\n{dicts.songs.wanna_add_text}"
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
 
     # add/delete sounds
     elif option_id == "2":
         sounds = db_songs.get_sound_by_song_id(song_id)
         call_config = cd.edit_song_material_text
         data = [
-            (text, f"{call_config}:{song_id}:{option_id}:{edit_id}")
+            {"text": text, "callback_data": f"{call_config}:{song_id}:{option_id}:{edit_id}"}
             for edit_id, text in enumerate(dicts.changes.add_remove_text_tuple)
         ]
 
@@ -131,7 +114,7 @@ def edit_song_options(call: CallbackQuery):
             data.pop()
             msg = dicts.songs.not_sound_add_text
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
 
     # change comment
     elif option_id == "3":
@@ -155,10 +138,10 @@ def edit_song_options(call: CallbackQuery):
         data = []
         msg = f"{dicts.changes.delete_confirmation_text} {item_name}?"
 
-        for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
-            data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))
+        for i, text in enumerate(dicts.changes.delete_confirmation_text_tuple):
+            data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{song_id}:{i}"})
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
 
     bot.delete_message(call.message.chat.id, call.message.id)
 
@@ -166,6 +149,7 @@ def edit_song_options(call: CallbackQuery):
 def enter_new_song_name(message: Message, song_id):
     """UPDATE the song name in the database"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -183,6 +167,7 @@ def enter_new_song_name(message: Message, song_id):
 def enter_new_song_comment(message: Message, song_id):
     """Update the comment for a song"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -192,7 +177,6 @@ def enter_new_song_comment(message: Message, song_id):
 
     if db_songs.edit_song_comment(song_id, message.text):
         edit_song_menu(message, song_id, dicts.changes.comment_changed_text)
-
 
     else:
         msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
@@ -205,6 +189,7 @@ def enter_new_song_comment(message: Message, song_id):
 def edit_song_materials(call: CallbackQuery):
     """Add or Remove sheets and sounds for a song"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
@@ -234,10 +219,10 @@ def edit_song_materials(call: CallbackQuery):
             data = []
             msg = f"{dicts.changes.delete_confirmation_text} {dicts.changes.all_sounds_text} {item_name}?"
 
-        for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
-            data.append((answer, f"{call_config}:{item_type}:{song_id}:{i}"))
+        for i, text in enumerate(dicts.changes.delete_confirmation_text_tuple):
+            data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{song_id}:{i}"})
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
 
     if edit_id == "0":
         _add()
@@ -254,6 +239,7 @@ def edit_song_materials(call: CallbackQuery):
 def add_sheets_or_sounds(message: Message, song_id):
     """Manage batch or a single file upload processing"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -286,6 +272,7 @@ def voice_detect(file_name):
 def edit_song_menu(message, song_id, msg):
     """Display buttons to edit song name, sheets or sounds"""
 
+    # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
@@ -298,7 +285,7 @@ def edit_song_menu(message, song_id, msg):
     call_config = cd.edit_song_text
     data = []
 
-    for i, option in enumerate(dicts.changes.edit_song_text_tuple):
-        data.append((option, f"{call_config}:{song_id}:{i}"))
+    for i, text in enumerate(dicts.changes.edit_song_text_tuple):
+        data.append({"text": text, "callback_data": f"{call_config}:{song_id}:{i}"})
 
-    bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
+    bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, message.id))

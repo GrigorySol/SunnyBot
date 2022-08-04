@@ -1,7 +1,7 @@
 import datetime
-import timeit
+import inspect
 
-from loader import bot
+from loader import bot, log
 from datetime import date
 from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from handlers.admin.admin_songs import add_sheets_or_sounds
@@ -12,6 +12,10 @@ from database_control import db_singer, db_songs, db_event, db_attendance
 @bot.message_handler(commands=["singers"])
 def show_singers_search(message: Message):
     """Display callback buttons with search singer options"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
@@ -28,7 +32,10 @@ def show_singers_search(message: Message):
 def add_menu_handler(message: Message):
     """Show buttons to choose event, song or suit to add"""
 
-    print(f"calendar_command_handler")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
         bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
@@ -36,12 +43,12 @@ def add_menu_handler(message: Message):
 
     call_config = cd.add_new_text
     data = []
-    for item_type, event in enumerate(dicts.events.to_add_text_tuple):
+    for item_type, text in enumerate(dicts.events.to_add_text_tuple):
         if not item_type:
             continue
-        data.append((event, f"{call_config}:{item_type}"))
+        data.append({"text": text, "callback_data": f"{call_config}:{item_type}"})
     bot.send_message(
-        message.chat.id, dicts.events.song_or_event_text, reply_markup=keys.buttons.callback_buttons(data)
+        message.chat.id, dicts.events.song_or_event_text, reply_markup=keys.buttons.buttons_markup(data, message.id)
     )
 
 
@@ -49,7 +56,10 @@ def add_menu_handler(message: Message):
 def location_buttons_handler(message: Message):
     """Show location buttons for editing"""
 
-    print(f"location_menu_handler")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     is_admin = db_singer.is_admin(message.chat.id)
     if not is_admin:
         bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
@@ -60,11 +70,11 @@ def location_buttons_handler(message: Message):
     item_type = "location"
     data = []
 
-    for location_id, location_name, _ in locations:
-        data.append((location_name, f"{call_config}:{item_type}:{location_id}"))
+    for location_id, text, _ in locations:
+        data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{location_id}"})
 
     bot.send_message(
-        message.chat.id, dicts.events.choose_location_text, reply_markup=keys.buttons.callback_buttons(data)
+        message.chat.id, dicts.events.choose_location_text, reply_markup=keys.buttons.buttons_markup(data, message.id)
     )
 
 
@@ -72,8 +82,11 @@ def location_buttons_handler(message: Message):
 def show_blacklist(message: Message):
     """Display blocked users to unblock"""
 
-    is_admin = db_singer.is_admin(message.from_user.id)
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
+    is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
         bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
         return
@@ -87,20 +100,23 @@ def show_blacklist(message: Message):
     call_config = cd.unblock_user_text
     data = []
 
-    for telegram_id, telegram_name in blocked_users:
-        data.append((telegram_name, f"{call_config}:{telegram_id}"))
+    for telegram_id, text in blocked_users:
+        data.append({"text": text, "callback_data": f"{call_config}:{telegram_id}"})
 
     bot.send_message(
-        message.chat.id, dicts.changes.blacklist_text, reply_markup=keys.buttons.callback_buttons(data)
+        message.chat.id, dicts.changes.blacklist_text, reply_markup=keys.buttons.buttons_markup(data, message.id)
     )
 
 
 @bot.message_handler(commands=["magic"])
-def show_blacklist(message: Message):
+def full_participation(message: Message):
     """Add participation of all singers with voice"""
 
-    is_admin = db_singer.is_admin(message.from_user.id)
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
+    is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
         bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
         return
@@ -111,11 +127,14 @@ def show_blacklist(message: Message):
 
 
 @bot.message_handler(commands=["menu_photo"])
-def show_blacklist(message: Message):
+def menu_tutorial(message: Message):
     """Change menu screenshot"""
 
-    is_admin = db_singer.is_admin(message.from_user.id)
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
+    is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
         bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
         return
@@ -126,6 +145,10 @@ def show_blacklist(message: Message):
 
 def edit_menu_photo_id(message: Message):
     """Save photo file_id in the .env file in 'MENU_IMAGE' variable"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not message.photo:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -152,18 +175,21 @@ def edit_menu_photo_id(message: Message):
 def show_all_singers(call: CallbackQuery):
     """Displays callback buttons with all singers"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     singers = db_singer.get_all_singers()
     call_config = cd.singer_display_text
     data = []
 
     for name, singer_id in singers:
         indicator = indicate_attendance(singer_id)
-        data.append((f"{indicator} {name}", f"{call_config}:{singer_id}"))
+        data.append({"text": f"{indicator} {name}", "callback_data": f"{call_config}:{singer_id}"})
 
-    bot.send_message(
-        call.message.chat.id, dicts.singers.show_all_singers_text, reply_markup=keys.buttons.callback_buttons(data)
-    )
-    bot.delete_message(call.message.chat.id, call.message.id)
+    msg = dicts.singers.show_all_singers_text
+    markup = keys.buttons.buttons_markup(data, call.message.id)
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
 def indicate_attendance(singer_id):
@@ -191,28 +217,26 @@ def indicate_attendance(singer_id):
 
 
 @bot.inline_handler(func=lambda query: len(query.query))
-def location_query(query: InlineQuery):
-    """Inline User Search"""
+def song_query(query: InlineQuery):
+    """Inline Song Search"""
 
-    singers = db_singer.get_all_singers()
-    call_config = cd.singer_display_text
+    call_config = cd.song_info_text
+    songs = db_songs.get_all_songs()
     data = []
 
-    for i, (name, singer_id) in enumerate(singers):
-        indicator = indicate_attendance(singer_id)
+    for i, (song_id, name, comment) in enumerate(songs):
+
         if query.query.lower().strip() in name.lower():
-            voices = ", ".join([voice for _, voice in db_singer.get_singer_voices(singer_id)])
-            suits = ", ".join([suit for _, suit, _ in db_singer.get_singer_suits(singer_id)])
-            if voices and suits:
-                content = InputTextMessageContent(f"Голос: {voices}\nКостюмы: {suits}")
-            elif voices:
-                content = InputTextMessageContent(f"Голос: {voices}")
-            elif suits:
-                content = InputTextMessageContent(f"Костюмы: {suits}")
+            sheets = len(db_songs.get_sheets_by_song_id(song_id))
+            records = len(db_songs.get_sound_by_song_id(song_id))
+            if comment:
+                content = InputTextMessageContent(f"Нот: {sheets}. Учебок: {records}.\n{comment}")
             else:
-                content = InputTextMessageContent(f"У этого певуна ещё нет ни голоса, ни костюмов.")
-            markup = keys.buttons.query_button(name, f"{call_config}:{singer_id}")
-            data.append(InlineQueryResultArticle(i, f"{indicator} {name}", content, reply_markup=markup))
+                content = InputTextMessageContent(f"Нот: {sheets}. Учебок: {records}.")
+
+            image_url = "https://images-na.ssl-images-amazon.com/images/I/71EodKggiQL.png"
+            markup = keys.buttons.query_button(name, f"{call_config}:{song_id}")
+            data.append(InlineQueryResultArticle(i, f"🎵 {name}", content, reply_markup=markup, thumb_url=image_url))
 
     bot.answer_inline_query(query.id, data)
 
@@ -221,7 +245,10 @@ def location_query(query: InlineQuery):
 def song_or_event(call: CallbackQuery):
     """Get id from data and call a song or an event creation."""
 
-    print(f"song_or_event {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, item_type = call.data.split(":")
     if item_type == "4":
         """Add location"""
@@ -242,7 +269,7 @@ def song_or_event(call: CallbackQuery):
     else:
         """For events show calendar buttons"""
         now = date.today()
-        start = timeit.default_timer()
+
         bot.send_message(
             call.message.chat.id,
             dicts.events.set_event_date_text,
@@ -250,13 +277,16 @@ def song_or_event(call: CallbackQuery):
                 call.from_user.id, now.year, now.month, int(item_type)
             )
         )
-        stop = timeit.default_timer()
-        print(f"Time admin_actions song_or_event: {stop-start}")
+
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def add_song_name(message: Message):
     """Save the song name to the database and call buttons to edit the song name/sounds/sheets."""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -275,6 +305,10 @@ def add_song_name(message: Message):
 def add_suit_name(message: Message):
     """Check if the suit name exists and ask to upload an image."""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
@@ -289,6 +323,10 @@ def add_suit_name(message: Message):
 
 
 def save_new_suit(message: Message, suit_name):
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)

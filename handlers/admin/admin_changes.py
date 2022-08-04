@@ -1,13 +1,12 @@
 import datetime
-import timeit
-from datetime import date
+import inspect
 
 import misc.messages.buttons_dictionary
 from config import VIP
-from keyboards.inline.choice_buttons import add_remove_participant_buttons, go_menu_button, close_btn
-from loader import bot
+from loader import bot, log
 from telebot.types import CallbackQuery, Message, InputMediaPhoto
 from misc.edit_functions import enter_new_event_time
+from misc.messages import buttons_dictionary as but_d
 from misc import dicts, keys, bot_speech, callback_dict as cd
 from database_control import db_songs, db_singer, db_event, db_attendance
 
@@ -15,6 +14,11 @@ from database_control import db_songs, db_singer, db_event, db_attendance
 @bot.callback_query_handler(func=lambda c: c.data == cd.display_suits_text)
 def show_suits(call: CallbackQuery):
     """Display all suits and buttons with suit names"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     suits = db_singer.get_all_suits()
 
     if suits:
@@ -23,26 +27,27 @@ def show_suits(call: CallbackQuery):
         data = []
         suit_data = []
 
-        for suit_id, suit_name, photo in suits:
-            data.append((suit_name, f"{call_config}:{item_type}:{suit_id}"))
-            suit_data.append(InputMediaPhoto(photo, suit_name))
+        for suit_id, text, photo in suits:
+            data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{suit_id}"})
+            suit_data.append(InputMediaPhoto(photo, text))
 
         bot.send_media_group(call.message.chat.id, suit_data)
-        bot.send_message(
-            call.message.chat.id, dicts.changes.edit_suit_text, reply_markup=keys.buttons.callback_buttons(data)
-        )
+        msg = dicts.changes.edit_suit_text
+        markup = keys.buttons.buttons_markup(data, call.message.id)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
     else:
-        bot.send_message(call.message.chat.id, dicts.changes.no_suits_to_edit_text)
-
-    bot.delete_message(call.message.chat.id, call.message.id)
+        bot.edit_message_text(dicts.changes.no_suits_to_edit_text, call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.change_callback.filter(type="event"))
 def display_event_options_to_change(call: CallbackQuery):
     """Display event options to change"""
 
-    print(f"We are in display_event_options_to_change CALL DATA = {call.data}\n")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, item_id = call.data.split(":")
 
     # "Название", "Дату", "Время", "Место", "Комментарий", "УДАЛИТЬ"
@@ -67,7 +72,10 @@ def display_event_options_to_change(call: CallbackQuery):
 def display_location_options_to_change(call: CallbackQuery):
     """Display location options to change"""
 
-    print(f"We are in display_location_options_to_change CALL DATA = {call.data}\n")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, item_id = call.data.split(":")
 
     location = db_event.search_location_by_id(int(item_id))
@@ -87,7 +95,10 @@ def display_location_options_to_change(call: CallbackQuery):
 def display_suit_options_to_change(call: CallbackQuery):
     """Display location options to change"""
 
-    print(f"We are in display_suit_options_to_change CALL DATA = {call.data}\n")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, item_id = call.data.split(":")
 
     suit = db_singer.search_suits_by_id(int(item_id))
@@ -105,22 +116,22 @@ def display_suit_options_to_change(call: CallbackQuery):
 def create_option_buttons(message: Message, call_config, item_id, options):
     data = []
 
-    for option_id, option in enumerate(options):
-        data.append((option, f"{call_config}:{option_id}:{item_id}"))
+    for option_id, text in enumerate(options):
+        data.append({"text": text, "callback_data": f"{call_config}:{option_id}:{item_id}"})
 
-    bot.send_message(
-        message.chat.id,
-        dicts.changes.select_option_to_change_text,
-        reply_markup=keys.buttons.callback_buttons(data)
-    )
-    bot.delete_message(message.chat.id, message.id)
+    msg = dicts.changes.select_option_to_change_text
+    markup = keys.buttons.buttons_markup(data, message.id)
+    bot.edit_message_text(msg, message.chat.id, message.id, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="0"))
 def edit_event_name(call: CallbackQuery):
     """Edit name for an Event"""
 
-    print(f"edit_event_name {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_event_name_text)
     bot.register_next_step_handler(msg, enter_new_event_name, event_id)
@@ -129,6 +140,10 @@ def edit_event_name(call: CallbackQuery):
 
 def enter_new_event_name(message: Message, event_id):
     """Update the name for an event"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -150,17 +165,17 @@ def enter_new_event_name(message: Message, event_id):
 def edit_event_date(call: CallbackQuery):
     """Edit date for an Event"""
 
-    print(f"admin_changes edit_event_date {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id = call.data.split(":")
-    now = date.today()
+    now = datetime.date.today()
     event_type = "4"  # edit
-    start = timeit.default_timer()
     markup = keys.calendar.generate_calendar_days(
         call.from_user.id, now.year, now.month, int(event_type), event_id
     )
     bot.send_message(call.message.chat.id, dicts.events.set_event_date_text, reply_markup=markup)
-    stop = timeit.default_timer()
-    print(f"Time admin_changes edit_event_date: {stop-start}")
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
@@ -168,7 +183,10 @@ def edit_event_date(call: CallbackQuery):
 def edit_event_time(call: CallbackQuery):
     """Edit time for an Event"""
 
-    print(f"edit_event_time {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id = call.data.split(":")
     event_date = db_event.get_event_date(event_id)
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_event_time_text)
@@ -180,21 +198,26 @@ def edit_event_time(call: CallbackQuery):
 def edit_event_location(call: CallbackQuery):
     """Edit location for an Event"""
 
-    print(f"edit_event_location {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id = call.data.split(":")
-    bot.send_message(
-        call.message.chat.id,
-        dicts.events.choose_event_location_text,
-        reply_markup=keys.buttons.choose_location(event_id)
+
+    msg = dicts.events.choose_event_location_text
+    bot.edit_message_text(
+        msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.choose_location(event_id)
     )
-    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="4"))
 def edit_comment_event(call: CallbackQuery):
     """Edit comment for an Event"""
 
-    print(f"edit_comment_event {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id = call.data.split(":")
     comment = db_event.get_event_by_id(event_id)[6]
     if comment:
@@ -206,6 +229,10 @@ def edit_comment_event(call: CallbackQuery):
 
 def enter_new_event_comment(message: Message, event_id):
     """Update the comment for an event"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -233,7 +260,10 @@ def enter_new_event_comment(message: Message, event_id):
 def edit_event_participant(call: CallbackQuery):
     """Edit Event participants"""
 
-    print(f"admin_changes.py edit_event_participant {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id = call.data.split(":")
     attendance_buttons(call, event_id)
 
@@ -242,7 +272,10 @@ def edit_event_participant(call: CallbackQuery):
 def event_attendance(call: CallbackQuery):
     """Display singers attendance for an event"""
 
-    print(f"admin_changes.py event_attendance {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, event_id = call.data.split(":")
     attendance_buttons(call, event_id)
 
@@ -251,7 +284,8 @@ def attendance_buttons(call, event_id):
     attendance_data = []
     attendance_to_count = []
     for _, fullname, telegram_name, attendance in db_attendance.get_attendance_by_event_id(event_id):
-        attendance_data.append((fullname, telegram_name, dicts.attends.attendance_pics_tuple[int(attendance)]))
+        text = f"{dicts.attends.attendance_pics_tuple[int(attendance)]} {fullname}"
+        attendance_data.append({"text": text, "callback_data": telegram_name})
         attendance_to_count.append(attendance)
 
     if attendance_data:
@@ -259,7 +293,8 @@ def attendance_buttons(call, event_id):
                     f"{dicts.attends.attendance_text_tuple[1]} - {attendance_to_count.count(1)}\n" \
                     f"{dicts.attends.attendance_text_tuple[2]} - {attendance_to_count.count(2)}"
         msg = f"{dicts.attends.attendant_singers_text}{statistic}"
-        markup = keys.buttons.participant_message_buttons(attendance_data, event_id)
+        markup = keys.buttons.buttons_markup(attendance_data, call.message.id, event_id=event_id, menu_btn=True,
+                                             participant=True)
     else:
         msg = dicts.attends.empty_attendance_text
         markup = keys.buttons.empty_participant_buttons(event_id)
@@ -270,7 +305,10 @@ def attendance_buttons(call, event_id):
 def delete_event(call: CallbackQuery):
     """DELETE Event"""
 
-    print(f"delete_event {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id = call.data.split(":")
 
     item_name = db_event.get_event_name(event_id)
@@ -282,41 +320,63 @@ def delete_confirmation_buttons(call, item_id, item_name, item_type):
     data = []
     call_config = cd.delete_confirmation_text
     msg = f"{dicts.changes.delete_confirmation_text} {item_name}?"
-    for i, answer in enumerate(dicts.changes.delete_confirmation_text_tuple):
-        data.append((answer, f"{call_config}:{item_type}:{item_id}:{i}"))
-    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.callback_buttons(data))
+    for i, text in enumerate(dicts.changes.delete_confirmation_text_tuple):
+        data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{item_id}:{i}"})
+
+    markup = keys.buttons.buttons_markup(data, call.message.id)
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="7"))
 def edit_concert_songs(call: CallbackQuery):
     """Edit songs for a concert"""
 
-    print(f"edit_event_songs {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, concert_id = call.data.split(":")
     call_config = cd.change_songs_text
     data = []
+    msg = get_song_list(concert_id)
 
-    for option_id, option_name in enumerate(dicts.changes.add_remove_text_tuple):
-        data.append((option_name, f"{call_config}:{concert_id}:{option_id}"))
-    bot.send_message(
-        call.message.chat.id, dicts.singers.what_to_do_text, reply_markup=keys.buttons.callback_buttons(data)
-    )
-    bot.delete_message(call.message.chat.id, call.message.id)
+    msg += f"\n{dicts.singers.what_to_do_text}"
+
+    for option_id, text in enumerate(dicts.changes.add_remove_text_tuple):
+        data.append({"text": text, "callback_data": f"{call_config}:{concert_id}:{option_id}"})
+
+        markup = keys.buttons.buttons_markup(data, call.message.id, event_id=concert_id, menu_btn=True)
+        bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
+
+
+def get_song_list(concert_id):
+    songs = db_songs.get_songs_by_event_id(concert_id)
+    msg = ""
+    if songs:
+        for _, song, _ in songs:
+            msg += f"🎵 {song}\n"
+    else:
+        msg += f"{dicts.events.repertoire_is_empty_text}\n"
+    return msg
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="8"))
 def edit_concert_suit(call: CallbackQuery):
     """Show add or remove button to edit suit for a concert"""
 
-    print(f"edit_event_suit {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id = call.data.split(":")
     suit = db_event.get_suit_by_event_id(event_id)
 
     if suit:
         call_config = cd.remove_suit_text
         msg = dicts.changes.concert_suit_change_text
-        markup = keys.buttons.callback_buttons([(misc.messages.buttons_dictionary.suit_change_btn_text,
-                                                 f"{call_config}:{event_id}:{suit[0]}")])
+        markup = keys.buttons.buttons_markup([{"text": misc.messages.buttons_dictionary.suit_change_btn_text,
+                                               "callback_data": f"{call_config}:{event_id}:{suit[0]}"}],
+                                             call.message.id)
         bot.send_photo(call.message.chat.id, suit[2], reply_markup=keys.buttons.close_markup)
         bot.send_message(call.message.chat.id, msg, reply_markup=markup)
 
@@ -339,16 +399,23 @@ def select_suit_for_concert(call, event_id):
     suit_data = []
 
     for suit_id, suit_name, photo, amount in suits:
-        data.append((f"{amount}/{singers_amount} {suit_name}", f"{call_config}:{event_id}:{suit_id}"))
+        data.append(
+            {"text": f"{amount}/{singers_amount} {suit_name}",
+             "callback_data": f"{call_config}:{event_id}:{suit_id}"}
+        )
         suit_data.append(InputMediaPhoto(photo, suit_name))
 
     bot.send_media_group(call.message.chat.id, suit_data)
-    bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.callback_buttons(data))
+    bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.remove_suit_callback.filter())
 def display_suit_options_to_change(call: CallbackQuery):
     """Remove current concert suit and display suit options to change"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
     _, event_id, suit_id = call.data.split(":")
     db_event.remove_suit_from_concert(event_id, suit_id)
@@ -360,36 +427,42 @@ def display_suit_options_to_change(call: CallbackQuery):
 def edit_songs_for_concert(call: CallbackQuery):
     """List of songs to edit"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, concert_id, option_id = call.data.split(":")
 
     show_songs_for_concert(call.message, concert_id, option_id)
 
 
 def show_songs_for_concert(message, concert_id, option_id):
+
     call_config = cd.concert_songs_text
     data = []
 
     if option_id == "0":
         option = "add"
         songs = db_songs.get_remain_songs(concert_id)
-
     else:
         option = "remove"
         songs = db_songs.get_songs_by_event_id(concert_id)
-    for song_id, song_name, _ in songs:
-        data.append((song_name, f"{call_config}:{option}:{concert_id}:{song_id}"))
 
-    bot.edit_message_text(
-        dicts.changes.add_remove_text_tuple[int(option_id)],
-        message.chat.id,
-        message.id,
-        reply_markup=keys.buttons.callback_buttons(data)
-    )
+    for song_id, text, _ in songs:
+        data.append({"text": text, "callback_data": f"{call_config}:{option}:{concert_id}:{song_id}"})
+
+    msg = dicts.changes.add_remove_text_tuple[int(option_id)]
+    markup = keys.buttons.buttons_markup(data, message.id, event_id=concert_id, menu_btn=True)
+    bot.edit_message_text(msg, message.chat.id, message.id, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.concert_songs_callback.filter())
 def add_or_remove_songs(call: CallbackQuery):
     """Add or remove songs in concert program"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
     _, option, concert_id, song_id = call.data.split(":")
 
@@ -415,6 +488,10 @@ def add_or_remove_songs(call: CallbackQuery):
 def change_suit_for_concert(call: CallbackQuery):
     """Add a suit for a concert"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, concert_id, suit_id = call.data.split(":")
     if db_event.add_suit_to_concert(concert_id, suit_id):
         bot.send_message(call.message.chat.id, dicts.changes.suit_added_text)
@@ -432,6 +509,10 @@ def change_suit_for_concert(call: CallbackQuery):
 def edit_location_name(call: CallbackQuery):
     """Edit location name"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, location_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_name_text)
     bot.register_next_step_handler(msg, enter_new_location_name, location_id)
@@ -440,6 +521,10 @@ def edit_location_name(call: CallbackQuery):
 
 def enter_new_location_name(message: Message, location_id):
     """Update the name for a location"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -458,6 +543,10 @@ def enter_new_location_name(message: Message, location_id):
 def edit_location_url(call: CallbackQuery):
     """Edit location URL"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, location_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_location_url_text)
     bot.register_next_step_handler(msg, enter_new_location_url, location_id)
@@ -466,6 +555,10 @@ def edit_location_url(call: CallbackQuery):
 
 def enter_new_location_url(message: Message, location_id):
     """Update the name for a location"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "отмена" in message.text.lower():
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -489,6 +582,10 @@ def enter_new_location_url(message: Message, location_id):
 def edit_location_none(call: CallbackQuery):
     """Edit location none"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, location_id = call.data.split(":")
     bot.send_sticker(
         call.message.chat.id,
@@ -501,6 +598,10 @@ def edit_location_none(call: CallbackQuery):
 def delete_location(call: CallbackQuery):
     """DELETE location"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, location_id = call.data.split(":")
 
     item_name = db_event.search_location_by_id(location_id)[0]
@@ -512,6 +613,10 @@ def delete_location(call: CallbackQuery):
 def edit_suit_name(call: CallbackQuery):
     """Edit suit name"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, suit_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_suit_name_text)
     bot.register_next_step_handler(msg, enter_new_suit_name, suit_id)
@@ -520,6 +625,10 @@ def edit_suit_name(call: CallbackQuery):
 
 def enter_new_suit_name(message: Message, suit_id):
     """Update the name for a suit"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -539,6 +648,10 @@ def enter_new_suit_name(message: Message, suit_id):
 def edit_suit_photo(call: CallbackQuery):
     """Edit suit photo"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, suit_id = call.data.split(":")
     msg = bot.send_message(call.message.chat.id, dicts.changes.drop_new_photo_text)
     bot.register_next_step_handler(msg, drop_new_suit_photo, suit_id)
@@ -547,6 +660,10 @@ def edit_suit_photo(call: CallbackQuery):
 
 def drop_new_suit_photo(message: Message, suit_id):
     """Update the photo for a suit"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -576,6 +693,10 @@ def drop_new_suit_photo(message: Message, suit_id):
 def edit_suit_name(call: CallbackQuery):
     """DELETE suit"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, suit_id = call.data.split(":")
 
     item_name = db_singer.search_suits_by_id(suit_id)[0]
@@ -587,7 +708,10 @@ def edit_suit_name(call: CallbackQuery):
 def delete_item(call: CallbackQuery):
     """DELETE confirmation"""
 
-    print(f"delete_item {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, item_type, item_id, action_id = call.data.split(":")
 
     if action_id == "0":
@@ -636,6 +760,10 @@ def delete_item(call: CallbackQuery):
 def blacklist_user_remove(call: CallbackQuery):
     """Remove a user from the blacklist"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, telegram_id = call.data.split(":")
     if db_singer.remove_user_from_blacklist(int(telegram_id)):
         bot.send_message(call.message.chat.id, dicts.changes.user_is_free_text)
@@ -648,57 +776,67 @@ def blacklist_user_remove(call: CallbackQuery):
 def remove_participation(call: CallbackQuery):
     """Display singers to remove from an event"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, event_id = call.data.split(":")
     remove_participant_buttons(call, event_id)
-    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def remove_participant_buttons(call, event_id):
     remove_data = [
-        (fullname, f"singer_attendance:remove:{event_id}:{singer_id}")
-        for singer_id, fullname, *_ in db_attendance.get_attendance_by_event_id(event_id)
+        {"text": text, "callback_data": f"singer_attendance:remove:{event_id}:{singer_id}"}
+        for singer_id, text, *_ in db_attendance.get_attendance_by_event_id(event_id)
     ]
 
-    markup = keys.buttons.callback_buttons(remove_data)
-    markup.keyboard.pop()
-    markup.add(add_remove_participant_buttons(event_id, True))
-    markup.add(go_menu_button(event_id, "event"))
-    markup.add(close_btn)
-
-    bot.send_message(
-        call.message.chat.id, dicts.attends.choose_singer_to_add_text, reply_markup=markup
-    )
+    msg = dicts.attends.choose_singer_to_add_text
+    markup = keys.buttons.buttons_markup(remove_data, call.message.id, event_id=event_id, menu_btn=True,
+                                         participant=True)
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.add_participant_callback.filter())
 def add_participant(call: CallbackQuery):
     """Display singers to add into an event"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, event_id = call.data.split(":")
     add_participant_buttons(call, event_id)
-    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def add_participant_buttons(call, event_id):
+
     add_data = [
-        (fullname, f"singer_attendance:add:{event_id}:{singer_id}")
-        for singer_id, fullname, _ in db_attendance.get_not_participating_by_event_id(event_id)
+        {"text": text, "callback_data": f"singer_attendance:add:{event_id}:{singer_id}"}
+        for singer_id, text, _ in db_attendance.get_not_participating_by_event_id(event_id)
     ]
 
-    markup = keys.buttons.callback_buttons(add_data)
-    markup.keyboard.pop()
-    markup.add(add_remove_participant_buttons(event_id, False))
-    markup.add(go_menu_button(event_id, "event"))
-    markup.add(close_btn)
+    msg = dicts.attends.choose_singer_to_add_text
+    markup = keys.buttons.buttons_markup(add_data, call.message.id, event_id=event_id, menu_btn=True, participant=True)
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
-    bot.send_message(
-        call.message.chat.id, dicts.attends.choose_singer_to_add_text, reply_markup=markup
-    )
+    # markup = keys.buttons.buttons_markup(add_data!)
+    # markup.keyboard.pop()
+    # markup.add(add_remove_participant_buttons(event_id, False))
+    # markup.add(go_menu_button(event_id, "event"))
+    # markup.add(close_btn)
+    #
+    # bot.send_message(
+    #     call.message.chat.id, dicts.attends.choose_singer_to_add_text, reply_markup=markup
+    # )
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.add_all_participants_callback.filter())
 def add_all_participants(call: CallbackQuery):
     """Add all available singers with voices into an event"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"!!! {__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
     _, event_id = call.data.split(":")
     db_attendance.add_all_singers_attendance(event_id)
@@ -716,6 +854,10 @@ def add_all_participants(call: CallbackQuery):
 def remove_all_participants(call: CallbackQuery):
     """Remove all singers from the event"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"@@@ {__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, event_id = call.data.split(":")
     db_attendance.remove_all_singers_attendance(event_id)
     item_type = "event"
@@ -732,6 +874,10 @@ def remove_all_participants(call: CallbackQuery):
 def remove_singer_attendance(call: CallbackQuery):
     """Remove selected singer attendance from an event"""
 
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id, singer_id = call.data.split(":")
     singer_name = db_singer.get_singer_fullname(singer_id)
 
@@ -742,12 +888,15 @@ def remove_singer_attendance(call: CallbackQuery):
     db_attendance.remove_singer_attendance(event_id, singer_id)
     bot.send_message(call.message.chat.id, f"{singer_name} {dicts.attends.singer_removed_text}")
     remove_participant_buttons(call, event_id)
-    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.singer_attendance_callback.filter(action="add"))
 def add_singer_attendance(call: CallbackQuery):
     """Add selected singer attendance from an event"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
     *_, event_id, singer_id = call.data.split(":")
     singer_name = db_singer.get_singer_fullname(singer_id)
@@ -759,15 +908,16 @@ def add_singer_attendance(call: CallbackQuery):
     db_attendance.add_singer_attendance(event_id, singer_id)
     bot.send_message(call.message.chat.id, f"{singer_name} {dicts.attends.singer_added_text}")
     add_participant_buttons(call, event_id)
-    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.singer_attendance_callback.filter(action="edit"))
 def edit_singer_attendance(call: CallbackQuery):
     """Edit a singer attendance by a singer for an event"""
 
-    print(f"❗️ admin_changes.py edit_singer_attendance "
-          f"{call.from_user.username} {call.from_user.full_name} {call.data}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id, decision = call.data.split(":")
     db_attendance.edit_singer_attendance(event_id, call.from_user.id, decision)
     bot.send_message(call.message.chat.id, f"{dicts.attends.attendance_changed_text}")

@@ -1,4 +1,6 @@
-from loader import bot
+import inspect
+
+from loader import bot, log
 from database_control import db_singer
 from telebot.types import CallbackQuery
 from keyboards.inline.callback_datas import singer_add_callback, singer_remove_callback
@@ -10,8 +12,12 @@ from misc.messages.singer_dictionary import add_wrong_text, remove_wrong_text, s
 @bot.callback_query_handler(func=None, singer_config=singer_add_callback.filter())
 def add_action(call: CallbackQuery):
     """Add singer's something to the database"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, item, singer_id, item_id = call.data.split(":")
-    print(f"{item}, {singer_id}, {item_id}, {call.data}")
 
     if item == "suit":
         db_singer.add_singer_suit(singer_id, item_id)
@@ -31,8 +37,12 @@ def add_action(call: CallbackQuery):
 @bot.callback_query_handler(func=None, singer_config=singer_remove_callback.filter())
 def remove_action(call: CallbackQuery):
     """Remove singer's something from the database"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, item, singer_id, item_id = call.data.split(":")
-    print(f"{item}, {singer_id}, {item_id}, {call.data}")
 
     if item == "suit":
         db_singer.remove_suit(singer_id, item_id)

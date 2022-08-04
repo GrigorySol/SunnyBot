@@ -1,7 +1,7 @@
 import misc.messages.changes_dictionary
 from loader import bot
 from telebot.types import InputMediaPhoto, Message
-from keyboards.inline.choice_buttons import callback_buttons
+from keyboards.inline.choice_buttons import buttons_markup
 from misc import dicts
 from database_control import db_singer, db_event
 
@@ -24,12 +24,12 @@ def display_suits(message, sid):
 
     # add/remove/close buttons
     for i, text in enumerate(dicts.changes.add_remove_text_tuple):
-        data.append((text, f"{call_config}:{i}:{sid}"))
+        data.append({"text": text, "callback_data": f"{call_config}:{i}:{sid}"})
 
     if not suits:
         data.pop()
-        msg = f"{dicts.singers.no_suit_text}"
-        bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
+        msg = dicts.singers.no_suit_text
+        bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data, message.id))
         return
 
     msg = f"{dicts.singers.available_suits}\n{', '.join(suit_names)}.\n"
@@ -40,7 +40,7 @@ def display_suits(message, sid):
         msg += dicts.changes.add_remove_text
 
     bot.send_media_group(message.chat.id, suit_data)
-    bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
+    bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data, message.id))
 
 
 def display_voices(message, sid):
@@ -50,7 +50,7 @@ def display_voices(message, sid):
     data = []
 
     for i, text in enumerate(dicts.changes.add_remove_text_tuple):
-        data.append((text, f"{call_config}:{i}:{sid}"))
+        data.append({"text": text, "callback_data": f"{call_config}:{i}:{sid}"})
 
     if not voices:
         data.pop()
@@ -70,7 +70,7 @@ def display_voices(message, sid):
             voice_names.append(name)
         msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{misc.messages.changes_dictionary.edit_text}"
 
-    bot.send_message(message.chat.id, msg, reply_markup=callback_buttons(data))
+    bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data, message.id))
 
 
 def action_definition(action: str):
@@ -93,21 +93,21 @@ def edit_suits(call):
 
     if action_id == "1":
         suits = db_singer.get_singer_suits(sid)
-        for suit_id, name, _ in suits:
-            data.append((name, f"{call_config}:suit:{sid}:{suit_id}"))
+        for suit_id, text, _ in suits:
+            data.append({"text": text, "callback_data": f"{call_config}:suit:{sid}:{suit_id}"})
 
     else:
         suit_data = []
         suits = db_singer.get_all_suits()
-        for suit_id, name, photo in suits:
+        for suit_id, text, photo in suits:
             available = db_singer.get_singer_suits(sid)
-            if (suit_id, name, photo) in available:
+            if (suit_id, text, photo) in available:
                 continue
-            data.append((name, f"{call_config}:suit:{sid}:{suit_id}"))
-            suit_data.append(InputMediaPhoto(photo, name))
+            data.append({"text": text, "callback_data": f"{call_config}:suit:{sid}:{suit_id}"})
+            suit_data.append(InputMediaPhoto(photo, text))
         bot.send_media_group(call.message.chat.id, suit_data)
 
-    bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+    bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data, call.message.id))
 
 
 def edit_voices(call):
@@ -118,22 +118,26 @@ def edit_voices(call):
 
     if action_id == "1":
         voices = db_singer.get_singer_voices(sid)
-        for voice_id, name in voices:
-            data.append((name, f"{call_config}:voice:{sid}:{voice_id}"))
+        for voice_id, text in voices:
+            data.append({"text": text, "callback_data": f"{call_config}:voice:{sid}:{voice_id}"})
 
     else:
         voices = db_singer.get_all_voices()
-        for voice_id, name in voices:
+        for voice_id, text in voices:
             available = db_singer.get_singer_voices(sid)
-            if (voice_id, name) in available:
+            if (voice_id, text) in available:
                 continue
-            data.append((name, f"{call_config}:voice:{sid}:{voice_id}"))
+            data.append({"text": text, "callback_data": f"{call_config}:voice:{sid}:{voice_id}"})
 
-    bot.send_message(call.message.chat.id, msg, reply_markup=callback_buttons(data))
+    bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data, call.message.id))
 
 
 def enter_new_event_time(message: Message, event_id: int, date):
     """Update the time for an event"""
+
+    if not message.text or "/" in message.text or message.text[0].isalpha():
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
 
     time = message.text
     if '-' in time:
