@@ -4,7 +4,8 @@ from config import BOT_TOKEN
 from telebot import TeleBot, custom_filters
 from handlers.singers import filters
 
-logging.basicConfig(level=logging.INFO)
+log = logging
+log.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 bot = TeleBot(BOT_TOKEN)
 

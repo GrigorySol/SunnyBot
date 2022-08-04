@@ -1,7 +1,9 @@
+import inspect
+
 import misc.messages.buttons_dictionary
 import misc.messages.changes_dictionary
 from config import VIP
-from loader import bot
+from loader import bot, log
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
 from database_control import db_songs, db_singer
 from misc import dicts, keys, callback_dict as cd
@@ -13,7 +15,9 @@ def show_song_info(call: CallbackQuery):
     Show song info and allow admin to edit.
     """
 
-    print(f"show_song_info {call.data} {call.from_user.full_name}")
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     song_id = call.data.split(":")[1]
     sheets = db_songs.get_sheets_by_song_id(song_id)
     sounds = db_songs.get_sound_by_song_id(song_id)
@@ -83,7 +87,9 @@ def show_song_info(call: CallbackQuery):
 def edit_song_options(call: CallbackQuery):
     """Manage song edit options: Name, Sheets, Sound or DELETE"""
 
-    print()
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, song_id, option_id = call.data.split(":")
 
     # change name
@@ -160,7 +166,9 @@ def edit_song_options(call: CallbackQuery):
 def enter_new_song_name(message: Message, song_id):
     """UPDATE the song name in the database"""
 
-    print(f"enter_new_song_name {song_id}, {message.text}")
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
@@ -174,6 +182,9 @@ def enter_new_song_name(message: Message, song_id):
 
 def enter_new_song_comment(message: Message, song_id):
     """Update the comment for a song"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -194,7 +205,9 @@ def enter_new_song_comment(message: Message, song_id):
 def edit_song_materials(call: CallbackQuery):
     """Add or Remove sheets and sounds for a song"""
 
-    print(f"edit_song_materials {call.data}")
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, song_id, option_id, edit_id = call.data.split(":")
 
     def _add():
@@ -241,6 +254,9 @@ def edit_song_materials(call: CallbackQuery):
 def add_sheets_or_sounds(message: Message, song_id):
     """Manage batch or a single file upload processing"""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     if message.document:        # sheets
         doc_file_id = message.document.file_id
         voice_id = voice_detect(message.document.file_name)
@@ -269,6 +285,9 @@ def voice_detect(file_name):
 
 def edit_song_menu(message, song_id, msg):
     """Display buttons to edit song name, sheets or sounds"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not db_songs.song_exists(song_id):
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"

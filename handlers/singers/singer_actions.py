@@ -1,9 +1,10 @@
 import datetime
+import inspect
 from random import randint
 
 import misc.messages.buttons_dictionary
 from config import VIP, VIP2
-from loader import bot
+from loader import bot, log
 from database_control import db_singer, db_songs, db_event, db_attendance
 from telebot.custom_filters import TextFilter
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
@@ -15,7 +16,9 @@ from misc import dicts, keys, callback_dict as cd
 def rolling_callback_buttons(call: CallbackQuery):
     """Roll a page with buttons"""
 
-    print(f"buttons_rolling {call.data}")
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, direction, btn_type, index, event_id = call.data.split(":")
 
     if not keys.buttons.keep_data.row:
@@ -47,6 +50,9 @@ def rolling_callback_buttons(call: CallbackQuery):
 def show_voice(message: Message):
     """Display singer voices"""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     singer_id = db_singer.get_singer_id(message.from_user.id)
     voices = db_singer.get_singer_voices(singer_id)
     if not voices:
@@ -59,6 +65,10 @@ def show_voice(message: Message):
 @bot.message_handler(commands=["suits"])
 def show_suits(message: Message):
     """Display singer suits and buttons to add or remove"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     singer_id = db_singer.get_singer_id(message.from_user.id)
     display_suits(message, singer_id)
 
@@ -72,6 +82,10 @@ def show_suits(message: Message):
 @bot.callback_query_handler(func=None, singer_config=keys.call.suit_edit_callback.filter())
 def edit_suits_buttons(call: CallbackQuery):
     """Display buttons to add or remove suit"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     edit_suits(call)
     bot.delete_message(call.message.chat.id, call.message.id)
 
@@ -79,6 +93,9 @@ def edit_suits_buttons(call: CallbackQuery):
 @bot.message_handler(commands=["songs"])
 def chose_song_filter(message: Message):
     """Display buttons for selecting the output of all songs, in work or concert program."""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     call_config = cd.song_filter_text
     data = []
@@ -94,6 +111,9 @@ def chose_song_filter(message: Message):
 def show_songs(call: CallbackQuery):
     """Display buttons with all song names, songs in work or upcoming concerts."""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, filter_id = call.data.split(":")
     data = []
     call_config = cd.song_info_text
@@ -107,9 +127,12 @@ def show_songs(call: CallbackQuery):
         songs = db_songs.get_songs_in_work(2, f"{start_date}", f"{end_date}")
 
     else:
-        concerts = db_event.search_events_by_event_type(2)
+        actual_concerts = db_event.search_future_events_by_event_type(2, datetime.datetime.now().date())
         call_config = cd.concert_filter_text
-        for concert_id, concert_name, date, _ in concerts:
+        if not actual_concerts:
+            bot.send_message(call.message.chat.id, dicts.singers.no_concerts_planned)
+            return
+        for concert_id, concert_name, date, _ in actual_concerts:
             _, month, day = date.split("-")
             name = f"{concert_name} {int(day)} {dicts.events.chosen_months_text_tuple[int(month) - 1]}"
             data.append((name, f"{call_config}:{concert_id}"))
@@ -133,6 +156,9 @@ def show_songs(call: CallbackQuery):
 @bot.callback_query_handler(func=None, singer_config=keys.call.concert_filter_callback.filter())
 def concert_songs(call: CallbackQuery):
     """Display buttons with song names for a concert program."""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
     _, event_id = call.data.split(":")
     data = []
@@ -165,18 +191,30 @@ def concert_songs(call: CallbackQuery):
 
 @bot.message_handler(commands=["events"])
 def nothing_to_say(message: Message):
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     bot.send_sticker(message.chat.id,
                      "CAACAgIAAxkBAAETnXxicIxNf0TYCRSrmzD9SD-iTjSr1QAClBQAAsBCeEsVRtvoCLXI0iQE")
 
 
 @bot.message_handler(commands=["rehearsal"])
 def nothing_to_say(message: Message):
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     bot.send_sticker(message.chat.id,
                      "CAACAgIAAxkBAAETnX5icIyDshGmTfhQFatW5TJnbJkjkQACtBoAApsZwUq8_BZS0faNxyQE")
 
 
 @bot.message_handler(commands=["concerts"])
 def nothing_to_say(message: Message):
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     bot.send_audio(message.chat.id,
                    "CQACAgIAAxkBAAETnYJicIzUt04joDIy7_uLOkUpHENW3wACKBoAAhFE4UpblvEevwxe_yQE")
 
@@ -184,6 +222,9 @@ def nothing_to_say(message: Message):
 @bot.callback_query_handler(func=None, calendar_config=keys.call.show_event_callback.filter())
 def show_event(call: CallbackQuery):
     """Display info about the chosen event"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
     _, event_id = call.data.split(":")
     _, event_type, event_name, event_date, time, location_id, comment = db_event.search_event_by_id(event_id)
@@ -262,12 +303,20 @@ def show_event(call: CallbackQuery):
 @bot.callback_query_handler(func=lambda c: c.data == cd.close_text)
 def close_btn(call: CallbackQuery):
     """Remove a block of the buttons"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.message_handler(text=TextFilter(contains=dicts.filters.calendar_text_list, ignore_case=True))
 def calendar_message(message: Message):
     """Answer to type a command /calendar"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     if message.via_bot:
         return
     bot.send_message(message.chat.id, dicts.singers.calendar_command_text, reply_to_message_id=message.id)
@@ -276,6 +325,9 @@ def calendar_message(message: Message):
 @bot.message_handler(text=TextFilter(contains=dicts.filters.songs_text_list, ignore_case=True))
 def song_message(message: Message):
     """Answer to type a command /songs"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if message.via_bot:
         return
@@ -286,6 +338,9 @@ def song_message(message: Message):
 def suit_message(message: Message):
     """Answer to type a command /suits"""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     if message.via_bot:
         return
     bot.send_message(message.chat.id, dicts.singers.suit_command_text, reply_to_message_id=message.id)
@@ -294,6 +349,9 @@ def suit_message(message: Message):
 @bot.message_handler(text=TextFilter(contains=dicts.filters.boring_text_list, ignore_case=True))
 def boring_message(message: Message):
     """Send a random joke into the chat"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if message.via_bot:
         return
@@ -305,6 +363,9 @@ def boring_message(message: Message):
 @bot.message_handler(text=TextFilter(contains=dicts.filters.fool_text_list, ignore_case=True))
 def fool_message(message: Message):
     """Answer for the fool"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if message.via_bot:
         return
@@ -326,6 +387,9 @@ def check_commands(message: Message):
 @bot.message_handler(func=check_commands)
 def nothing_to_say(message: Message):
     """Random answer on unrecognised message"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     text = randomizer(dicts.jokes.random_answer_text_tuple)
     bot.forward_message(VIP, message.chat.id, message.id, disable_notification=True)

@@ -1,8 +1,8 @@
-import timeit
 from datetime import datetime, date, timedelta
+import inspect
 
 from config import VIP
-from loader import bot
+from loader import bot, log
 from database_control import db_event, db_attendance, db_singer
 from telebot.types import Message, CallbackQuery
 from misc.edit_functions import enter_new_event_time
@@ -25,20 +25,24 @@ event_data = EventData()
 @bot.message_handler(commands=['calendar'])
 def calendar_command_handler(message: Message):
     """Show calendar buttons"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     now = date.today()
     event_id = "0"
-    start = timeit.default_timer()
     bot.send_message(message.chat.id, dicts.events.set_event_date_text,
                      reply_markup=keys.calendar.generate_calendar_days(
                          message.from_user.id, now.year, now.month, int(event_id))
                      )
-    stop = timeit.default_timer()
-    print(f"Time admin_event calendar_command_handler: {stop-start}")
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.calendar_data.filter(event_type="0"))
 def calendar_show_event_handler(call: CallbackQuery):
     """Show events for the chosen date"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
     *_, year, month, day = call.data.split(":")
     # Show all events for this day
@@ -72,6 +76,9 @@ def calendar_show_event_handler(call: CallbackQuery):
 def edit_event_date_handler(call: CallbackQuery):
     """Edit date for the chosen event"""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, event_type, event_id, year, month, day = call.data.split(":")
     event_data.date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
     # Edit event date
@@ -86,6 +93,9 @@ def edit_event_date_handler(call: CallbackQuery):
 @bot.callback_query_handler(func=None, calendar_config=keys.call.calendar_data.filter())
 def add_event_time_handler(call: CallbackQuery):
     """Add time for a new event"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
     _, event_type, _, year, month, day = call.data.split(":")
     event_data.date = f"{year}-{str(month).zfill(2)}-{str(day).zfill(2)}"
@@ -102,6 +112,9 @@ def add_event_time_handler(call: CallbackQuery):
 
 def add_time_for_event(message: Message):
     """Get time from the input and ask to name the event or set the place"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     time = message.text
     if message.text and "/" in message.text:
@@ -140,6 +153,10 @@ def add_time_for_event(message: Message):
 
 def set_name_for_event(message: Message):
     """Get event name from the input and ask to set the place"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     if message.text and "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
@@ -156,6 +173,9 @@ def set_name_for_event(message: Message):
 def add_new_location(call: CallbackQuery):
     """Ask to input the URL for a new location"""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     *_, event_id = call.data.split(":")
     event_data.event_id = event_id
     msg_data = bot.send_message(call.message.chat.id, dicts.events.enter_location_url_text)
@@ -165,6 +185,9 @@ def add_new_location(call: CallbackQuery):
 
 def check_location_url(message: Message, event_id=None):
     """Check if URL for the location exists. Ask a name for the Location."""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "отмена" in message.text.lower():
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -188,6 +211,9 @@ def check_location_url(message: Message, event_id=None):
 def save_location_and_event(message: Message, url, event_id):
     """Save location and event"""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
@@ -210,6 +236,10 @@ def save_location_and_event(message: Message, url, event_id):
 
 def save_new_event(location_id, message):
     """Save new event and display buttons depending on event type."""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+
     event_data.event_id = db_event.add_event(event_data.event_type, event_data.event_name,
                                              event_data.date, event_data.time, location_id)
     print(f"save_new_event {event_data.event_type},"
@@ -242,6 +272,9 @@ def save_new_event(location_id, message):
 def show_repeat_interval_buttons(call: CallbackQuery):
     """Show buttons to choose interval"""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, event_id = call.data.split(":")
     call_config = cd.event_interval_text
     data = []
@@ -258,6 +291,9 @@ def show_repeat_interval_buttons(call: CallbackQuery):
 def number_of_repeats(call: CallbackQuery):
     """Ask to enter the number"""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, event_id, interval = call.data.split(":")
     # Save data to use in the next function set_event_repeating
     msg_data = bot.send_message(call.message.chat.id, dicts.events.set_repeat_times_text)
@@ -267,6 +303,9 @@ def number_of_repeats(call: CallbackQuery):
 
 def check_data_for_event_repeating(message: Message, event_id, interval):
     """Repeat event № times with defined interval"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -301,6 +340,9 @@ def check_data_for_event_repeating(message: Message, event_id, interval):
 def choose_location(call: CallbackQuery):
     """Show the location buttons"""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     locations = db_event.get_all_locations()
     call_data, _, event_id = call.data.split(":")
     event_data.event_id = event_id
@@ -317,6 +359,9 @@ def choose_location(call: CallbackQuery):
 def save_event(call: CallbackQuery):
     """Get location from the callback data and save the event"""
 
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, location_id, _ = call.data.split(":")
     if event_data.is_in_progress:
         save_new_event(location_id, call.message)
@@ -332,8 +377,9 @@ def save_event(call: CallbackQuery):
 def calendar_action_handler(call: CallbackQuery):
     """Create calendar day buttons"""
 
-    print(f"❗️ admin_event.py calendar_action_handler "
-          f"{call.from_user.username} {call.from_user.full_name} {call.data}")
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
     _, event_type, event_id, year, month = call.data.split(":")
     bot.edit_message_reply_markup(
         call.message.chat.id,
@@ -347,6 +393,9 @@ def calendar_action_handler(call: CallbackQuery):
 @bot.callback_query_handler(func=None, calendar_config=keys.call.calendar_zoom.filter())
 def calendar_zoom_out_handler(call: CallbackQuery):
     """Create calendar month buttons"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
 
     _, event_type, event_id, year = call.data.split(":")
     bot.edit_message_reply_markup(

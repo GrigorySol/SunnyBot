@@ -50,14 +50,15 @@ def search_event_by_id(event_id):
         return cursor.fetchone()
 
 
-def search_events_by_event_type(event_type):
+def search_future_events_by_event_type(event_type, current_date):
     """Return (id, location_name, date, time) from the database."""
     with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()
 
         cursor.execute("SELECT events.id, location_name, events.date, events.time FROM events "
                        "JOIN locations ON locations.id = events.location_id "
-                       "WHERE event_type = ? ORDER BY date", (event_type,))
+                       "WHERE event_type = ? AND events.date >= ?"
+                       "ORDER BY date", (event_type, current_date))
         return cursor.fetchall()
 
 
