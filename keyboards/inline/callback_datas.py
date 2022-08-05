@@ -57,4 +57,4 @@ singer_attendance_callback = CallbackData("action", "event_id", "singer_id", pre
 
 delete_confirmation_callback = CallbackData("item_type", "item_id", "action_id", prefix=cd.delete_confirmation_text)
 
-buttons_roll_callback = CallbackData("direction", "index", "event_id", prefix=cd.buttons_roll_text)
+buttons_roll_callback = CallbackData("roll_bar_id", "direction", "index", "event_id", prefix=cd.buttons_roll_text)

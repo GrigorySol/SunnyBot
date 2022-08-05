@@ -29,7 +29,7 @@ def display_suits(message, sid):
     if not suits:
         data.pop()
         msg = dicts.singers.no_suit_text
-        bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data, message.id))
+        bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data))
         return
 
     msg = f"{dicts.singers.available_suits}\n{', '.join(suit_names)}.\n"
@@ -40,7 +40,7 @@ def display_suits(message, sid):
         msg += dicts.changes.add_remove_text
 
     bot.send_media_group(message.chat.id, suit_data)
-    bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data, message.id))
+    bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data))
 
 
 def display_voices(message, sid):
@@ -70,7 +70,7 @@ def display_voices(message, sid):
             voice_names.append(name)
         msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{misc.messages.changes_dictionary.edit_text}"
 
-    bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data, message.id))
+    bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data))
 
 
 def action_definition(action: str):
@@ -107,7 +107,7 @@ def edit_suits(call):
             suit_data.append(InputMediaPhoto(photo, text))
         bot.send_media_group(call.message.chat.id, suit_data)
 
-    bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data, call.message.id))
+    bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
 
 
 def edit_voices(call):
@@ -129,7 +129,7 @@ def edit_voices(call):
                 continue
             data.append({"text": text, "callback_data": f"{call_config}:voice:{sid}:{voice_id}"})
 
-    bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data, call.message.id))
+    bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
 
 
 def enter_new_event_time(message: Message, event_id: int, date):

@@ -26,7 +26,7 @@ def search_by_voice(call: CallbackQuery):
         data.append({"text": text, "callback_data": f"{call_config}:{text}"})
 
     msg = choose_voice_text
-    markup = buttons_markup(data, call.message.id)
+    markup = buttons_markup(data)
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
@@ -53,5 +53,5 @@ def show_voice(call: CallbackQuery):
             data.append({"text": text, "callback_data": f"{call_config}:{singer_id}"})
 
         msg = voice
-        markup = buttons_markup(data, call.message.id)
+        markup = buttons_markup(data)
         bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)

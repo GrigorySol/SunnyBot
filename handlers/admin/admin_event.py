@@ -72,7 +72,7 @@ def calendar_show_event(call: CallbackQuery):
         bot.send_message(VIP, f"@{call.from_user.username} {call.from_user.first_name}\n"
                               f"{year} {month} {day}")
 
-    markup = keys.buttons.buttons_markup(data, call.message.id)
+    markup = keys.buttons.buttons_markup(data)
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
@@ -286,7 +286,7 @@ def show_repeat_interval_buttons(call: CallbackQuery):
         data.append({"text": text, "callback_data": f"{call_config}:{event_id}:{i}"})
 
     msg = dicts.events.choose_period_text
-    markup = keys.buttons.buttons_markup(data, call.message.id, event_id=event_id, menu_btn=True)
+    markup = keys.buttons.buttons_markup(data, event_id=event_id, menu_btn=True)
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
@@ -354,7 +354,7 @@ def choose_location(call: CallbackQuery):
         data.append({"text": text, "callback_data": f"{call_data}:{location_id}:{event_id}"})
 
     msg = dicts.events.choose_location_text
-    markup = keys.buttons.buttons_markup(data, call.message.id)
+    markup = keys.buttons.buttons_markup(data)
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 

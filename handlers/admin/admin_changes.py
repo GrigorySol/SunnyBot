@@ -125,7 +125,7 @@ def create_option_buttons(message: Message, call_config, item_id, options):
         data.append({"text": text, "callback_data": f"{call_config}:{option_id}:{item_id}"})
 
     msg = dicts.changes.select_option_to_change_text
-    markup = keys.buttons.buttons_markup(data, message.id)
+    markup = keys.buttons.buttons_markup(data)
     bot.edit_message_text(msg, message.chat.id, message.id, reply_markup=markup)
 
 
@@ -307,7 +307,7 @@ def attendance_buttons(call, event_id):
                     f"{dicts.attends.attendance_text_tuple[1]} - {attendance_to_count.count(1)}\n" \
                     f"{dicts.attends.attendance_text_tuple[2]} - {attendance_to_count.count(2)}"
         msg = f"{dicts.attends.attendant_singers_text}{statistic}"
-        markup = keys.buttons.buttons_markup(attendance_data, call.message.id, event_id=event_id, menu_btn=True,
+        markup = keys.buttons.buttons_markup(attendance_data, event_id=event_id, menu_btn=True,
                                              participant=True)
     else:
         msg = dicts.attends.empty_attendance_text
@@ -338,7 +338,7 @@ def delete_confirmation_buttons(call, item_id, item_name, item_type):
     for i, text in enumerate(dicts.changes.delete_confirmation_text_tuple):
         data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{item_id}:{i}"})
 
-    markup = keys.buttons.buttons_markup(data, call.message.id)
+    markup = keys.buttons.buttons_markup(data)
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
@@ -361,7 +361,7 @@ def edit_concert_songs(call: CallbackQuery):
     for option_id, text in enumerate(dicts.changes.add_remove_text_tuple):
         data.append({"text": text, "callback_data": f"{call_config}:{concert_id}:{option_id}"})
 
-        markup = keys.buttons.buttons_markup(data, call.message.id, event_id=concert_id, menu_btn=True)
+        markup = keys.buttons.buttons_markup(data, event_id=concert_id, menu_btn=True)
         bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
@@ -392,8 +392,7 @@ def edit_concert_suit(call: CallbackQuery):
         call_config = cd.remove_suit_text
         msg = dicts.changes.concert_suit_change_text
         markup = keys.buttons.buttons_markup([{"text": misc.messages.buttons_dictionary.suit_change_btn_text,
-                                               "callback_data": f"{call_config}:{event_id}:{suit[0]}"}],
-                                             call.message.id)
+                                               "callback_data": f"{call_config}:{event_id}:{suit[0]}"}])
         bot.send_photo(call.message.chat.id, suit[2], reply_markup=keys.buttons.close_markup)
         bot.send_message(call.message.chat.id, msg, reply_markup=markup)
 
@@ -423,7 +422,7 @@ def select_suit_for_concert(call, event_id):
         suit_data.append(InputMediaPhoto(photo, suit_name))
 
     bot.send_media_group(call.message.chat.id, suit_data)
-    bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
+    bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.remove_suit_callback.filter())
@@ -471,7 +470,7 @@ def show_songs_for_concert(message, concert_id, option_id):
         data.append({"text": text, "callback_data": f"{call_config}:{option}:{concert_id}:{song_id}"})
 
     msg = dicts.changes.add_remove_text_tuple[int(option_id)]
-    markup = keys.buttons.buttons_markup(data, message.id, event_id=concert_id, menu_btn=True)
+    markup = keys.buttons.buttons_markup(data, event_id=concert_id, menu_btn=True)
     bot.edit_message_text(msg, message.chat.id, message.id, reply_markup=markup)
 
 
@@ -826,8 +825,7 @@ def remove_participant_buttons(call, event_id):
     ]
 
     msg = dicts.attends.choose_singer_to_add_text
-    markup = keys.buttons.buttons_markup(remove_data, call.message.id, event_id=event_id, menu_btn=True,
-                                         participant=True)
+    markup = keys.buttons.buttons_markup(remove_data, event_id=event_id, menu_btn=True, participant=True)
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
@@ -852,18 +850,8 @@ def add_participant_buttons(call, event_id):
     ]
 
     msg = dicts.attends.choose_singer_to_add_text
-    markup = keys.buttons.buttons_markup(add_data, call.message.id, event_id=event_id, menu_btn=True, participant=True)
+    markup = keys.buttons.buttons_markup(add_data, event_id=event_id, menu_btn=True, participant=True)
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
-
-    # markup = keys.buttons.buttons_markup(add_data!)
-    # markup.keyboard.pop()
-    # markup.add(add_remove_participant_buttons(event_id, False))
-    # markup.add(go_menu_button(event_id, "event"))
-    # markup.add(close_btn)
-    #
-    # bot.send_message(
-    #     call.message.chat.id, dicts.attends.choose_singer_to_add_text, reply_markup=markup
-    # )
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.add_all_participants_callback.filter())

@@ -98,7 +98,7 @@ def edit_song_options(call: CallbackQuery):
             data.pop()
             msg = f"{dicts.songs.no_sheets_text}\n{dicts.songs.wanna_add_text}"
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
     # add/delete sounds
     elif option_id == "2":
@@ -116,7 +116,7 @@ def edit_song_options(call: CallbackQuery):
             data.pop()
             msg = dicts.songs.not_sound_add_text
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
     # change comment
     elif option_id == "3":
@@ -143,7 +143,7 @@ def edit_song_options(call: CallbackQuery):
         for i, text in enumerate(dicts.changes.delete_confirmation_text_tuple):
             data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{song_id}:{i}"})
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
     bot.delete_message(call.message.chat.id, call.message.id)
 
@@ -227,7 +227,7 @@ def edit_song_materials(call: CallbackQuery):
         for i, text in enumerate(dicts.changes.delete_confirmation_text_tuple):
             data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{song_id}:{i}"})
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
     if edit_id == "0":
         _add()
@@ -295,4 +295,4 @@ def edit_song_menu(message, song_id, msg):
     for i, text in enumerate(dicts.changes.edit_song_text_tuple):
         data.append({"text": text, "callback_data": f"{call_config}:{song_id}:{i}"})
 
-    bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, message.id))
+    bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))

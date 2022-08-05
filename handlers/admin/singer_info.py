@@ -60,7 +60,7 @@ def singer_menu(call: CallbackQuery):
         for i, text in enumerate(dicts.attends.attendance_interval_text_tuple):
             data.append({"text": text, "callback_data": f"{call_config}:{i}:{singer_id}"})
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
     elif option_id == "3":  # Комментарий
         comment = db_singer.get_singer_comment(singer_id)
@@ -87,7 +87,7 @@ def singer_menu(call: CallbackQuery):
         for i, text in enumerate(dicts.changes.delete_confirmation_text_tuple):
             data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{singer_id}:{i}"})
 
-        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, call.message.id))
+        bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
     bot.delete_message(call.message.chat.id, call.message.id)
 
@@ -148,7 +148,7 @@ def singer_markup(message, singer_id):
     data = [{"text": dicts.buttons.send_msg_btn_text, "url": f"t.me/{telegram_name}"}]
     for i, text in enumerate(dicts.changes.edit_singer_text_tuple):
         data.append({"text": text, "callback_data": f"{cd.singer_info_text}:{i}:{singer_id}"})
-    markup = keys.buttons.buttons_markup(data, message.id)
+    markup = keys.buttons.buttons_markup(data)
     return markup
 
 

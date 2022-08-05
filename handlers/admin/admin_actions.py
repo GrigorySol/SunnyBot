@@ -50,7 +50,7 @@ def add_menu(message: Message):
             continue
         data.append({"text": text, "callback_data": f"{call_config}:{item_type}"})
     bot.send_message(
-        message.chat.id, dicts.events.song_or_event_text, reply_markup=keys.buttons.buttons_markup(data, message.id)
+        message.chat.id, dicts.events.song_or_event_text, reply_markup=keys.buttons.buttons_markup(data)
     )
 
 
@@ -78,7 +78,7 @@ def location_buttons(message: Message):
 
     bot.send_message(
         message.chat.id, dicts.events.choose_location_text,
-        reply_markup=keys.buttons.buttons_markup(data, message.id + 1)      # find the way to fix this
+        reply_markup=keys.buttons.buttons_markup(data)      # find the way to fix this
     )
 
 
@@ -109,7 +109,7 @@ def show_blacklist(message: Message):
         data.append({"text": text, "callback_data": f"{call_config}:{telegram_id}"})
 
     bot.send_message(
-        message.chat.id, dicts.changes.blacklist_text, reply_markup=keys.buttons.buttons_markup(data, message.id)
+        message.chat.id, dicts.changes.blacklist_text, reply_markup=keys.buttons.buttons_markup(data)
     )
 
 
@@ -197,7 +197,7 @@ def show_all_singers(call: CallbackQuery):
         data.append({"text": f"{indicator} {name}", "callback_data": f"{call_config}:{singer_id}"})
 
     msg = dicts.singers.show_all_singers_text
-    markup = keys.buttons.buttons_markup(data, call.message.id)
+    markup = keys.buttons.buttons_markup(data)
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 

@@ -21,7 +21,8 @@ def rolling_callback_buttons(call: CallbackQuery):
     log.info(f"{__name__} <{func_name}\t{call.data}\t{call.message.id}\t\t"
              f"{call.from_user.username} {call.from_user.full_name}")
 
-    _, direction, index, event_id = call.data.split(":")
+    _, roll_bar_id, direction, index, event_id = call.data.split(":")
+    print(roll_bar_id)
 
     if not keys.buttons.ButtonsKeeper.data_exists(call.message.id):
         bot.edit_message_text(dicts.changes.ERROR_text, call.message.chat.id, call.message.id, reply_markup=None)
@@ -37,7 +38,7 @@ def rolling_callback_buttons(call: CallbackQuery):
     bot.edit_message_reply_markup(
         call.message.chat.id,
         call.message.id,
-        reply_markup=keys.buttons.buttons_markup(data=btn_keeper.data, message_id=call.message.id, multiple=True,
+        reply_markup=keys.buttons.buttons_markup(data=btn_keeper.data, roll_bar_id=roll_bar_id, multiple=True,
                                                  row=btn_keeper.row)
     )
 
@@ -76,7 +77,7 @@ def show_suits(message: Message):
         call_config = cd.display_suits_text
         data = [{"text": dicts.changes.button_show_all_suits_text, "callback_data": f"{call_config}"}]
         msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{dicts.changes.show_all_suits_text}"
-        bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data, message.id))
+        bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.suit_edit_callback.filter())
@@ -108,7 +109,7 @@ def chose_song_filter(message: Message):
 
     bot.send_message(
         message.chat.id, dicts.singers.choose_filter_text,
-        reply_markup=keys.buttons.buttons_markup(data, message.id)
+        reply_markup=keys.buttons.buttons_markup(data)
     )
 
 
@@ -144,7 +145,7 @@ def show_songs(call: CallbackQuery):
             text = f"{concert_name} {int(day)} {dicts.events.chosen_months_text_tuple[int(month) - 1]}"
             data.append({"text": text, "callback_data": f"{call_config}:{concert_id}"})
         msg = dicts.singers.choose_concert_text
-        markup = keys.buttons.buttons_markup(data, call.message.id)
+        markup = keys.buttons.buttons_markup(data)
         bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
         return
 
@@ -152,7 +153,7 @@ def show_songs(call: CallbackQuery):
         for song_id, text, _ in songs:
             data.append({"text": text, "callback_data": f"{call_config}:{song_id}"})
         msg = dicts.songs.which_song_text
-        markup = keys.buttons.buttons_markup(data, call.message.id)
+        markup = keys.buttons.buttons_markup(data)
         bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
     else:
         bot.edit_message_text(dicts.songs.no_songs_text, call.message.chat.id, call.message.id)
@@ -177,7 +178,7 @@ def concert_songs(call: CallbackQuery):
             data.append({"text": text, "callback_data": f"{call_config}:{song_id}"})
 
         msg = dicts.songs.which_song_text
-        markup = keys.buttons.buttons_markup(data, call.message.id, event_id=event_id, menu_btn=True)
+        markup = keys.buttons.buttons_markup(data, event_id=event_id, menu_btn=True)
         bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
     else:
@@ -287,7 +288,7 @@ def show_event(call: CallbackQuery):
         else:
             msg += f"\n{dicts.attends.select_attendance_text}"
 
-        markup = keys.buttons.buttons_markup(data, call.message.id)
+        markup = keys.buttons.buttons_markup(data)
         bot.send_message(telegram_id, msg, reply_markup=markup)
 
     elif telegram_id != int(VIP) and telegram_id != int(VIP2):

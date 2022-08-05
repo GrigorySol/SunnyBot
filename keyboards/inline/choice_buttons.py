@@ -1,3 +1,5 @@
+import datetime
+
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from misc.messages.event_dictionary import next_button_text, prev_button_text
 from misc.messages import buttons_dictionary as but_d
@@ -77,23 +79,20 @@ accept_markup.add(yes_btn, of_course_btn, close_btn)
 
 
 def buttons_markup(
-        data, message_id=None, event_id=None, menu_btn=False, participant=False, multiple=False, row=2, line=5
+        data, roll_bar_id=None, event_id=None,
+        menu_btn=False, participant=False, multiple=False,
+        row=2, line=5
 ):
+
     markup = InlineKeyboardMarkup(row_width=row)
     data_amount = len(data)
 
-    if data_amount > line * row and message_id:
-        multiple = set_multiple(data, message_id, data_amount, row, line)
+    if data_amount > line * row:
+        multiple, roll_bar_id = set_multiple(data, data_amount, row, line)
 
     if multiple:
-        keep_buttons_data = ButtonsKeeper(message_id)
-        buttons = [
-            InlineKeyboardButton(**kwargs)
-            for kwargs in data[keep_buttons_data.get_index():
-                               keep_buttons_data.get_index() + row * line]
-        ]
-
-        next_btn, previous_btn = rolling_buttons("None", message_id)
+        buttons = partial_buttons(data, line, roll_bar_id, row)
+        next_btn, previous_btn = rolling_buttons("None", roll_bar_id)
         markup.add(*buttons)
         markup.add(previous_btn, next_btn)
 
@@ -116,6 +115,16 @@ def buttons_markup(
     return markup
 
 
+def partial_buttons(data, line, roll_bar_id, row):
+    keep_buttons_data = ButtonsKeeper(roll_bar_id)
+    buttons = [
+        InlineKeyboardButton(**kwargs)
+        for kwargs in data[keep_buttons_data.get_index():
+                           keep_buttons_data.get_index() + row * line]
+    ]
+    return buttons
+
+
 def add_remove_participant_buttons(markup, event_id):
     add_one_btn = InlineKeyboardButton(but_d.event_add_singer_btn_text,
                                        callback_data=f"{cd.add_participant_text}:{event_id}")
@@ -130,12 +139,14 @@ def add_remove_participant_buttons(markup, event_id):
     markup.add(add_all_btn, remove_all_btn)
 
 
-def set_multiple(data, message_id, data_amount, row, line):
-    keep_buttons_data = ButtonsKeeper(message_id)
+def set_multiple(data, data_amount, row, line):
+    roll_bar_id = datetime.datetime.now().timestamp()
+    print(f"{__name__} {roll_bar_id}")
+    keep_buttons_data = ButtonsKeeper(roll_bar_id)
     keep_buttons_data.data = data
     keep_buttons_data.row = row
     keep_buttons_data.division = [i for i in range(0, data_amount, row * line)]
-    return True
+    return True, roll_bar_id
 
 
 def choose_location_buttons(event_id):
@@ -222,22 +233,22 @@ def go_menu_button(item_id, item_type):
     return InlineKeyboardButton(but_d.go_menu_btn_text, callback_data=f"{cd.change_item_text}:{item_type}:{item_id}")
 
 
-def rolling_buttons(event_id, message_id=0):
+def rolling_buttons(event_id, roll_bar_id):
     previous_btn = InlineKeyboardButton(" ", callback_data=EMTPY_FIELD)
     next_btn = InlineKeyboardButton(" ", callback_data=EMTPY_FIELD)
     call_config = cd.buttons_roll_text
 
-    keep_buttons_data = ButtonsKeeper(message_id)
+    keep_buttons_data = ButtonsKeeper(roll_bar_id)
 
     if keep_buttons_data.get_index():
         previous_btn = InlineKeyboardButton(
             prev_button_text,
-            callback_data=f"{call_config}:previous:{keep_buttons_data.previous_index()}:{event_id}"
+            callback_data=f"{call_config}:{roll_bar_id}:previous:{keep_buttons_data.previous_index()}:{event_id}"
         )
 
     if keep_buttons_data.get_index() < keep_buttons_data.division[-1]:
         next_btn = InlineKeyboardButton(
             next_button_text,
-            callback_data=f"{call_config}:next:{keep_buttons_data.next_index()}:{event_id}"
+            callback_data=f"{call_config}:{roll_bar_id}:next:{keep_buttons_data.next_index()}:{event_id}"
         )
     return next_btn, previous_btn
