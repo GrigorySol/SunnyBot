@@ -328,6 +328,18 @@ def close_btn(call: CallbackQuery):
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
+@bot.callback_query_handler(func=lambda c: c.data == "close")
+def temporary_close_btn(call: CallbackQuery):   # TODO: Delete after 2022-08-20
+    """Remove an old block of the buttons"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
+
+    bot.delete_message(call.message.chat.id, call.message.id)
+
+
 @bot.message_handler(text=TextFilter(contains=dicts.filters.calendar_text_list, ignore_case=True))
 def calendar_message(message: Message):
     """Answer to type a command /calendar"""
