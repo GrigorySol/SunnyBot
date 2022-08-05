@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta
 from time import sleep
+import inspect
 
 from config import VIP
-from loader import bot
+from loader import bot, log
 import schedule
 
 from database_control.db_singer import get_singers_id_by_event
 from database_control.db_event import search_event_by_date, search_location_by_event_id
-from keyboards.inline.choice_buttons import callback_buttons
+from keyboards.inline.choice_buttons import buttons_markup
 from misc import dicts
 from misc.messages import attendance_dictionary as at_d, event_dictionary as ev_d, reminder_dictionary as rem_d
 
@@ -21,7 +22,10 @@ def schedule_pending():
 def check_event_date():
     """Check if there is an event in one week, one day or day to day in the database."""
 
-    print(f"reminder.py check_event_date started {datetime.now()}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\n")
+
     current_date = datetime.now().date()
     before_day = current_date + timedelta(days=1)
     before_week = current_date + timedelta(weeks=1)
@@ -47,7 +51,10 @@ def check_event_date():
 def event_reminder(event_id: int, event_name: str, event_date: str, event_time: str):
     """Create and send a message to all participating singers."""
 
-    print(f"reminder.py event_reminder started {datetime.now()}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\n")
+
     location = search_location_by_event_id(event_id)
     location_name = "Не определена." if not location else location[0]
 
@@ -63,7 +70,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
         year, month, day = event_date.split("-")
         msg_date = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
 
-    markup = callback_buttons(data)
+    markup = buttons_markup(data)
 
     for telegram_id, attendance in get_singers_id_by_event(event_id):
         try:

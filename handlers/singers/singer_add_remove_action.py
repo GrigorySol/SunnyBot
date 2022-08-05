@@ -15,7 +15,8 @@ def add_action(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     _, item, singer_id, item_id = call.data.split(":")
 
@@ -40,7 +41,8 @@ def remove_action(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     _, item, singer_id, item_id = call.data.split(":")
 

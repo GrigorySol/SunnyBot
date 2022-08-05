@@ -15,7 +15,8 @@ def search_by_voice(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     voices = get_all_voices()
     call_config = cd.singer_voice_text
@@ -35,7 +36,8 @@ def show_voice(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     voice = call.data.split(":")[1]
     singers = search_singers_by_voice(voice)

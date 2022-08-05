@@ -18,7 +18,8 @@ def rolling_callback_buttons(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t{call.message.id}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     _, direction, index, event_id = call.data.split(":")
 
@@ -47,7 +48,8 @@ def show_voice(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     singer_id = db_singer.get_singer_id(message.from_user.id)
     voices = db_singer.get_singer_voices(singer_id)
@@ -64,7 +66,8 @@ def show_suits(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     singer_id = db_singer.get_singer_id(message.from_user.id)
     display_suits(message, singer_id)
@@ -82,7 +85,8 @@ def edit_suits_buttons(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     edit_suits(call)
     bot.delete_message(call.message.chat.id, call.message.id)
@@ -94,7 +98,8 @@ def chose_song_filter(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     call_config = cd.song_filter_text
     data = []
@@ -113,7 +118,8 @@ def show_songs(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     _, filter_id = call.data.split(":")
     data = []
@@ -158,7 +164,8 @@ def concert_songs(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     _, event_id = call.data.split(":")
     data = []
@@ -193,7 +200,8 @@ def nothing_to_say(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     bot.send_sticker(message.chat.id,
                      "CAACAgIAAxkBAAETnXxicIxNf0TYCRSrmzD9SD-iTjSr1QAClBQAAsBCeEsVRtvoCLXI0iQE")
@@ -203,7 +211,8 @@ def nothing_to_say(message: Message):
 def nothing_to_say(message: Message):
 
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     bot.send_sticker(message.chat.id,
                      "CAACAgIAAxkBAAETnX5icIyDshGmTfhQFatW5TJnbJkjkQACtBoAApsZwUq8_BZS0faNxyQE")
@@ -214,7 +223,8 @@ def nothing_to_say(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     bot.send_audio(message.chat.id,
                    "CQACAgIAAxkBAAETnYJicIzUt04joDIy7_uLOkUpHENW3wACKBoAAhFE4UpblvEevwxe_yQE")
@@ -226,7 +236,8 @@ def show_event(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     _, event_id = call.data.split(":")
     _, event_type, event_name, event_date, time, location_id, comment = db_event.search_event_by_id(event_id)
@@ -289,7 +300,7 @@ def show_event(call: CallbackQuery):
     # Admin can change the record about the event
     if db_singer.is_admin(telegram_id):
         item_type = "event"
-        markup = keys.buttons.show_participation(event_id)
+        markup = keys.buttons.show_participation_button(event_id)
 
         for buttons in keys.buttons.change_buttons(item_type, event_id).keyboard:
             markup.add(*buttons)
@@ -304,7 +315,8 @@ def close_btn(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     if keys.buttons.ButtonsKeeper.data_exists(call.message.id):
         keys.buttons.ButtonsKeeper.delete_btn(call.message.id)
@@ -318,7 +330,8 @@ def calendar_message(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if message.via_bot:
         return
@@ -331,7 +344,8 @@ def song_message(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if message.via_bot:
         return
@@ -344,7 +358,8 @@ def suit_message(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if message.via_bot:
         return
@@ -357,7 +372,8 @@ def boring_message(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if message.via_bot:
         return
@@ -372,7 +388,8 @@ def fool_message(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if message.via_bot:
         return
@@ -392,7 +409,9 @@ def nothing_to_say(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
+    log.info(f"Saved Messages: {keys.buttons.ButtonsKeeper.get_saved_messages()}")
 
     text = randomizer(dicts.jokes.random_answer_text_tuple)
     bot.forward_message(VIP, message.chat.id, message.id, disable_notification=True)

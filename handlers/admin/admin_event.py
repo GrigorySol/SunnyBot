@@ -151,7 +151,7 @@ def add_time_for_event(message: Message):
         bot.send_message(
             message.chat.id,
             dicts.events.choose_event_location_text,
-            reply_markup=keys.buttons.choose_location(event_data.event_id)
+            reply_markup=keys.buttons.choose_location_buttons(event_data.event_id)
         )
 
 
@@ -169,7 +169,7 @@ def set_name_for_event(message: Message):
     bot.send_message(
         message.chat.id,
         dicts.events.choose_event_location_text,
-        reply_markup=keys.buttons.choose_location(event_data.event_id)
+        reply_markup=keys.buttons.choose_location_buttons(event_data.event_id)
     )
 
 
@@ -202,7 +202,7 @@ def check_location_url(message: Message, event_id=None):
             bot.send_message(
                 message.chat.id,
                 dicts.events.location_url_exists_text,
-                reply_markup=keys.buttons.choose_location(event_data.event_id)
+                reply_markup=keys.buttons.choose_location_buttons(event_data.event_id)
             )
         else:
             msg_data = bot.send_message(message.chat.id, dicts.events.enter_location_name_text)
@@ -250,20 +250,20 @@ def save_new_event(location_id, message):
           f"{event_data.event_name}, {event_data.date, event_data.time}")
     if event_data.event_type == 2:
         msg = f"{dicts.events.new_event_text}{event_data.event_name}\n{dicts.events.add_concert_songs_text}"
-        markup = keys.buttons.show_participation(event_data.event_id)
+        markup = keys.buttons.show_participation_button(event_data.event_id)
         for buttons in keys.buttons.add_songs_to_concert_buttons(event_data.event_id).keyboard:
             markup.add(*buttons)
         bot.send_message(message.chat.id, msg, reply_markup=markup)
 
     elif event_data.event_type == 3:
         msg = f"{dicts.events.new_event_text}{event_data.event_name}\n{dicts.events.want_repeat_text}"
-        markup = keys.buttons.show_participation(event_data.event_id)
+        markup = keys.buttons.show_participation_button(event_data.event_id)
 
         for buttons in keys.buttons.repeat_buttons(event_data.event_id).keyboard:
             markup.add(*buttons)
         bot.send_message(message.chat.id, msg, reply_markup=markup)
     else:
-        markup = keys.buttons.show_participation(event_data.event_id)
+        markup = keys.buttons.show_participation_button(event_data.event_id)
         markup.add(keys.buttons.close_btn)
         msg = f"{dicts.events.new_event_text}{event_data.event_name}"
         bot.send_message(message.chat.id, msg, reply_markup=markup)

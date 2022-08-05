@@ -17,7 +17,8 @@ def show_song_info(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     song_id = call.data.split(":")[1]
     sheets = db_songs.get_sheets_by_song_id(song_id)
@@ -71,7 +72,8 @@ def edit_song_options(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     _, song_id, option_id = call.data.split(":")
 
@@ -151,7 +153,8 @@ def enter_new_song_name(message: Message, song_id):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -169,7 +172,8 @@ def enter_new_song_comment(message: Message, song_id):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -191,7 +195,8 @@ def edit_song_materials(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     _, song_id, option_id, edit_id = call.data.split(":")
 
@@ -241,7 +246,8 @@ def add_sheets_or_sounds(message: Message, song_id):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if message.document:        # sheets
         doc_file_id = message.document.file_id
@@ -274,7 +280,8 @@ def edit_song_menu(message, song_id, msg):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if not db_songs.song_exists(song_id):
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"

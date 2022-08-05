@@ -1,13 +1,14 @@
 from datetime import datetime
+import inspect
 
 from handlers.admin.singer_info import singer_markup
-from loader import bot
+from loader import bot, log
 from config import PASS_PHRASE, SECRET_PASS_PHRASE, VIP, MENU_IMAGE
 from telebot.types import Message, CallbackQuery
 from keyboards.inline.choice_buttons import new_singer_markup
 from keyboards.inline.callback_datas import register_callback
 from misc.bot_speech import greetings
-from misc import dicts, keys
+from misc import dicts
 from database_control.db_singer import add_singer, block_user, add_admin, get_singer_id
 
 
@@ -33,6 +34,11 @@ def user_blocked(message: Message):
 @bot.message_handler(is_new_singer=True)
 def singer_not_registered(message: Message):
     """Interact with a new user and offer to register"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     print(f"Registration started for {message.from_user.username} "
           f"{message.from_user.first_name} {message.from_user.last_name}")
@@ -60,7 +66,11 @@ def add_new_singer(call: CallbackQuery):
 def security_control_step(message: Message, singer: SingerRegister):
     """Check the secret phrase and ask for a name."""
 
-    print(f"{message.text} from {message.from_user.username} {message.from_user.first_name}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
+
     if message.text and "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return
@@ -101,7 +111,11 @@ def security_control_step(message: Message, singer: SingerRegister):
 def singer_name_step(message: Message, singer: SingerRegister):
     """Save the name and ask to enter a lastname."""
 
-    print(f"{message.text} {len(message.text)}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
+
     name = message.text
     if name and "/" in name:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -139,6 +153,12 @@ def singer_name_step(message: Message, singer: SingerRegister):
 
 
 def finalize_registration(lastname, message, singer):
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
+
     msg = f"New singer @{singer.telegram_name} " \
           f"{message.from_user.first_name} -> {singer.name} " \
           f"{message.from_user.last_name} -> {lastname} registered"
@@ -152,7 +172,11 @@ def finalize_registration(lastname, message, singer):
 def singer_lastname_step(message: Message, singer: SingerRegister):
     """Save lastname and finish registration"""
 
-    print(f"{message.text} {len(message.text)}")
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
+
     if message.text and "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
         return

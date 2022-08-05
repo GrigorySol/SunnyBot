@@ -40,17 +40,17 @@ class ButtonsKeeper:
     def delete_btn(cls, message_id):
         cls._btn_msgs.pop(message_id, None)
 
+    @classmethod
+    def get_saved_messages(cls):
+        return cls._btn_msgs.keys()
+
 
 # def callback_buttons(*args):
 #     pass
 
 
-# keep_data = DataKeeper()
-
 # Regular buttons
-
 close_btn = InlineKeyboardButton(but_d.close_btn_text, callback_data=cd.close_text)
-
 close_markup = InlineKeyboardMarkup()
 close_markup.add(close_btn)
 
@@ -77,12 +77,12 @@ accept_markup.add(yes_btn, of_course_btn, close_btn)
 
 
 def buttons_markup(
-        data, message_id, event_id=None, menu_btn=False, participant=False, multiple=False, row=2, line=5
+        data, message_id=None, event_id=None, menu_btn=False, participant=False, multiple=False, row=2, line=5
 ):
     markup = InlineKeyboardMarkup(row_width=row)
     data_amount = len(data)
 
-    if data_amount > line * row:
+    if data_amount > line * row and message_id:
         multiple = set_multiple(data, message_id, data_amount, row, line)
 
     if multiple:
@@ -105,7 +105,7 @@ def buttons_markup(
         markup.add(*buttons)
 
     if participant:
-        add_remove_participant(markup, event_id=event_id)
+        add_remove_participant_buttons(markup, event_id=event_id)
 
     if menu_btn:
         call_btn = f"{cd.change_item_text}:event:{event_id}"
@@ -116,7 +116,7 @@ def buttons_markup(
     return markup
 
 
-def add_remove_participant(markup, event_id):
+def add_remove_participant_buttons(markup, event_id):
     add_one_btn = InlineKeyboardButton(but_d.event_add_singer_btn_text,
                                        callback_data=f"{cd.add_participant_text}:{event_id}")
     remove_one_btn = InlineKeyboardButton(but_d.event_remove_singer_btn_text,
@@ -138,7 +138,7 @@ def set_multiple(data, message_id, data_amount, row, line):
     return True
 
 
-def choose_location(event_id):
+def choose_location_buttons(event_id):
     markup = InlineKeyboardMarkup(row_width=2)
     choose_old = InlineKeyboardButton(
         but_d.choose_location_btn_text_tuple[0], callback_data=f"{cd.add_event_location_text}:db:{event_id}"
@@ -152,7 +152,7 @@ def choose_location(event_id):
     return markup
 
 
-def show_participation(event_id) -> InlineKeyboardMarkup:
+def show_participation_button(event_id) -> InlineKeyboardMarkup:
     markup = InlineKeyboardMarkup(row_width=1)
     singers_button = InlineKeyboardButton(
         but_d.show_participation_btn_text, callback_data=f"{cd.show_participation_text}:{event_id}"
@@ -216,35 +216,10 @@ def empty_participant_buttons(event_id, row=2):
     return markup
 
 
-def add_remove_participant_buttons(event_id, add=True):
-    """Create add or remove button"""
-
-    if add:
-        button = InlineKeyboardButton(
-            but_d.event_add_singer_btn_text, callback_data=f"{cd.add_participant_text}:{event_id}"
-        )
-    else:
-        button = InlineKeyboardButton(
-            but_d.event_remove_singer_btn_text, callback_data=f"{cd.remove_participation_text}:{event_id}"
-        )
-
-    return button
-
-
 def go_menu_button(item_id, item_type):
     """Create type change menu button"""
 
     return InlineKeyboardButton(but_d.go_menu_btn_text, callback_data=f"{cd.change_item_text}:{item_type}:{item_id}")
-
-
-# def setup_multiple(data, data_amount, row):
-#     keep_data.data = data
-#     keep_data.division = [i for i in range(0, data_amount, ROW_HEIGHT * row)]
-#     keep_data.row = row
-#     print(f"inside setup_multiple row is {row}")
-#     if keep_data.index_out_of_scope():
-#         keep_data.reset_index()
-#     return True
 
 
 def rolling_buttons(event_id, message_id=0):
@@ -266,16 +241,3 @@ def rolling_buttons(event_id, message_id=0):
             callback_data=f"{call_config}:next:{keep_buttons_data.next_index()}:{event_id}"
         )
     return next_btn, previous_btn
-
-
-# def singer_info_buttons(telegram_name, singer_id, btn_names):
-#     print(f"{telegram_name}, {singer_id}, {btn_names}")
-#     markup = InlineKeyboardMarkup(row_width=2)
-#     send_msg_btn = InlineKeyboardButton(but_d.send_msg_btn_text, url=f"t.me/{telegram_name}")
-#     buttons = [send_msg_btn]
-#     for i, text in enumerate(btn_names):
-#         btn = InlineKeyboardButton(text, callback_data=f"{cd.singer_info_text}:{i}:{singer_id}")
-#         buttons.append(btn)
-#     markup.add(*buttons)
-#     markup.add(close_btn)
-#     return markup

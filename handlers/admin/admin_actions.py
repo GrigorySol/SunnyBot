@@ -15,7 +15,8 @@ def show_singers_search(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
@@ -29,12 +30,13 @@ def show_singers_search(message: Message):
 
 
 @bot.message_handler(commands=['add'])
-def add_menu_handler(message: Message):
+def add_menu(message: Message):
     """Show buttons to choose event, song or suit to add"""
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
@@ -53,12 +55,13 @@ def add_menu_handler(message: Message):
 
 
 @bot.message_handler(commands=['locations'])
-def location_buttons_handler(message: Message):
+def location_buttons(message: Message):
     """Show location buttons for editing"""
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t{message.id}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     is_admin = db_singer.is_admin(message.chat.id)
     if not is_admin:
@@ -74,7 +77,8 @@ def location_buttons_handler(message: Message):
         data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{location_id}"})
 
     bot.send_message(
-        message.chat.id, dicts.events.choose_location_text, reply_markup=keys.buttons.buttons_markup(data, message.id)
+        message.chat.id, dicts.events.choose_location_text,
+        reply_markup=keys.buttons.buttons_markup(data, message.id + 1)      # find the way to fix this
     )
 
 
@@ -84,7 +88,8 @@ def show_blacklist(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
@@ -114,7 +119,8 @@ def full_participation(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
@@ -132,7 +138,8 @@ def menu_tutorial(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     is_admin = db_singer.is_admin(message.from_user.id)
     if not is_admin:
@@ -148,7 +155,8 @@ def edit_menu_photo_id(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if not message.photo:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -177,7 +185,8 @@ def show_all_singers(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     singers = db_singer.get_all_singers()
     call_config = cd.singer_display_text
@@ -247,7 +256,8 @@ def song_or_event(call: CallbackQuery):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     _, item_type = call.data.split(":")
     if item_type == "4":
@@ -286,7 +296,8 @@ def add_song_name(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -307,7 +318,8 @@ def add_suit_name(message: Message):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if not message.text or "/" in message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
@@ -326,7 +338,8 @@ def save_new_suit(message: Message, suit_name):
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t {message.text}\t\t {message.from_user.username} {message.from_user.full_name}")
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
 
     if message.text:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
