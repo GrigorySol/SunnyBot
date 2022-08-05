@@ -29,8 +29,6 @@ def show_song_info(call: CallbackQuery):
     media_sounds = []
     telegram_id = call.from_user.id
 
-    print(f"show info {telegram_id} exists? {db_singer.singer_exists(telegram_id)}")
-
     if not db_singer.singer_exists(telegram_id):
         from handlers.singers.singer_registration import start_registration
         start_registration(call.from_user.username, call.from_user.id, datetime.datetime.now().hour)
@@ -285,11 +283,6 @@ def voice_detect(file_name):
 
 def edit_song_menu(message, song_id, msg):
     """Display buttons to edit song name, sheets or sounds"""
-
-    # debug
-    func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
-             f"{message.from_user.username} {message.from_user.full_name}")
 
     if not db_songs.song_exists(song_id):
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
