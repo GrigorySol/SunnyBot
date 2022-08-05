@@ -38,7 +38,10 @@ def get_song_comment(song_id):
         cursor = db.cursor()
 
         cursor.execute("SELECT comment FROM songs WHERE id = ?", (song_id,))
-        return cursor.fetchone()[0]
+        res = cursor.fetchone()
+        if not res:
+            return None
+        return res[0]
 
 
 def get_songs_in_work(event_type: int, start_date, end_date):

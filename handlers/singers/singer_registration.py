@@ -42,15 +42,18 @@ def singer_not_registered(message: Message):
 
     print(f"Registration started for {message.from_user.username} "
           f"{message.from_user.first_name} {message.from_user.last_name}")
-    if not message.from_user.username:
-        bot.send_message(message.chat.id, dicts.singers.need_telegram_name_text)
-        return
-        
-    telegram_id = message.from_user.id
-    singer_time = datetime.utcfromtimestamp(message.date).hour
 
-    text = f"{greetings(singer_time)}\n{dicts.singers.not_registered_text}"
-    bot.send_message(telegram_id, text, reply_markup=new_singer_markup)
+    singer_time = datetime.utcfromtimestamp(message.date).hour
+    start_registration(message.from_user.username, message.from_user.id, singer_time)
+
+
+def start_registration(telegram_name, telegram_id, singer_time):
+    if not telegram_name:
+        bot.send_message(telegram_id, dicts.singers.need_telegram_name_text)
+        return
+
+    msg = f"{greetings(singer_time)}\n{dicts.singers.not_registered_text}"
+    bot.send_message(telegram_id, msg, reply_markup=new_singer_markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=register_callback.filter())
@@ -127,6 +130,7 @@ def singer_name_step(message: Message, singer: SingerRegister):
 
     elif " " in name and len(name) > 3:
         name, lastname = name.split(" ")
+        singer.name = name
         singer.telegram_id = message.from_user.id
         singer.telegram_name = message.from_user.username
         # bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEUXldijsMSalTOs3O2M01uwWqKGzVoqwACGwADwDZPE329ioPLRE1qJAQ")

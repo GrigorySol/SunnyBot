@@ -1,3 +1,4 @@
+import datetime
 import inspect
 
 import misc.messages.buttons_dictionary
@@ -27,6 +28,13 @@ def show_song_info(call: CallbackQuery):
     media_sheets = []
     media_sounds = []
     telegram_id = call.from_user.id
+
+    print(f"show info {telegram_id} exists? {db_singer.singer_exists(telegram_id)}")
+
+    if not db_singer.singer_exists(telegram_id):
+        from handlers.singers.singer_registration import start_registration
+        start_registration(call.from_user.username, call.from_user.id, datetime.datetime.now().hour)
+        return
 
     is_admin = db_singer.is_admin(telegram_id)
     singer_id = db_singer.get_singer_id(telegram_id)

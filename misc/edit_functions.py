@@ -95,19 +95,23 @@ def edit_suits(call):
         suits = db_singer.get_singer_suits(sid)
         for suit_id, text, _ in suits:
             data.append({"text": text, "callback_data": f"{call_config}:suit:{sid}:{suit_id}"})
+        bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
 
     else:
         suit_data = []
         suits = db_singer.get_all_suits()
-        for suit_id, text, photo in suits:
-            available = db_singer.get_singer_suits(sid)
-            if (suit_id, text, photo) in available:
-                continue
-            data.append({"text": text, "callback_data": f"{call_config}:suit:{sid}:{suit_id}"})
-            suit_data.append(InputMediaPhoto(photo, text))
-        bot.send_media_group(call.message.chat.id, suit_data)
-
-    bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
+        if suits:
+            for suit_id, text, photo in suits:
+                available = db_singer.get_singer_suits(sid)
+                if (suit_id, text, photo) in available:
+                    continue
+                data.append({"text": text, "callback_data": f"{call_config}:suit:{sid}:{suit_id}"})
+                suit_data.append(InputMediaPhoto(photo, text))
+            bot.send_media_group(call.message.chat.id, suit_data)
+            bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
+        else:
+            msg = dicts.singers.suits_not_available_text
+            bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
 
 
 def edit_voices(call):
