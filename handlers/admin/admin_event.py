@@ -91,7 +91,7 @@ def edit_event_date(call: CallbackQuery):
                            f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года.\n"
                            f"{dicts.events.set_event_time_text}")
     bot.register_next_step_handler(msg, enter_new_event_time, int(event_id), event_data.date)
-    bot.delete_message(call.message.chat.id, call.message.id)   # TODO: display event info
+    # bot.delete_message(call.message.chat.id, call.message.id)   # TODO: display event info
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.calendar_data.filter())
@@ -111,7 +111,7 @@ def add_event_time(call: CallbackQuery):
           f"{dicts.events.chosen_months_text_tuple[int(month) - 1]} {year} года.\n{dicts.events.set_event_time_text}"
     msg_data = bot.send_message(call.message.chat.id, msg)
     bot.register_next_step_handler(msg_data, add_time_for_event)
-    bot.delete_message(call.message.chat.id, call.message.id)   # TODO: display event info
+    # bot.delete_message(call.message.chat.id, call.message.id)   # TODO: display event info
 
 
 def add_time_for_event(message: Message):

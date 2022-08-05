@@ -209,4 +209,5 @@ def display_attendance(call: CallbackQuery):
            f"{dicts.attends.attendance_description_text_tuple[1]}: {attendance.count('1')}\n" \
            f"{dicts.attends.attendance_description_text_tuple[2]}: {attendance.count('2')}"
 
-    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=None)
+    markup = singer_markup(call.message, singer_id)
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)

@@ -9,7 +9,7 @@ import schedule
 from database_control.db_singer import get_singers_id_by_event
 from database_control.db_event import search_event_by_date, search_location_by_event_id
 from keyboards.inline.choice_buttons import buttons_markup
-from misc import dicts
+from misc import dicts, keys
 from misc.messages import attendance_dictionary as at_d, event_dictionary as ev_d, reminder_dictionary as rem_d
 
 
@@ -94,13 +94,15 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
 
 
 def database_sender():
-    """Send database file to the VIP telegram_id"""
+    """Send database file to the VIP telegram_id and clear ButtonKeeper _btn_ids"""
 
     print(f"DATABASE file sent at {datetime.now()}")
     file = open("database_control/sunny_bot.db", 'rb')
     bot.send_document(VIP, file)
     bot.send_message(VIP, f"database backup {datetime.now()}")
     file.close()
+
+    keys.buttons.ButtonsKeeper.clear_saved_ids()
 
 
 schedule.every().day.at("01:27").do(database_sender)

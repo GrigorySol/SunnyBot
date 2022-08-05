@@ -2,7 +2,7 @@ import misc.messages.changes_dictionary
 from loader import bot
 from telebot.types import InputMediaPhoto, Message
 from keyboards.inline.choice_buttons import buttons_markup
-from misc import dicts
+from misc import dicts, keys
 from database_control import db_singer, db_event
 
 
@@ -159,4 +159,6 @@ def enter_new_event_time(message: Message, event_id: int, date):
         return
 
     if db_event.edit_event_datetime(event_id, date, time):
-        bot.send_message(message.chat.id, dicts.changes.event_time_changed_text)
+        msg = dicts.changes.event_time_changed_text
+        markup = keys.buttons.buttons_markup(event_id=event_id, menu_btn=True)
+        bot.send_message(message.chat.id, msg, reply_markup=markup)

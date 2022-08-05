@@ -30,7 +30,7 @@ def show_singers_search(message: Message):
 
 
 @bot.message_handler(commands=['add'])
-def add_menu(message: Message):
+def add_options(message: Message):
     """Show buttons to choose event, song or suit to add"""
 
     # debug

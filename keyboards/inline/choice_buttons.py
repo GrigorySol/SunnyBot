@@ -9,13 +9,13 @@ EMTPY_FIELD = 'calendar_button'
 
 
 class ButtonsKeeper:
-    _btn_msgs = {}
+    _btn_ids = {}
 
-    def __new__(cls, message_id):
-        if (data := cls._btn_msgs.get(message_id)) is not None:
+    def __new__(cls, roll_bar_id):
+        if (data := cls._btn_ids.get(roll_bar_id)) is not None:
             return data
         data = super().__new__(cls)
-        cls._btn_msgs[message_id] = data
+        cls._btn_ids[roll_bar_id] = data
         data._save_data()
         return data
 
@@ -35,32 +35,38 @@ class ButtonsKeeper:
         return self.division[self.i]
 
     @classmethod
-    def data_exists(cls, message_id):
-        return message_id in cls._btn_msgs
+    def data_exists(cls, roll_bar_id):
+        return roll_bar_id in cls._btn_ids
 
     @classmethod
-    def delete_btn(cls, message_id):
-        cls._btn_msgs.pop(message_id, None)
+    def delete_btn(cls, roll_bar_id):
+        cls._btn_ids.pop(roll_bar_id, None)
+
+    @classmethod
+    def clear_saved_ids(cls):
+        cls._btn_ids.clear()
 
     @classmethod
     def get_saved_messages(cls):
-        return cls._btn_msgs.keys()
+        return cls._btn_ids.keys()
 
 
 # def callback_buttons(*args):
 #     pass
 
+def close_btn(roll_bar_id=None):
+    btn = InlineKeyboardButton(but_d.close_btn_text, callback_data=f"{cd.close_text}:{roll_bar_id}")
+    return btn
 
-# Regular buttons
-close_btn = InlineKeyboardButton(but_d.close_btn_text, callback_data=cd.close_text)
+
 close_markup = InlineKeyboardMarkup()
-close_markup.add(close_btn)
+close_markup.add(close_btn())
 
 # New singer buttons
 new_singer_markup = InlineKeyboardMarkup(row_width=2)
 add_singer = InlineKeyboardButton(but_d.register_btn_text, callback_data=cd.singer_registration_text)
 new_singer_markup.add(add_singer)
-new_singer_markup.add(close_btn)
+new_singer_markup.add(close_btn())
 
 # Singer search choice buttons
 search_choice_markup = InlineKeyboardMarkup(row_width=2)
@@ -69,39 +75,41 @@ search_by_voice = InlineKeyboardButton(but_d.singer_filter_btn_text_tuple[1],
                                        callback_data=f"{cd.singer_search_text}:voice")
 show_all_btn = InlineKeyboardButton(but_d.singer_filter_btn_text_tuple[2], callback_data=cd.singer_show_all_text)
 search_choice_markup.add(search_by_name, search_by_voice, show_all_btn)
-search_choice_markup.add(close_btn)
+search_choice_markup.add(close_btn())
 
 # Reply with joke
 accept_markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
 yes_btn = KeyboardButton(but_d.accept_btn_text_tuple[0])
 of_course_btn = KeyboardButton(but_d.accept_btn_text_tuple[1])
-accept_markup.add(yes_btn, of_course_btn, close_btn)
+accept_markup.add(yes_btn, of_course_btn, close_btn())
 
 
 def buttons_markup(
-        data, roll_bar_id=None, event_id=None,
+        data=None, roll_bar_id=None, event_id=None,
         menu_btn=False, participant=False, multiple=False,
         row=2, line=5
 ):
 
     markup = InlineKeyboardMarkup(row_width=row)
-    data_amount = len(data)
 
-    if data_amount > line * row:
-        multiple, roll_bar_id = set_multiple(data, data_amount, row, line)
+    if data:
+        data_amount = len(data)
 
-    if multiple:
-        buttons = partial_buttons(data, line, roll_bar_id, row)
-        next_btn, previous_btn = rolling_buttons("None", roll_bar_id)
-        markup.add(*buttons)
-        markup.add(previous_btn, next_btn)
+        if data_amount > line * row and not multiple:
+            multiple, roll_bar_id = set_multiple(data, data_amount, row, line)
 
-    else:
-        buttons = [
-            InlineKeyboardButton(**kwargs)
-            for kwargs in data
-        ]
-        markup.add(*buttons)
+        if multiple:
+            buttons = partial_buttons(data, line, roll_bar_id, row)
+            next_btn, previous_btn = rolling_buttons(roll_bar_id, event_id)
+            markup.add(*buttons)
+            markup.add(previous_btn, next_btn)
+
+        else:
+            buttons = [
+                InlineKeyboardButton(**kwargs)
+                for kwargs in data
+            ]
+            markup.add(*buttons)
 
     if participant:
         add_remove_participant_buttons(markup, event_id=event_id)
@@ -111,16 +119,16 @@ def buttons_markup(
         go_btn = InlineKeyboardButton(but_d.go_menu_btn_text, callback_data=call_btn)
         markup.add(go_btn)
 
-    markup.add(close_btn)
+    markup.add(close_btn(roll_bar_id))
     return markup
 
 
 def partial_buttons(data, line, roll_bar_id, row):
-    keep_buttons_data = ButtonsKeeper(roll_bar_id)
+    btn_keeper = ButtonsKeeper(roll_bar_id)
     buttons = [
         InlineKeyboardButton(**kwargs)
-        for kwargs in data[keep_buttons_data.get_index():
-                           keep_buttons_data.get_index() + row * line]
+        for kwargs in data[btn_keeper.get_index():
+                           btn_keeper.get_index() + row * line]
     ]
     return buttons
 
@@ -140,12 +148,11 @@ def add_remove_participant_buttons(markup, event_id):
 
 
 def set_multiple(data, data_amount, row, line):
-    roll_bar_id = datetime.datetime.now().timestamp()
-    print(f"{__name__} {roll_bar_id}")
-    keep_buttons_data = ButtonsKeeper(roll_bar_id)
-    keep_buttons_data.data = data
-    keep_buttons_data.row = row
-    keep_buttons_data.division = [i for i in range(0, data_amount, row * line)]
+    roll_bar_id = int(datetime.datetime.now().timestamp())
+    btn_keeper = ButtonsKeeper(roll_bar_id)
+    btn_keeper.data = data
+    btn_keeper.row = row
+    btn_keeper.division = [i for i in range(0, data_amount, row * line)]
     return True, roll_bar_id
 
 
@@ -159,7 +166,7 @@ def choose_location_buttons(event_id):
     )
     markup.add(choose_old, get_url)
     markup.add(go_menu_button(event_id, "event"))
-    markup.add(close_btn)
+    markup.add(close_btn())
     return markup
 
 
@@ -179,7 +186,7 @@ def add_songs_to_concert_buttons(concert_id):
     )
     concert_markup.add(add_songs_button)
     concert_markup.add(go_menu_button(concert_id, "event"))
-    concert_markup.add(close_btn)
+    concert_markup.add(close_btn())
     return concert_markup
 
 
@@ -189,7 +196,7 @@ def repeat_buttons(event_id):
         but_d.repeat_btn_text, callback_data=f"{cd.event_repeat_text}:{event_id}"
     )
     repeat_markup.add(repeat_button)
-    repeat_markup.add(close_btn)
+    repeat_markup.add(close_btn())
     return repeat_markup
 
 
@@ -199,7 +206,7 @@ def change_buttons(item_type, item_id):
         but_d.event_change_btn_text, callback_data=f"{cd.change_item_text}:{item_type}:{item_id}"
     )
     change_markup.add(change_button)
-    change_markup.add(close_btn)
+    change_markup.add(close_btn())
     return change_markup
 
 
@@ -223,7 +230,7 @@ def empty_participant_buttons(event_id, row=2):
     markup.add(add_one_btn)
     markup.add(add_all_btn)
     markup.add(go_menu_button(event_id, "event"))
-    markup.add(close_btn)
+    markup.add(close_btn())
     return markup
 
 
@@ -233,22 +240,22 @@ def go_menu_button(item_id, item_type):
     return InlineKeyboardButton(but_d.go_menu_btn_text, callback_data=f"{cd.change_item_text}:{item_type}:{item_id}")
 
 
-def rolling_buttons(event_id, roll_bar_id):
+def rolling_buttons(roll_bar_id, event_id):
     previous_btn = InlineKeyboardButton(" ", callback_data=EMTPY_FIELD)
     next_btn = InlineKeyboardButton(" ", callback_data=EMTPY_FIELD)
     call_config = cd.buttons_roll_text
 
-    keep_buttons_data = ButtonsKeeper(roll_bar_id)
+    btn_keeper = ButtonsKeeper(roll_bar_id)
 
-    if keep_buttons_data.get_index():
+    if btn_keeper.get_index():
         previous_btn = InlineKeyboardButton(
             prev_button_text,
-            callback_data=f"{call_config}:{roll_bar_id}:previous:{keep_buttons_data.previous_index()}:{event_id}"
+            callback_data=f"{call_config}:{roll_bar_id}:previous:{btn_keeper.previous_index()}:{event_id}"
         )
 
-    if keep_buttons_data.get_index() < keep_buttons_data.division[-1]:
+    if btn_keeper.get_index() < btn_keeper.division[-1]:
         next_btn = InlineKeyboardButton(
             next_button_text,
-            callback_data=f"{call_config}:{roll_bar_id}:next:{keep_buttons_data.next_index()}:{event_id}"
+            callback_data=f"{call_config}:{roll_bar_id}:next:{btn_keeper.next_index()}:{event_id}"
         )
     return next_btn, previous_btn

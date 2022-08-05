@@ -10,11 +10,11 @@ from database_control.db_event import search_event_by_date, search_event_by_date
 from keyboards.inline.callback_datas import calendar_factory, calendar_zoom
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from misc.messages.event_dictionary import next_button_text, prev_button_text, zoom_out_text, WEEK_DAYS, MONTHS
-from misc import callback_dict as cd
+from misc import keys, callback_dict as cd
 
 EMTPY_FIELD = 'calendar_button'
 
-CLOSE_BTN = InlineKeyboardButton("Закрыть", callback_data=cd.close_text)
+# CLOSE_BTN = InlineKeyboardButton("Закрыть", callback_data=cd.close_text)
 
 
 def generate_calendar_days(telegram_id: int, year: int, month: int, event_type=0, event_id=0):
@@ -108,7 +108,7 @@ def generate_calendar_days(telegram_id: int, year: int, month: int, event_type=0
             )
         ),
     )
-    keyboard.add(CLOSE_BTN)
+    keyboard.add(keys.buttons.close_btn())
 
     return keyboard
 
@@ -157,6 +157,6 @@ def generate_calendar_months(year: int, event_type=0, event_id=0):
             )
         )
     )
-    keyboard.add(CLOSE_BTN)
+    keyboard.add(keys.buttons.close_btn())
 
     return keyboard

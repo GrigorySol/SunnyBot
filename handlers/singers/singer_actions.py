@@ -22,13 +22,13 @@ def rolling_callback_buttons(call: CallbackQuery):
              f"{call.from_user.username} {call.from_user.full_name}")
 
     _, roll_bar_id, direction, index, event_id = call.data.split(":")
-    print(roll_bar_id)
+    roll_bar_id = int(roll_bar_id)
 
-    if not keys.buttons.ButtonsKeeper.data_exists(call.message.id):
+    if not keys.buttons.ButtonsKeeper.data_exists(roll_bar_id):
         bot.edit_message_text(dicts.changes.ERROR_text, call.message.chat.id, call.message.id, reply_markup=None)
         return
 
-    btn_keeper = keys.buttons.ButtonsKeeper(call.message.id)
+    btn_keeper = keys.buttons.ButtonsKeeper(roll_bar_id)
 
     if direction == "previous":
         btn_keeper.i -= 1
@@ -38,8 +38,8 @@ def rolling_callback_buttons(call: CallbackQuery):
     bot.edit_message_reply_markup(
         call.message.chat.id,
         call.message.id,
-        reply_markup=keys.buttons.buttons_markup(data=btn_keeper.data, roll_bar_id=roll_bar_id, multiple=True,
-                                                 row=btn_keeper.row)
+        reply_markup=keys.buttons.buttons_markup(data=btn_keeper.data, roll_bar_id=roll_bar_id,
+                                                 multiple=True, row=btn_keeper.row)
     )
 
 
@@ -293,10 +293,10 @@ def show_event(call: CallbackQuery):
 
     elif telegram_id != int(VIP) and telegram_id != int(VIP2):
         msg += f"\n{dicts.attends.you_not_participate_text}"
-        bot.send_message(telegram_id, msg)
+        bot.send_message(telegram_id, msg, reply_markup=keys.buttons.close_markup)
 
     else:
-        bot.send_message(telegram_id, msg)
+        bot.send_message(telegram_id, msg, reply_markup=keys.buttons.close_markup)
 
     # Admin can change the record about the event
     if db_singer.is_admin(telegram_id):
@@ -310,7 +310,7 @@ def show_event(call: CallbackQuery):
         bot.send_message(telegram_id, msg, reply_markup=markup)
 
 
-@bot.callback_query_handler(func=lambda c: c.data == cd.close_text)
+@bot.callback_query_handler(func=None, calendar_config=keys.call.close_button.filter())
 def close_btn(call: CallbackQuery):
     """Remove a block of the buttons"""
 
@@ -319,8 +319,11 @@ def close_btn(call: CallbackQuery):
     log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
              f"{call.from_user.username} {call.from_user.full_name}")
 
-    if keys.buttons.ButtonsKeeper.data_exists(call.message.id):
-        keys.buttons.ButtonsKeeper.delete_btn(call.message.id)
+    roll_bar_id = call.data.split(":")[1]
+    roll_bar_id = int(roll_bar_id) if roll_bar_id.isdigit() else 0
+
+    if keys.buttons.ButtonsKeeper.data_exists(roll_bar_id):
+        keys.buttons.ButtonsKeeper.delete_btn(roll_bar_id)
 
     bot.delete_message(call.message.chat.id, call.message.id)
 
