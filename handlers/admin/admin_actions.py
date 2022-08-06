@@ -5,7 +5,7 @@ from loader import bot, log
 from datetime import date
 from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from handlers.admin.admin_songs import add_sheets_or_sounds
-from misc import dicts, keys, callback_dict as cd
+from misc import dicts, keys, tools, callback_dict as cd
 from database_control import db_singer, db_songs, db_event, db_attendance
 
 
@@ -18,9 +18,7 @@ def show_singers_search(message: Message):
     log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
              f"{message.from_user.username} {message.from_user.full_name}")
 
-    is_admin = db_singer.is_admin(message.from_user.id)
-    if not is_admin:
-        bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
+    if not tools.admin_checker(message):
         return
 
     amount = db_singer.count_singers()
@@ -38,9 +36,7 @@ def add_options(message: Message):
     log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
              f"{message.from_user.username} {message.from_user.full_name}")
 
-    is_admin = db_singer.is_admin(message.from_user.id)
-    if not is_admin:
-        bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
+    if not tools.admin_checker(message):
         return
 
     call_config = cd.add_new_text
@@ -63,9 +59,7 @@ def location_buttons(message: Message):
     log.info(f"{__name__} <{func_name}\t{message.text}\t{message.id}\t\t"
              f"{message.from_user.username} {message.from_user.full_name}")
 
-    is_admin = db_singer.is_admin(message.chat.id)
-    if not is_admin:
-        bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
+    if not tools.admin_checker(message):
         return
 
     locations = db_event.get_all_locations()
@@ -82,6 +76,33 @@ def location_buttons(message: Message):
     )
 
 
+@bot.message_handler(commands=["admins"])
+def show_admins(message: Message):
+    """Show admin list. Ask to add/remove admins."""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{message.text}\t{message.id}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
+
+    if not tools.admin_checker(message):
+        return
+
+    admins = db_singer.get_all_admins()
+    msg = "\n".join([
+        db_singer.get_singer_fullname(db_singer.get_singer_id(telegram_id[0]))
+        for telegram_id in admins
+    ])
+    call_config = cd.admin_edit_text
+    data = [
+        {"text": text, "callback_data": f"{call_config}:{option_id}"}
+        for option_id, text in enumerate(dicts.changes.add_remove_text_tuple)
+    ]
+    msg = f"{dicts.singers.admins_text}\n{msg}"
+    markup = keys.buttons.buttons_markup(data)
+    bot.send_message(message.chat.id, msg, reply_markup=markup)
+
+
 @bot.message_handler(commands=["blacklist"])
 def show_blacklist(message: Message):
     """Display blocked users to unblock"""
@@ -91,9 +112,7 @@ def show_blacklist(message: Message):
     log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
              f"{message.from_user.username} {message.from_user.full_name}")
 
-    is_admin = db_singer.is_admin(message.from_user.id)
-    if not is_admin:
-        bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
+    if not tools.admin_checker(message):
         return
 
     blocked_users = db_singer.get_all_blocked_users()
@@ -122,9 +141,7 @@ def full_participation(message: Message):
     log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
              f"{message.from_user.username} {message.from_user.full_name}")
 
-    is_admin = db_singer.is_admin(message.from_user.id)
-    if not is_admin:
-        bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
+    if not tools.admin_checker(message):
         return
 
     db_attendance.magic_attendance(date.today())
@@ -141,9 +158,7 @@ def menu_tutorial(message: Message):
     log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
              f"{message.from_user.username} {message.from_user.full_name}")
 
-    is_admin = db_singer.is_admin(message.from_user.id)
-    if not is_admin:
-        bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
+    if not tools.admin_checker(message):
         return
 
     msg = bot.send_message(message.chat.id, dicts.changes.drop_a_menu_photo_text)
