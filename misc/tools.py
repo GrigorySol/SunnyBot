@@ -39,7 +39,9 @@ def display_suits(message, sid):
     else:
         msg += dicts.changes.add_remove_text
 
-    bot.send_media_group(message.chat.id, suit_data)
+    for n in range(0, len(suit_data), 9):           # TODO: move amount into the variable
+        bot.send_media_group(message.chat.id, suit_data[n:n+9])
+
     bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data))
 
 
@@ -107,7 +109,9 @@ def edit_suits(call):
                     continue
                 data.append({"text": text, "callback_data": f"{call_config}:suit:{sid}:{suit_id}"})
                 suit_data.append(InputMediaPhoto(photo, text))
-            bot.send_media_group(call.message.chat.id, suit_data)
+
+            for n in range(0, len(suit_data), 9):       # TODO: move amount into the variable
+                bot.send_media_group(call.message.chat.id, suit_data[n:n+9])
             bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
         else:
             msg = dicts.singers.suits_not_available_text
@@ -166,3 +170,13 @@ def enter_new_event_time(message: Message, event_id: int, date):
         msg = dicts.changes.event_time_changed_text
         markup = keys.buttons.buttons_markup(event_id=event_id, menu_btn=True)
         bot.send_message(message.chat.id, msg, reply_markup=markup)
+
+
+def admin_checker(message):
+    """Restrict access for a non-admin singer."""
+
+    is_admin = db_singer.is_admin(message.chat.id)
+    if not is_admin:
+        bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
+        return False
+    return True

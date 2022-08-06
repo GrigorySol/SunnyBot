@@ -5,7 +5,7 @@ import misc.messages.buttons_dictionary
 from config import VIP
 from loader import bot, log
 from telebot.types import CallbackQuery, Message, InputMediaPhoto
-from misc.edit_functions import enter_new_event_time
+from misc.tools import enter_new_event_time
 from misc.messages import buttons_dictionary as but_d
 from misc import dicts, keys, bot_speech, callback_dict as cd
 from database_control import db_songs, db_singer, db_event, db_attendance
@@ -33,10 +33,11 @@ def show_suits(call: CallbackQuery):
             suit_data.append(InputMediaPhoto(photo, text))
 
         msg = dicts.changes.edit_suit_text
-        for n in range(0, len(suit_data), 8):
-            bot.send_media_group(call.message.chat.id, suit_data[n:n+8])
-        markup = keys.buttons.buttons_markup(data)      # TODO: FIX IT
+        for n in range(0, len(suit_data), 9):       # TODO: move the amount into the variable
+            bot.send_media_group(call.message.chat.id, suit_data[n:n+9])
+        markup = keys.buttons.buttons_markup(data)
         bot.send_message(call.message.chat.id, msg, reply_markup=markup)
+        bot.delete_message(call.message.chat.id, call.message.id)
 
     else:
         bot.edit_message_text(dicts.changes.no_suits_to_edit_text, call.message.chat.id, call.message.id)
@@ -425,7 +426,9 @@ def select_suit_for_concert(call, event_id):
         )
         suit_data.append(InputMediaPhoto(photo, suit_name))
 
-    bot.send_media_group(call.message.chat.id, suit_data)
+    for n in range(0, len(suit_data), 9):       # TODO: move amount into the variable
+        bot.send_media_group(call.message.chat.id, suit_data[n:n+9])
+
     bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
 

@@ -5,7 +5,7 @@ from config import VIP
 from loader import bot, log
 from database_control import db_event, db_attendance, db_singer
 from telebot.types import Message, CallbackQuery
-from misc.edit_functions import enter_new_event_time
+from misc.tools import enter_new_event_time
 from misc import dicts, keys, callback_dict as cd
 from handlers.admin.admin_changes import create_option_buttons
 
