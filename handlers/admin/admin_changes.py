@@ -69,6 +69,7 @@ def display_event_options_to_change(call: CallbackQuery):
         options = dicts.changes.edit_event_text_tuple
 
     create_option_buttons(call.message, call_config, item_id, options)
+    bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.change_callback.filter(type="location"))
