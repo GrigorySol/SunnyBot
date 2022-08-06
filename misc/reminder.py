@@ -37,7 +37,7 @@ def check_event_date():
     if today_events:
         for event_id, _, event_name, event_time in today_events:
             print(f"Events for today:\n{event_name}")
-            event_reminder(event_id, event_name, "❗️ Cегодня", event_time)
+            event_reminder(event_id, event_name, dicts.attends.today_text, event_time)
     if day_events:
         for event_id, _, event_name, event_time in day_events:
             print(f"Events in one day:\n{event_name}")
@@ -66,7 +66,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
 
     msg_date = f"{event_date} в {event_time}"
 
-    if event_date != "❗️ Cегодня":
+    if event_date != dicts.attends.today_text:
         year, month, day = event_date.split("-")
         msg_date = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
 
@@ -74,10 +74,10 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
 
     for telegram_id, attendance in get_singers_id_by_event(event_id):
         try:
-            msg = f"{msg_date}:\n{event_name}\nЛокация: {location_name}\n" \
+            msg = f"{msg_date}:\n{event_name}\n{dicts.events.location_text} {location_name}\n" \
                   f"{rem_d.info_in_calendar_text}\n"
 
-            if attendance == 1:
+            if attendance == 1 and event_date == dicts.attends.today_text:
                 msg += f"\n{dicts.attends.chosen_attendance_text}\n" \
                        f"{dicts.attends.set_attendance_text_tuple[1]}\n" \
                        f"\n{dicts.attends.wanna_change_text}"
@@ -87,10 +87,8 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
                 msg += f"{rem_d.select_attendance_text}"
                 bot.send_message(telegram_id, msg, reply_markup=markup)
 
-            print(f"❗️ Message sent for {telegram_id} with {attendance}\n{msg}")
-
         except Exception as e:
-            print(f"{e}\n{telegram_id} not exists")
+            print(f"{e}\n\n❗️ {telegram_id} not exists ❗️\n\n")
 
 
 def database_sender():
@@ -106,4 +104,4 @@ def database_sender():
 
 
 schedule.every().day.at("01:27").do(database_sender)
-schedule.every().day.at("08:15").do(check_event_date)
+schedule.every().day.at("07:15").do(check_event_date)
