@@ -70,11 +70,10 @@ new_singer_markup.add(close_btn())
 
 # Singer search choice buttons
 search_choice_markup = InlineKeyboardMarkup(row_width=2)
-search_by_name = InlineKeyboardButton(but_d.singer_filter_btn_text_tuple[0], switch_inline_query_current_chat="а")
-search_by_voice = InlineKeyboardButton(but_d.singer_filter_btn_text_tuple[1],
+search_by_voice = InlineKeyboardButton(but_d.singer_filter_btn_text_tuple[0],
                                        callback_data=f"{cd.singer_search_text}:voice")
-show_all_btn = InlineKeyboardButton(but_d.singer_filter_btn_text_tuple[2], callback_data=cd.singer_show_all_text)
-search_choice_markup.add(search_by_name, search_by_voice, show_all_btn)
+show_all_btn = InlineKeyboardButton(but_d.singer_filter_btn_text_tuple[1], callback_data=cd.singer_show_all_text)
+search_choice_markup.add(search_by_voice, show_all_btn)
 search_choice_markup.add(close_btn())
 
 # Reply with joke

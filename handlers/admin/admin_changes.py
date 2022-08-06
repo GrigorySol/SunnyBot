@@ -90,6 +90,7 @@ def display_location_options_to_change(call: CallbackQuery):
         bot.send_sticker(call.message.chat.id, sticker_id)
         return
 
+    # TODO: display info here
     # "location" - "Название", "Ссылку на карту", "Ничего", "УДАЛИТЬ
     call_config = cd.selected_location_text
     create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_location_text_tuple)
@@ -126,7 +127,7 @@ def create_option_buttons(message: Message, call_config, item_id, options):
 
     msg = dicts.changes.select_option_to_change_text
     markup = keys.buttons.buttons_markup(data)
-    bot.edit_message_text(msg, message.chat.id, message.id, reply_markup=markup)
+    bot.send_message(message.chat.id, msg, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="0"))

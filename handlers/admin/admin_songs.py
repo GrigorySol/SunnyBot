@@ -38,6 +38,8 @@ def show_song_info(call: CallbackQuery):
     singer_id = db_singer.get_singer_id(telegram_id)
     singer_voices = db_singer.get_singer_voice_id(singer_id)
 
+    # TODO: group messages and send song name/description
+
     if sheets:
         for _, _, sheet_voice_id, sheet_id in sheets:
             if not sheet_voice_id:
@@ -46,6 +48,7 @@ def show_song_info(call: CallbackQuery):
             if sheet_voice_id in singer_voices or is_admin:
                 media_sheets.append(InputMediaDocument(sheet_id))
         bot.send_media_group(telegram_id, media_sheets)
+
     else:
         bot.send_message(telegram_id, dicts.songs.no_sheets_text)
 
@@ -68,8 +71,6 @@ def show_song_info(call: CallbackQuery):
         if is_admin:
             msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{misc.messages.changes_dictionary.edit_text}"
             edit_song_menu(call.message, song_id, msg)
-
-        bot.delete_message(call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.edit_song_callback.filter())

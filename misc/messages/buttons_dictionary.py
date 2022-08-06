@@ -1,6 +1,6 @@
 close_btn_text = "💢 Закрыть"
 register_btn_text = "✅ Зарегистрироваться"
-singer_filter_btn_text_tuple = ("🧾 По имени", "🗣 По голосу", "👨‍👧‍👧 Посмотреть всех")
+singer_filter_btn_text_tuple = ("🗣 По голосу", "👨‍👧‍👧 Посмотреть всех")
 accept_btn_text_tuple = ("🎉 Да!", "🎊 Конечно!")
 choose_location_btn_text_tuple = ("🌆 Выбрать", "🏙 Добавить")
 add_songs_btn_text = "🪗 Добавить песни в программу"

@@ -103,7 +103,7 @@ def chose_song_filter(message: Message):
              f"{message.from_user.username} {message.from_user.full_name}")
 
     call_config = cd.song_filter_text
-    data = []
+    data = [{"text": dicts.singers.song_name_search_text, "switch_inline_query_current_chat": "a"}]  # inline search
     for filter_id, text in enumerate(dicts.singers.song_filter_text_tuple):
         data.append({"text": text, "callback_data": f"{call_config}:{filter_id}"})
 

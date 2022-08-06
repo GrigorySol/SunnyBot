@@ -27,12 +27,12 @@ def display_singer_info(call: CallbackQuery):
         return
 
     comment = db_singer.get_singer_comment(singer_id)
-    msg = dicts.singers.what_to_do_text
+    msg = dicts.singers.what_to_do_text     # TODO: add singer name
     if comment:
         msg = f"{dicts.singers.singer_comment_text}\n{comment}\n\n{msg}"
 
     markup = singer_markup(call.message, singer_id)
-    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
+    bot.send_message(call.message.chat.id, msg, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.info_callback.filter())
