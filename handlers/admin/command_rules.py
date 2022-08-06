@@ -1,4 +1,5 @@
 from loader import bot
+from telebot.apihelper import ApiTelegramException
 from telebot.types import BotCommand, BotCommandScopeChat
 from misc.bot_commands import admin_commands, singer_commands
 from database_control.db_singer import get_all_admins
@@ -25,15 +26,19 @@ def admin_command_rules():
     admin_chats = []
     for admin in admins:
         print(admin[0])
-        bot.delete_my_commands(BotCommandScopeChat(admin[0]))
-        chat = BotCommandScopeChat(admin[0])
-        admin_chats.append(chat)
+        try:
+            bot.delete_my_commands(BotCommandScopeChat(admin[0]))
+            chat = BotCommandScopeChat(admin[0])
+            admin_chats.append(chat)
+        except ApiTelegramException as e:
+            print(e)
+            print(f"Admin id {admin[0]} doesn't exists anymore!")
 
     for admin_chat in admin_chats:
         bot.set_my_commands(
             commands=commands,
             scope=admin_chat
-        )
+            )
 
 
 admin_command_rules()
