@@ -219,7 +219,8 @@ def edit_event_location(call: CallbackQuery):
 
     msg = dicts.events.choose_event_location_text
     bot.edit_message_text(
-        msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.choose_location_buttons(event_id)
+        msg, call.message.chat.id, call.message.id,
+        reply_markup=keys.buttons.choose_location_buttons(event_id, go_menu=True)
     )
 
 

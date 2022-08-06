@@ -155,7 +155,7 @@ def set_multiple(data, data_amount, row, line):
     return True, roll_bar_id
 
 
-def choose_location_buttons(event_id):
+def choose_location_buttons(event_id, go_menu=False):
     markup = InlineKeyboardMarkup(row_width=2)
     choose_old = InlineKeyboardButton(
         but_d.choose_location_btn_text_tuple[0], callback_data=f"{cd.add_event_location_text}:db:{event_id}"
@@ -164,7 +164,8 @@ def choose_location_buttons(event_id):
         but_d.choose_location_btn_text_tuple[1], callback_data=f"{cd.add_event_location_text}:url:{event_id}"
     )
     markup.add(choose_old, get_url)
-    markup.add(go_menu_button(event_id, "event"))
+    if go_menu:
+        markup.add(go_menu_button(event_id, "event"))
     markup.add(close_btn())
     return markup
 
