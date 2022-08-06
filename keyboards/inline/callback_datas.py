@@ -1,5 +1,5 @@
 from telebot.callback_data import CallbackData
-from misc import callback_dict as cd
+from misc.dictionaries import callback_dictionary as cd
 
 # calendar
 calendar_data = CallbackData("event_type", "event_id", "year", "month", "day", prefix=cd.calendar_data_text)
@@ -40,10 +40,12 @@ search_callback = CallbackData("type", prefix=cd.singer_search_text)
 show_singer_callback = CallbackData("singer_id", prefix=cd.singer_display_text)
 voice_callback = CallbackData("voice_id", prefix=cd.singer_voice_text)
 edit_voice_callback = CallbackData("action", "voice_id", prefix=cd.singer_edit_voice_text)
-suit_edit_callback = CallbackData("action", "suit_id", prefix=cd.singer_edit_suit_text)
+display_suit_photos_callback = CallbackData(prefix=cd.display_suit_photos_text)
+display_suit_buttons_callback = CallbackData(prefix=cd.display_suit_buttons_text)
+singer_suit_callback = CallbackData("action", "singer_id", prefix=cd.singer_suit_text)
 info_callback = CallbackData("name", "singer_id", prefix=cd.singer_info_text)
-singer_add_callback = CallbackData("type", "singer_id", "item_id", prefix=cd.singer_add_action_text)
-singer_remove_callback = CallbackData("type", "singer_id", "item_id", prefix=cd.singer_remove_action_text)
+singer_add_callback = CallbackData("item_type", "singer_id", "item_id", prefix=cd.singer_add_action_text)
+singer_remove_callback = CallbackData("item_type", "singer_id", "item_id", prefix=cd.singer_remove_action_text)
 unblock_user_callback = CallbackData("singer_id", prefix=cd.unblock_user_text)
 edit_admin_callback = CallbackData("option", prefix=cd.admin_edit_text)
 add_remove_admin_callback = CallbackData("option", "singer_id", prefix=cd.add_remove_admin_text)

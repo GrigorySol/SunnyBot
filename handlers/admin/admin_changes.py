@@ -6,40 +6,9 @@ from config import VIP
 from loader import bot, log
 from telebot.types import CallbackQuery, Message, InputMediaPhoto
 from misc.tools import enter_new_event_time
-from misc import dicts, keys, bot_speech, callback_dict as cd
+from misc import dicts, keys, bot_speech
+from misc.dictionaries import callback_dictionary as cd
 from database_control import db_songs, db_singer, db_event, db_attendance
-
-
-@bot.callback_query_handler(func=lambda c: c.data == cd.display_suits_text)
-def show_suits(call: CallbackQuery):
-    """Display all suits and buttons with suit names"""
-
-    # debug
-    func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
-             f"{call.from_user.username} {call.from_user.full_name}")
-
-    suits = db_singer.get_all_suits()
-
-    if suits:
-        call_config = cd.change_item_text
-        item_type = "suit"
-        data = []
-        suit_data = []
-
-        for suit_id, text, photo in suits:
-            data.append({"text": text, "callback_data": f"{call_config}:{item_type}:{suit_id}"})
-            suit_data.append(InputMediaPhoto(photo, text))
-
-        msg = dicts.changes.edit_suit_text
-        for n in range(0, len(suit_data), 9):       # TODO: move the amount into the variable
-            bot.send_media_group(call.message.chat.id, suit_data[n:n+9])
-        markup = keys.buttons.buttons_markup(data)
-        bot.send_message(call.message.chat.id, msg, reply_markup=markup)
-        bot.delete_message(call.message.chat.id, call.message.id)
-
-    else:
-        bot.edit_message_text(dicts.changes.no_suits_to_edit_text, call.message.chat.id, call.message.id)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.change_callback.filter(type="event"))
@@ -127,7 +96,7 @@ def create_option_buttons(message: Message, call_config, item_id, options):
     for option_id, text in enumerate(options):
         data.append({"text": text, "callback_data": f"{call_config}:{option_id}:{item_id}"})
 
-    msg = dicts.changes.select_option_to_change_text
+    msg = dicts.changes.edit_text
     markup = keys.buttons.buttons_markup(data)
     bot.send_message(message.chat.id, msg, reply_markup=markup)
 

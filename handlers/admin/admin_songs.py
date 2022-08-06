@@ -5,7 +5,8 @@ from config import VIP
 from loader import bot, log
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
 from database_control import db_songs, db_singer
-from misc import dicts, keys, callback_dict as cd
+from misc import dicts, keys
+from misc.dictionaries import callback_dictionary as cd
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.song_info_callback.filter())

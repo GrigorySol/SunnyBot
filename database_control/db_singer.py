@@ -181,25 +181,26 @@ def get_singer_voice_id(singer_id):
 
 
 def get_singer_suits(singer_id):
-    """Return the singer (id, suit_name, photo) from the database."""
+    """Return the singer (id, suit_name) from the database."""
     with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()
 
         # language=SQLITE-SQL
-        cursor.execute("SELECT id, suit_name, photo FROM suits "
+        cursor.execute("SELECT id, suit_name FROM suits "
                        "JOIN singer_suit ON singer_suit.suit_id = suits.id "
                        "WHERE singer_suit.singer_id = ?", (singer_id,))
         return cursor.fetchall()
 
 
-def get_singer_suit_id(singer_id):
-    """Return the singer suit_id from the database."""
+def get_available_suits(singer_id):
+    """Return all (id, suit_name) from the database."""
     with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()
 
-        # language=SQLITE-SQL
-        cursor.execute("SELECT suit_id FROM singer_suit "
-                       "WHERE singer_id = ?", (singer_id,))
+        cursor.execute("SELECT id, suit_name FROM suits EXCEPT "
+                       "SELECT id, suit_name FROM suits "
+                       "JOIN singer_suit ON singer_suit.suit_id = suits.id "
+                       "WHERE singer_suit.singer_id = ?", (singer_id,))
         return cursor.fetchall()
 
 
@@ -217,7 +218,7 @@ def get_all_suits():
     with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()
 
-        cursor.execute("SELECT * FROM suits ")
+        cursor.execute("SELECT * FROM suits")
         return cursor.fetchall()
 
 

@@ -6,43 +6,36 @@ from misc import dicts, keys
 from database_control import db_singer, db_event
 
 
-def display_suits(message, sid):
+def display_suit_photos(message, suits):
     """
-    Receive message data and a singer id from the database
-    Show group of the available suits photos and write the text
+    Show group of the available suits photos
     """
 
-    suits = db_singer.get_singer_suits(sid)
-    call_config = "suit"
-    data = []
-    suit_names = []
     suit_data = []
 
     for _, name, photo in suits:
-        suit_names.append(name)
         suit_data.append(InputMediaPhoto(photo, name))
 
-    # add/remove/close buttons
-    for i, text in enumerate(dicts.changes.add_remove_text_tuple):
-        data.append({"text": text, "callback_data": f"{call_config}:{i}:{sid}"})
-
-    if not suits:
-        data.pop()
-        msg = dicts.singers.no_suit_text
-        bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data))
-        return
-
-    msg = f"{dicts.singers.available_suits}\n{', '.join(suit_names)}.\n"
-    if len(db_singer.get_all_suits()) == len(suits):
-        data.pop(0)
-        msg += dicts.changes.remove_text
-    else:
-        msg += dicts.changes.add_remove_text
-
-    for n in range(0, len(suit_data), 9):           # TODO: move amount into the variable
+    for n in range(0, len(suit_data), 9):
         bot.send_media_group(message.chat.id, suit_data[n:n+9])
 
-    bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data))
+
+def generate_items_data(option, singer_id, items, item_type):
+    """Generates msg and data to add ot remove items for a singer."""
+
+    if option == "add":
+        msg = dicts.changes.what_to_add_text
+        call_config = dicts.call_dic.singer_add_action_text
+    else:
+        msg = dicts.changes.what_to_remove_text
+        call_config = dicts.call_dic.singer_remove_action_text
+
+    data = [
+        {"text": text, "callback_data": f"{call_config}:{item_type}:{singer_id}:{item_id}"}
+        for item_id, text in items
+    ]
+
+    return msg, data
 
 
 def display_voices(message, sid):
@@ -75,63 +68,23 @@ def display_voices(message, sid):
     bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data))
 
 
-def action_definition(action: str):
-    """Define what choice made by singer"""
-
-    if action == "0":  # "Добавить"
-        call_config = "singer_add"
-        msg = "Что добавить?"
-    else:   # УДАЛИТЬ
-        call_config = "singer_remove"
-        msg = "Что удалить?"
-    return call_config, msg
-
-
-def edit_suits(call):
-    print(f"edit_suits {call.data}")
-    _, action_id, sid = call.data.split(":")
-    call_config, msg = action_definition(action_id)
-    data = []
-
-    if action_id == "1":
-        suits = db_singer.get_singer_suits(sid)
-        for suit_id, text, _ in suits:
-            data.append({"text": text, "callback_data": f"{call_config}:suit:{sid}:{suit_id}"})
-        bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
-
-    else:
-        suit_data = []
-        suits = db_singer.get_all_suits()
-        if suits:
-            for suit_id, text, photo in suits:
-                available = db_singer.get_singer_suits(sid)
-                if (suit_id, text, photo) in available:
-                    continue
-                data.append({"text": text, "callback_data": f"{call_config}:suit:{sid}:{suit_id}"})
-                suit_data.append(InputMediaPhoto(photo, text))
-
-            for n in range(0, len(suit_data), 9):       # TODO: move amount into the variable
-                bot.send_media_group(call.message.chat.id, suit_data[n:n+9])
-            bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
-        else:
-            msg = dicts.singers.suits_not_available_text
-            bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
-
-
 def edit_voices(call):
     print(f"edit_voice {call.data}")
     _, action_id, sid = call.data.split(":")
-    call_config, msg = action_definition(action_id)
     data = []
 
     if action_id == "1":
+        msg = dicts.changes.what_to_remove_text
+        call_config = dicts.call_dic.singer_remove_action_text
         voices = db_singer.get_singer_voices(sid)
         for voice_id, text in voices:
             data.append({"text": text, "callback_data": f"{call_config}:voice:{sid}:{voice_id}"})
 
     else:
+        msg = dicts.changes.what_to_add_text
+        call_config = dicts.call_dic.singer_add_action_text
         voices = db_singer.get_all_voices()
-        for voice_id, text in voices:
+        for voice_id, text in voices:       # TODO: change it
             available = db_singer.get_singer_voices(sid)
             if (voice_id, text) in available:
                 continue

@@ -7,5 +7,6 @@ from misc.dictionaries import (
     reminder_dictionary as reminds,
     singer_dictionary as singers,
     song_dictionary as songs,
-    filter_dictionary as filters
+    filter_dictionary as filters,
+    callback_dictionary as call_dic
 )

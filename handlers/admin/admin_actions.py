@@ -5,7 +5,8 @@ from loader import bot, log
 from datetime import date
 from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from handlers.admin.admin_songs import add_sheets_or_sounds
-from misc import dicts, keys, tools, callback_dict as cd
+from misc import dicts, keys, tools
+from misc.dictionaries import callback_dictionary as cd
 from database_control import db_singer, db_songs, db_event, db_attendance
 
 

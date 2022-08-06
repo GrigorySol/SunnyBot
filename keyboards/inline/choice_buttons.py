@@ -2,8 +2,7 @@ import datetime
 
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 from misc.dictionaries.event_dictionary import next_button_text, prev_button_text
-from misc.dictionaries import buttons_dictionary as but_d
-from misc import callback_dict as cd
+from misc.dictionaries import buttons_dictionary as but_d, callback_dictionary as cd
 
 EMTPY_FIELD = 'calendar_button'
 
@@ -133,9 +132,9 @@ def partial_buttons(data, line, roll_bar_id, row):
 
 
 def add_remove_participant_buttons(markup, event_id):
-    add_one_btn = InlineKeyboardButton(but_d.event_add_singer_btn_text,
+    add_one_btn = InlineKeyboardButton(but_d.add_btn_text,
                                        callback_data=f"{cd.add_participant_text}:{event_id}")
-    remove_one_btn = InlineKeyboardButton(but_d.event_remove_singer_btn_text,
+    remove_one_btn = InlineKeyboardButton(but_d.remove_btn_text,
                                           callback_data=f"{cd.remove_participation_text}:{event_id}")
     add_all_btn = InlineKeyboardButton(but_d.event_add_all_btn_text,
                                        callback_data=f"{cd.add_all_participants_text}:{event_id}")
@@ -203,7 +202,7 @@ def repeat_buttons(event_id):
 def change_buttons(item_type, item_id):
     change_markup = InlineKeyboardMarkup(row_width=1)
     change_button = InlineKeyboardButton(
-        but_d.event_change_btn_text, callback_data=f"{cd.change_item_text}:{item_type}:{item_id}"
+        but_d.change_btn_text, callback_data=f"{cd.change_item_text}:{item_type}:{item_id}"
     )
     change_markup.add(change_button)
     change_markup.add(close_btn())
@@ -222,7 +221,7 @@ def empty_participant_buttons(event_id, row=2):
 
     markup = InlineKeyboardMarkup(row_width=row)
 
-    add_one_btn = InlineKeyboardButton(but_d.event_add_singer_btn_text,
+    add_one_btn = InlineKeyboardButton(but_d.add_btn_text,
                                        callback_data=f"{cd.add_participant_text}:{event_id}")
     add_all_btn = InlineKeyboardButton(but_d.event_add_all_btn_text,
                                        callback_data=f"{cd.add_all_participants_text}:{event_id}")

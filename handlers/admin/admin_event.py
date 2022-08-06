@@ -6,7 +6,8 @@ from loader import bot, log
 from database_control import db_event, db_attendance, db_singer
 from telebot.types import Message, CallbackQuery
 from misc.tools import enter_new_event_time
-from misc import dicts, keys, callback_dict as cd
+from misc import dicts, keys
+from misc.dictionaries import callback_dictionary as cd
 from handlers.admin.admin_changes import create_option_buttons
 
 
@@ -407,7 +408,7 @@ def calendar_zoom_out_handler(call: CallbackQuery):
     )
 
 
-@bot.callback_query_handler(func=lambda call: call.data == keys.calendar.EMTPY_FIELD)
+@bot.callback_query_handler(func=lambda call: call.data == keys.buttons.EMTPY_FIELD)
 def callback_empty_field_handler(call: CallbackQuery):
     """Do nothing for the empty buttons"""
     return

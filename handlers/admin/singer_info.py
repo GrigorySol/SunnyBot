@@ -4,9 +4,9 @@ import inspect
 from config import VIP
 from loader import bot, log
 from telebot.types import CallbackQuery, Message
-from misc.tools import display_suits, display_voices, edit_voices
+from misc.tools import display_voices, edit_voices
 from database_control import db_singer, db_attendance
-from misc import dicts, keys, callback_dict as cd
+from misc import dicts, keys
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.show_singer_callback.filter())
@@ -28,7 +28,7 @@ def display_singer_info(call: CallbackQuery):
 
     name = db_singer.get_singer_fullname(singer_id)
     voices = [voice_name for _, voice_name in db_singer.get_singer_voices(singer_id)]
-    suits = [suit_name for _, suit_name, _ in db_singer.get_singer_suits(singer_id)]
+    suits = [suit_name for _, suit_name in db_singer.get_singer_suits(singer_id)]
     comment = db_singer.get_singer_comment(singer_id)
 
     msg = f"📇 {name}\n🗣 {', '.join(voices)}\n🥋 {', '.join(suits)}"
@@ -36,7 +36,7 @@ def display_singer_info(call: CallbackQuery):
         msg += f"\n📝 {comment}"
     bot.send_message(call.from_user.id, msg)
 
-    markup = singer_markup(call.message, singer_id)
+    markup = singer_info_markup(singer_id)
     bot.send_message(call.from_user.id, dicts.singers.what_to_do_text, reply_markup=markup)
 
 
@@ -54,11 +54,11 @@ def singer_menu(call: CallbackQuery):
     if option_id == "0":  # Голос
         display_voices(call.message, singer_id)
 
-    elif option_id == "1":  # Костюмы
-        display_suits(call.message, singer_id)
+    elif option_id == "1":  # Костюмы TODO: Remove?
+        pass
 
     elif option_id == "2":  # Посещаемость
-        call_config = cd.attendance_intervals_text
+        call_config = dicts.call_dic.attendance_intervals_text
         data = []
         msg = dicts.attends.choose_interval_text
 
@@ -83,7 +83,7 @@ def singer_menu(call: CallbackQuery):
         bot.register_next_step_handler(msg, enter_new_singer_name, singer_id)
 
     elif option_id == "5":  # УДАЛИТЬ
-        call_config = cd.delete_confirmation_text
+        call_config = dicts.call_dic.delete_confirmation_text
         item_type = "singer"
         item_name = db_singer.get_singer_fullname(singer_id)
         data = []
@@ -94,7 +94,7 @@ def singer_menu(call: CallbackQuery):
 
         bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
-    bot.delete_message(call.message.chat.id, call.message.id)
+    # bot.delete_message(call.message.chat.id, call.message.id)
 
 
 def enter_new_singer_name(message: Message, singer_id):
@@ -138,7 +138,7 @@ def enter_new_singer_comment(message: Message, singer_id):
         return
 
     if db_singer.edit_singer_comment(singer_id, message.text):
-        markup = singer_markup(message, singer_id)
+        markup = singer_info_markup(singer_id)
         bot.send_message(message.chat.id, dicts.changes.comment_changed_text, reply_markup=markup)
 
     else:
@@ -148,11 +148,13 @@ def enter_new_singer_comment(message: Message, singer_id):
         bot.send_message(VIP, vip_msg)
 
 
-def singer_markup(message, singer_id):
+def singer_info_markup(singer_id):
     telegram_name = db_singer.get_singer_telegram_name(singer_id)
     data = [{"text": dicts.buttons.send_msg_btn_text, "url": f"t.me/{telegram_name}"}]
+
     for i, text in enumerate(dicts.changes.edit_singer_text_tuple):
-        data.append({"text": text, "callback_data": f"{cd.singer_info_text}:{i}:{singer_id}"})
+        data.append({"text": text, "callback_data": f"{dicts.call_dic.singer_info_text}:{i}:{singer_id}"})
+
     markup = keys.buttons.buttons_markup(data)
     return markup
 
@@ -214,5 +216,5 @@ def display_attendance(call: CallbackQuery):
            f"{dicts.attends.attendance_description_text_tuple[1]}: {attendance.count('1')}\n" \
            f"{dicts.attends.attendance_description_text_tuple[2]}: {attendance.count('2')}"
 
-    markup = singer_markup(call.message, singer_id)
+    markup = singer_info_markup(singer_id)
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)

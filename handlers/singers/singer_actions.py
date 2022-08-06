@@ -7,39 +7,8 @@ from loader import bot, log
 from database_control import db_singer, db_songs, db_event, db_attendance
 from telebot.custom_filters import TextFilter
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
-from misc.tools import display_suits, edit_suits
-from misc import dicts, keys, callback_dict as cd
-
-
-@bot.callback_query_handler(func=None, singer_config=keys.call.buttons_roll_callback.filter())
-def rolling_callback_buttons(call: CallbackQuery):
-    """Roll a page with buttons"""
-
-    # debug
-    func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t{call.data}\t{call.message.id}\t\t"
-             f"{call.from_user.username} {call.from_user.full_name}")
-
-    _, roll_bar_id, direction, index, event_id = call.data.split(":")
-    roll_bar_id = int(roll_bar_id)
-
-    if not keys.buttons.ButtonsKeeper.data_exists(roll_bar_id):
-        bot.edit_message_text(dicts.changes.ERROR_text, call.message.chat.id, call.message.id, reply_markup=None)
-        return
-
-    btn_keeper = keys.buttons.ButtonsKeeper(roll_bar_id)
-
-    if direction == "previous":
-        btn_keeper.i -= 1
-    elif direction == "next":
-        btn_keeper.i += 1
-
-    bot.edit_message_reply_markup(
-        call.message.chat.id,
-        call.message.id,
-        reply_markup=keys.buttons.buttons_markup(data=btn_keeper.data, roll_bar_id=roll_bar_id,
-                                                 multiple=True, row=btn_keeper.row)
-    )
+from misc import dicts, keys, tools
+from misc.dictionaries import callback_dictionary as cd
 
 
 @bot.message_handler(commands=["voice"])
@@ -61,7 +30,7 @@ def show_voice(message: Message):
 
 
 @bot.message_handler(commands=["suits"])
-def show_suits(message: Message):
+def edit_singer_suits(message: Message):
     """Display singer suits and buttons to add or remove"""
 
     # debug
@@ -69,27 +38,42 @@ def show_suits(message: Message):
     log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
              f"{message.from_user.username} {message.from_user.full_name}")
 
-    singer_id = db_singer.get_singer_id(message.from_user.id)
-    display_suits(message, singer_id)
+    singer_id = db_singer.get_singer_id(message.chat.id)
+    suits = db_singer.get_all_suits()
+    singer_suits = db_singer.get_singer_suits(singer_id)
+    suit_names = '\n'.join([f'🥋 {name}' for _, name in singer_suits])
 
-    if db_singer.is_admin(message.from_user.id):
-        call_config = cd.display_suits_text
-        data = [{"text": dicts.changes.button_show_all_suits_text, "callback_data": f"{call_config}"}]
-        msg = f"{dicts.buttons.admin_buttons_text}\n{dicts.changes.show_all_suits_text}"
-        bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
+    if not suits:
+        msg = dicts.singers.suits_not_available_text
+        bot.send_message(message.chat.id, msg)
+        return
 
+    if not singer_suits:
+        msg = dicts.singers.no_suit_text
+        data = [
+            {"text": dicts.buttons.add_btn_text, "callback_data": f"{cd.singer_suit_text}:add:{singer_id}"},
+            {"text": " ", "callback_data": f"{cd.EMTPY_FIELD}"}
+        ]
+    elif len(singer_suits) == len(suits):
+        msg = f"{suit_names}\n\n{dicts.singers.too_many_suits}"
+        data = [
+            {"text": " ", "callback_data": f"{cd.EMTPY_FIELD}"},
+            {"text": dicts.buttons.remove_btn_text, "callback_data": f"{cd.singer_suit_text}:remove:{singer_id}"}
+        ]
+    else:
+        msg = f"{suit_names}\n\n{dicts.singers.what_to_do_text}"
+        data = [
+            {"text": dicts.buttons.add_btn_text, "callback_data": f"{cd.singer_suit_text}:add:{singer_id}"},
+            {"text": dicts.buttons.remove_btn_text, "callback_data": f"{cd.singer_suit_text}:remove:{singer_id}"}
+        ]
 
-@bot.callback_query_handler(func=None, singer_config=keys.call.suit_edit_callback.filter())
-def edit_suits_buttons(call: CallbackQuery):
-    """Display buttons to add or remove suit"""
+    data.append({"text": dicts.buttons.show_all_suits_btn_text, "callback_data": f"{cd.display_suit_photos_text}"})
+    bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
-    # debug
-    func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
-             f"{call.from_user.username} {call.from_user.full_name}")
-
-    edit_suits(call)
-    bot.delete_message(call.message.chat.id, call.message.id)
+    if db_singer.is_admin(message.chat.id):
+        admin_msg = f"{dicts.buttons.admin_buttons_text}\n{dicts.changes.edit_text}"
+        data = [{"text": dicts.buttons.change_btn_text, "callback_data": f"{cd.display_suit_buttons_text}"}]
+        bot.send_message(message.chat.id, admin_msg, reply_markup=keys.buttons.buttons_markup(data))
 
 
 @bot.message_handler(commands=["songs"])
@@ -110,6 +94,45 @@ def chose_song_filter(message: Message):
         message.chat.id, dicts.singers.choose_filter_text,
         reply_markup=keys.buttons.buttons_markup(data)
     )
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.display_suit_photos_callback.filter())
+def show_suit_photos(call: CallbackQuery):
+    """Display photos of all suits"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
+
+    suits = db_singer.get_all_suits()
+    tools.display_suit_photos(call.message, suits)
+    bot.delete_message(call.message.chat.id, call.message.id)
+    edit_singer_suits(call.message)
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.singer_suit_callback.filter())
+def edit_suits_buttons(call: CallbackQuery):
+    """Display buttons to add or remove suit"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
+
+    _, option, singer_id = call.data.split(":")
+
+    if option == "add":
+        items = db_singer.get_available_suits(singer_id)
+    elif option == "remove":
+        items = db_singer.get_singer_suits(singer_id)
+    else:
+        bot.send_message(call.message.chat.id, dicts.changes.ERROR_text)
+        bot.delete_message(call.message.chat.id, call.message.id)
+        return
+
+    msg, data = tools.generate_items_data(option, singer_id, items, "suit")
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.buttons_markup(data))
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.song_filter_callback.filter())
@@ -193,6 +216,37 @@ def concert_songs(call: CallbackQuery):
             msg,
             reply_markup=keys.buttons.add_songs_to_concert_buttons(event_id)
         )
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.buttons_roll_callback.filter())
+def rolling_callback_buttons(call: CallbackQuery):
+    """Roll a page with buttons"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{call.data}\t{call.message.id}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
+
+    _, roll_bar_id, direction, index, event_id = call.data.split(":")
+    roll_bar_id = int(roll_bar_id)
+
+    if not keys.buttons.ButtonsKeeper.data_exists(roll_bar_id):
+        bot.edit_message_text(dicts.changes.ERROR_text, call.message.chat.id, call.message.id, reply_markup=None)
+        return
+
+    btn_keeper = keys.buttons.ButtonsKeeper(roll_bar_id)
+
+    if direction == "previous":
+        btn_keeper.i -= 1
+    elif direction == "next":
+        btn_keeper.i += 1
+
+    bot.edit_message_reply_markup(
+        call.message.chat.id,
+        call.message.id,
+        reply_markup=keys.buttons.buttons_markup(data=btn_keeper.data, roll_bar_id=roll_bar_id,
+                                                 multiple=True, row=btn_keeper.row)
+    )
 
 
 @bot.message_handler(commands=["events"])

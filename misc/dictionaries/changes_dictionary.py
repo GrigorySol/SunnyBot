@@ -18,8 +18,6 @@ song_removed_from_concert = "Удалена песня"
 all_sheets_text = "все ноты для песни"
 all_sounds_text = "все учебки для песни"
 
-show_all_suits_text = "Показать все костюмы?"
-button_show_all_suits_text = "Показать все костюмы"
 no_suits_to_edit_text = "Сначала нужно добавить костюмы через меню /add."
 edit_suit_text = "Можно изменить название/фотографию костюма или УДАЛИТЬ."
 suit_not_found_text = "Этого костюма уже нет."
@@ -32,7 +30,9 @@ photo_saved_text = "Фотография сохранена."
 wrong_photo_format_text = "Неправильный формат. Нужна фотография минимум 400х400. " \
                           "Если хочешь отменить, нажми '/'"
 
-edit_text = "Что желаешь изменить?"
+edit_text = "Хочешь что-то изменить?"
+what_to_add_text = "Что добавить?"
+what_to_remove_text = "Что убрать?"
 bot_cant_change_it_text = "Мне очень жаль, но на этом наши полномочия всё."
 
 name_changed_text = "Новое название сохранено."
@@ -43,7 +43,6 @@ would_be_changed_text = "будут изменены."
 enter_new_name_text = "Напиши имя и фамилию через пробел:"
 singer_name_changed_text = "Имя и фамилия изменены."
 
-select_option_to_change_text = "Что нужно изменить?"
 enter_new_event_name_text = "Напиши новое название мероприятия:"
 enter_new_event_time_text = "Напиши новое время для мероприятия в формате 23 00, 23:00 или 23-00:"
 event_time_busy = "Указанное время занято другим мероприятием."
