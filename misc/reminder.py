@@ -60,7 +60,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
 
     call_config = "singer_attendance"
     data = [
-        (text, f"{call_config}:edit:{event_id}:{i}")
+        {"text": text, "callback_data": f"{call_config}:edit:{event_id}:{i}"}
         for i, text in enumerate(at_d.set_attendance_text_tuple)
     ]
 
@@ -106,4 +106,4 @@ def database_sender():
 
 
 schedule.every().day.at("01:27").do(database_sender)
-schedule.every().day.at("07:15").do(check_event_date)
+schedule.every().day.at("08:15").do(check_event_date)
