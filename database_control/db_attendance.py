@@ -130,4 +130,3 @@ def remove_singer_attendance(event_id, singer_id):
         cursor = db.cursor()
 
         cursor.execute("DELETE FROM attendance WHERE event_id = ? AND singer_id = ?", (event_id, singer_id))
-

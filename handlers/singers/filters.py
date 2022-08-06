@@ -43,6 +43,3 @@ class CalendarZoomCallbackFilter(AdvancedCustomFilter):
 
     def check(self, call: CallbackQuery, config: CallbackDataFilter):
         return config.check(query=call)
-
-
-
