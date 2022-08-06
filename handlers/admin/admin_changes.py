@@ -101,7 +101,7 @@ def display_location_options_to_change(call: CallbackQuery):
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.change_callback.filter(type="suit"))
 def display_suit_options_to_change(call: CallbackQuery):
-    """Display location options to change"""
+    """Display suit options to change"""
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
@@ -118,7 +118,7 @@ def display_suit_options_to_change(call: CallbackQuery):
         bot.send_sticker(call.message.chat.id, sticker_id)
         return
 
-    call_config = cd.select_suit_text
+    call_config = cd.selected_suit_text
     create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_suit_text_tuple)
 
 
