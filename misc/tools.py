@@ -176,7 +176,7 @@ def admin_checker(message):
     """Restrict access for a non-admin singer."""
 
     is_admin = db_singer.is_admin(message.chat.id)
-    if not is_admin or not VIP:
+    if not is_admin and not VIP:
         bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
         return False
     return True
