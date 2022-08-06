@@ -22,6 +22,7 @@ def show_song_info(call: CallbackQuery):
              f"{call.from_user.username} {call.from_user.full_name}")
 
     song_id = call.data.split(":")[1]
+    song_name = db_songs.get_song_name(song_id)
     sheets = db_songs.get_sheets_by_song_id(song_id)
     sounds = db_songs.get_sound_by_song_id(song_id)
     comment = db_songs.get_song_comment(song_id)
@@ -38,7 +39,7 @@ def show_song_info(call: CallbackQuery):
     singer_id = db_singer.get_singer_id(telegram_id)
     singer_voices = db_singer.get_singer_voice_id(singer_id)
 
-    # TODO: group messages and send song name/description
+    msg = f"🧾 {song_name}"
 
     if sheets:
         for _, _, sheet_voice_id, sheet_id in sheets:
@@ -50,7 +51,7 @@ def show_song_info(call: CallbackQuery):
         bot.send_media_group(telegram_id, media_sheets)
 
     else:
-        bot.send_message(telegram_id, dicts.songs.no_sheets_text)
+        msg += f"\n🎼 {dicts.songs.no_sheets_text}"
 
     if sounds:
         for _, _, sound_voice_id, sound_id in sounds:
@@ -61,11 +62,12 @@ def show_song_info(call: CallbackQuery):
                 media_sounds.append(InputMediaAudio(sound_id))
         bot.send_media_group(telegram_id, media_sounds)
     else:
-        bot.send_message(telegram_id, dicts.songs.no_sounds_text)
+        msg += f"\n🎹 {dicts.songs.no_sounds_text}"
 
     if comment:
-        msg = f"{dicts.changes.edit_song_text_tuple[3]}:\n{comment}"
-        bot.send_message(telegram_id, msg)
+        msg += f"\n📝 {comment}"
+
+    bot.send_message(telegram_id, msg)
 
     if call.message:
         if is_admin:

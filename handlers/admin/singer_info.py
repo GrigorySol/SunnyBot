@@ -26,13 +26,18 @@ def display_singer_info(call: CallbackQuery):
         bot.send_sticker(call.from_user.id, sticker_id)
         return
 
+    name = db_singer.get_singer_fullname(singer_id)
+    voices = [voice_name for _, voice_name in db_singer.get_singer_voices(singer_id)]
+    suits = [suit_name for _, suit_name, _ in db_singer.get_singer_suits(singer_id)]
     comment = db_singer.get_singer_comment(singer_id)
-    msg = dicts.singers.what_to_do_text     # TODO: add singer name
+
+    msg = f"📇 {name}\n🗣 {', '.join(voices)}\n🥋 {', '.join(suits)}"
     if comment:
-        msg = f"{dicts.singers.singer_comment_text}\n{comment}\n\n{msg}"
+        msg += f"\n📝 {comment}"
+    bot.send_message(call.from_user.id, msg)
 
     markup = singer_markup(call.message, singer_id)
-    bot.send_message(call.message.chat.id, msg, reply_markup=markup)
+    bot.send_message(call.from_user.id, dicts.singers.what_to_do_text, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.info_callback.filter())
