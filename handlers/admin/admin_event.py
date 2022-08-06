@@ -7,6 +7,7 @@ from database_control import db_event, db_attendance, db_singer
 from telebot.types import Message, CallbackQuery
 from misc.edit_functions import enter_new_event_time
 from misc import dicts, keys, callback_dict as cd
+from handlers.admin.admin_changes import create_option_buttons
 
 
 class EventData:
@@ -237,6 +238,18 @@ def save_location_and_event(message: Message, url, event_id):
         db_event.edit_event_location(event_id, location_id)
         bot.send_message(message.chat.id, msg)
 
+    event_buttons(message)
+
+
+def event_buttons(message):
+    call_config = cd.selected_text
+    event = db_event.get_event_by_id(event_data.event_id)
+    if event[1] == 2:
+        options = dicts.changes.edit_concert_text_tuple
+    else:
+        options = dicts.changes.edit_event_text_tuple
+    create_option_buttons(message, call_config, event_data.event_id, options)
+
 
 def save_new_event(location_id, message):
     """Save new event and display buttons depending on event type."""
@@ -352,22 +365,13 @@ def save_event(call: CallbackQuery):
     _, location_id, _ = call.data.split(":")
     if event_data.is_in_progress:
         save_new_event(location_id, call.message)
-        bot.delete_message(call.message.chat.id, call.message.id)
     else:
         msg = dicts.changes.location_changed_text
         db_event.edit_event_location(event_data.event_id, location_id)
         bot.send_message(call.message.chat.id, msg)
 
-    call_config = cd.selected_text
-    event = db_event.get_event_by_id(event_data.event_id)
-
-    if event[1] == 2:
-        options = dicts.changes.edit_concert_text_tuple
-    else:
-        options = dicts.changes.edit_event_text_tuple
-
-    from handlers.admin.admin_changes import create_option_buttons
-    create_option_buttons(call.message, call_config, event_data.event_id, options)
+    bot.delete_message(call.message.chat.id, call.message.id)
+    event_buttons(call.message)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.calendar_factory.filter())
