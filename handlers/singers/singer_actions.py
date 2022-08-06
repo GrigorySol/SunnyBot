@@ -2,7 +2,6 @@ import datetime
 import inspect
 from random import randint
 
-import misc.dictionaries.buttons_dictionary
 from config import VIP, VIP2
 from loader import bot, log
 from database_control import db_singer, db_songs, db_event, db_attendance
@@ -76,7 +75,7 @@ def show_suits(message: Message):
     if db_singer.is_admin(message.from_user.id):
         call_config = cd.display_suits_text
         data = [{"text": dicts.changes.button_show_all_suits_text, "callback_data": f"{call_config}"}]
-        msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{dicts.changes.show_all_suits_text}"
+        msg = f"{dicts.buttons.admin_buttons_text}\n{dicts.changes.show_all_suits_text}"
         bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
 
@@ -188,7 +187,7 @@ def concert_songs(call: CallbackQuery):
     singer_id = call.from_user.id
 
     if db_singer.is_admin(singer_id):
-        msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{dicts.songs.wanna_add_text}"
+        msg = f"{dicts.buttons.admin_buttons_text}\n{dicts.songs.wanna_add_text}"
         bot.send_message(
             call.message.chat.id,
             msg,
@@ -306,7 +305,7 @@ def show_event(call: CallbackQuery):
         for buttons in keys.buttons.change_buttons(item_type, event_id).keyboard:
             markup.add(*buttons)
 
-        msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{dicts.changes.need_something_text}"
+        msg = f"{dicts.buttons.admin_buttons_text}\n{dicts.changes.need_something_text}"
         bot.send_message(telegram_id, msg, reply_markup=markup)
 
 

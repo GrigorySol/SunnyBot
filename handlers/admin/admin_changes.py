@@ -6,7 +6,6 @@ from config import VIP
 from loader import bot, log
 from telebot.types import CallbackQuery, Message, InputMediaPhoto
 from misc.tools import enter_new_event_time
-from misc.dictionaries import buttons_dictionary as but_d
 from misc import dicts, keys, bot_speech, callback_dict as cd
 from database_control import db_songs, db_singer, db_event, db_attendance
 
@@ -396,7 +395,7 @@ def edit_concert_suit(call: CallbackQuery):
     if suit:
         call_config = cd.remove_suit_text
         msg = dicts.changes.concert_suit_change_text
-        markup = keys.buttons.buttons_markup([{"text": misc.messages.buttons_dictionary.suit_change_btn_text,
+        markup = keys.buttons.buttons_markup([{"text": dicts.buttons.suit_change_btn_text,
                                                "callback_data": f"{call_config}:{event_id}:{suit[0]}"}])
         bot.send_photo(call.message.chat.id, suit[2], reply_markup=keys.buttons.close_markup)
         bot.send_message(call.message.chat.id, msg, reply_markup=markup)
@@ -426,7 +425,7 @@ def select_suit_for_concert(call, event_id):
         )
         suit_data.append(InputMediaPhoto(photo, suit_name))
 
-    for n in range(0, len(suit_data), 9):       # TODO: move amount into the variable
+    for n in range(0, len(suit_data), 9):       # TODO: move the amount into the variable
         bot.send_media_group(call.message.chat.id, suit_data[n:n+9])
 
     bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))

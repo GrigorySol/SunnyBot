@@ -1,8 +1,6 @@
 import datetime
 import inspect
 
-import misc.dictionaries.buttons_dictionary
-import misc.dictionaries.changes_dictionary
 from config import VIP
 from loader import bot, log
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
@@ -71,7 +69,7 @@ def show_song_info(call: CallbackQuery):
 
     if call.message:
         if is_admin:
-            msg = f"{misc.messages.buttons_dictionary.admin_buttons_text}\n{misc.messages.changes_dictionary.edit_text}"
+            msg = f"{dicts.buttons.admin_buttons_text}\n{dicts.changes.edit_text}"
             edit_song_menu(call.message, song_id, msg)
 
 
