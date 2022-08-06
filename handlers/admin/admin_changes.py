@@ -385,17 +385,12 @@ def select_suit_for_concert(call, event_id):
     msg = dicts.changes.choose_suit_text
     call_config = cd.select_suit_text
     data = []
-    suit_data = []
 
     for suit_id, suit_name, photo, amount in suits:
         data.append(
             {"text": f"{amount}/{singers_amount} {suit_name}",
              "callback_data": f"{call_config}:{event_id}:{suit_id}"}
         )
-        suit_data.append(InputMediaPhoto(photo, suit_name))
-
-    for n in range(0, len(suit_data), 9):       # TODO: move the amount into the variable
-        bot.send_media_group(call.message.chat.id, suit_data[n:n+9])
 
     bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
@@ -494,6 +489,7 @@ def change_suit_for_concert(call: CallbackQuery):
         call_config = cd.selected_text
         options = dicts.changes.edit_concert_text_tuple
         create_option_buttons(call.message, call_config, concert_id, options)
+        bot.delete_message(call.message.chat.id, call.message.id)
 
     else:
         bot.send_message(call.message.chat.id, dicts.changes.ERROR_text)
