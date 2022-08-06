@@ -86,7 +86,34 @@ def get_all_admins():
 
         # language=SQLITE-SQL
         cursor.execute("SELECT singers.telegram_id FROM singers "
-                       "JOIN admins ON admins.singer_id = singers.id ")
+                       "JOIN admins ON admins.singer_id = singers.id")
+        return cursor.fetchall()
+
+
+def get_admins_fullname_singer_id():
+    """Return (fullname, singer_id) for each admin from the database."""
+    with sqlite3.connect(BOT_DB) as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT singers.first_name || ' ' || singers.last_name "
+                       "AS fullname, singers.id FROM singers "
+                       "JOIN admins ON admins.singer_id = singers.id")
+        return cursor.fetchall()
+
+
+def get_all_non_admins():
+    """Return (fullname, singer_id) of singers that doesn't have admin rights."""
+    with sqlite3.connect(BOT_DB) as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT first_name || ' ' || last_name AS fullname, id "
+                       "FROM singers EXCEPT "
+                       "SELECT singers.first_name || ' ' || singers.last_name "
+                       "AS fullname, singers.id FROM singers "
+                       "JOIN admins ON admins.singer_id = singers.id "
+                       "ORDER BY fullname")
         return cursor.fetchall()
 
 
@@ -307,6 +334,15 @@ def add_admin(telegram_id):
                        "WHERE singers.telegram_id = ?", (telegram_id,))
 
 
+def add_admin_by_singer_id(singer_id):
+    """Add singer to admins in the database"""
+    with sqlite3.connect(BOT_DB) as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("INSERT INTO admins (singer_id) VALUES (?)", (singer_id,))
+
+
 def add_suit(suit_name: str, photo: str):
     """Add new suit into the database"""
     with sqlite3.connect(BOT_DB) as db:
@@ -416,6 +452,15 @@ def delete_singer(singer_id):
         except sqlite3.Error as err:
             print(err)
             return False
+
+
+def remove_admin(singer_id):
+    """REMOVE singer by singer_id from admins"""
+    with sqlite3.connect(BOT_DB) as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("DELETE FROM admins WHERE singer_id = ?", (singer_id,))
 
 
 def delete_suit(suit_id):

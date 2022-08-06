@@ -9,7 +9,7 @@ from database_control import db_singer
 from database_control.db_event import search_event_by_date, search_event_by_date_and_telegram_id
 from keyboards.inline.callback_datas import calendar_factory, calendar_zoom
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from misc.messages.event_dictionary import next_button_text, prev_button_text, zoom_out_text, WEEK_DAYS, MONTHS
+from misc.dictionaries.event_dictionary import next_button_text, prev_button_text, zoom_out_text, WEEK_DAYS, MONTHS
 from misc import keys, callback_dict as cd
 
 EMTPY_FIELD = 'calendar_button'

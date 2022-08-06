@@ -38,6 +38,8 @@ singer_info_text = "info"
 singer_add_action_text = "singer_add"
 singer_remove_action_text = "singer_remove"
 unblock_user_text = "unblock_user"
+admin_edit_text = "edit_admin"
+add_remove_admin_text = "add_remove_admin"
 
 attendance_intervals_text = "attendance_intervals"
 show_participation_text = "show_participation"

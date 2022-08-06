@@ -1,5 +1,5 @@
-import misc.messages.changes_dictionary
 from loader import bot
+from config import VIP
 from telebot.types import InputMediaPhoto, Message
 from keyboards.inline.choice_buttons import buttons_markup
 from misc import dicts, keys
@@ -64,13 +64,13 @@ def display_voices(message, sid):
         for _, name in voices:
             voice_names.append(name)
         msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{dicts.singers.too_many_voices}\n" \
-              f"{misc.messages.changes_dictionary.edit_text}"
+              f"{dicts.changes.edit_text}"
 
     else:
         voice_names = []
         for _, name in voices:
             voice_names.append(name)
-        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{misc.messages.changes_dictionary.edit_text}"
+        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{dicts.changes.edit_text}"
 
     bot.send_message(message.chat.id, msg, reply_markup=buttons_markup(data))
 
@@ -176,7 +176,7 @@ def admin_checker(message):
     """Restrict access for a non-admin singer."""
 
     is_admin = db_singer.is_admin(message.chat.id)
-    if not is_admin:
+    if not is_admin or not VIP:
         bot.send_message(message.chat.id, dicts.singers.you_shell_not_pass_text)
         return False
     return True

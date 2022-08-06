@@ -1,12 +1,12 @@
 import datetime
 import inspect
 
-import misc.messages.buttons_dictionary
+import misc.dictionaries.buttons_dictionary
 from config import VIP
 from loader import bot, log
 from telebot.types import CallbackQuery, Message, InputMediaPhoto
 from misc.tools import enter_new_event_time
-from misc.messages import buttons_dictionary as but_d
+from misc.dictionaries import buttons_dictionary as but_d
 from misc import dicts, keys, bot_speech, callback_dict as cd
 from database_control import db_songs, db_singer, db_event, db_attendance
 
@@ -956,3 +956,52 @@ def edit_singer_attendance(call: CallbackQuery):
     db_attendance.edit_singer_attendance(event_id, call.from_user.id, decision)
     bot.send_message(call.message.chat.id, f"{dicts.attends.attendance_changed_text}")
     bot.delete_message(call.message.chat.id, call.message.id)
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.edit_admin_callback.filter())
+def show_singers_admin(call: CallbackQuery):
+    """Show singers to add or remove admin rights"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
+
+    _, option_id = call.data.split(":")
+    display_singers_for_admin_rights(call, option_id)
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.add_remove_admin_callback.filter())
+def add_or_remove_admin(call: CallbackQuery):
+    """Add or remove admin rights for a singer"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
+
+    _, option_id, singer_id = call.data.split(":")
+
+    if option_id == "0":
+        db_singer.add_admin_by_singer_id(singer_id)
+    else:
+        db_singer.remove_admin(singer_id)
+
+    display_singers_for_admin_rights(call, option_id)
+
+
+def display_singers_for_admin_rights(call, option_id):
+    call_config = cd.add_remove_admin_text
+
+    if option_id == "0":
+        singers = db_singer.get_all_non_admins()
+        msg = dicts.singers.who_wants_to_leave_forever_text
+    else:
+        singers = db_singer.get_admins_fullname_singer_id()
+        msg = dicts.singers.no_more_future_text
+    data = [
+        {"text": text, "callback_data": f"{call_config}:{option_id}:{singer_id}"}
+        for text, singer_id in singers
+    ]
+    markup = keys.buttons.buttons_markup(data)
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)

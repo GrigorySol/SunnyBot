@@ -4,7 +4,7 @@ import inspect
 from config import VIP
 from loader import bot, log
 from telebot.types import CallbackQuery, Message
-from misc.edit_functions import display_suits, display_voices, edit_voices
+from misc.tools import display_suits, display_voices, edit_voices
 from database_control import db_singer, db_attendance
 from misc import dicts, keys, callback_dict as cd
 

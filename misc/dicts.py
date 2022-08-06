@@ -1,4 +1,4 @@
-from misc.messages import (
+from misc.dictionaries import (
     attendance_dictionary as attends,
     buttons_dictionary as buttons,
     changes_dictionary as changes,

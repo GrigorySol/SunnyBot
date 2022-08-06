@@ -4,7 +4,7 @@ from loader import bot, log
 from telebot.types import CallbackQuery
 from keyboards.inline.callback_datas import search_callback, voice_callback
 from misc import callback_dict as cd
-from misc.messages.singer_dictionary import choose_voice_text, no_singers_text
+from misc.dictionaries.singer_dictionary import choose_voice_text, no_singers_text
 from keyboards.inline.choice_buttons import buttons_markup, search_choice_markup
 from database_control.db_singer import get_all_voices, search_singers_by_voice
 

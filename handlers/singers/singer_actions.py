@@ -2,13 +2,13 @@ import datetime
 import inspect
 from random import randint
 
-import misc.messages.buttons_dictionary
+import misc.dictionaries.buttons_dictionary
 from config import VIP, VIP2
 from loader import bot, log
 from database_control import db_singer, db_songs, db_event, db_attendance
 from telebot.custom_filters import TextFilter
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
-from misc.edit_functions import display_suits, edit_suits
+from misc.tools import display_suits, edit_suits
 from misc import dicts, keys, callback_dict as cd
 
 

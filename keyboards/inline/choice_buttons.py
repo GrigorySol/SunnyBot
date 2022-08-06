@@ -1,8 +1,8 @@
 import datetime
 
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
-from misc.messages.event_dictionary import next_button_text, prev_button_text
-from misc.messages import buttons_dictionary as but_d
+from misc.dictionaries.event_dictionary import next_button_text, prev_button_text
+from misc.dictionaries import buttons_dictionary as but_d
 from misc import callback_dict as cd
 
 EMTPY_FIELD = 'calendar_button'

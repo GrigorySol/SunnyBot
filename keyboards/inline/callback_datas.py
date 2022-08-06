@@ -45,6 +45,8 @@ info_callback = CallbackData("name", "singer_id", prefix=cd.singer_info_text)
 singer_add_callback = CallbackData("type", "singer_id", "item_id", prefix=cd.singer_add_action_text)
 singer_remove_callback = CallbackData("type", "singer_id", "item_id", prefix=cd.singer_remove_action_text)
 unblock_user_callback = CallbackData("singer_id", prefix=cd.unblock_user_text)
+edit_admin_callback = CallbackData("option", prefix=cd.admin_edit_text)
+add_remove_admin_callback = CallbackData("option", "singer_id", prefix=cd.add_remove_admin_text)
 
 # attendance
 attendance_intervals_callback = CallbackData("interval", "singer_id", prefix=cd.attendance_intervals_text)

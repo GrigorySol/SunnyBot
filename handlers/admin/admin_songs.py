@@ -1,8 +1,8 @@
 import datetime
 import inspect
 
-import misc.messages.buttons_dictionary
-import misc.messages.changes_dictionary
+import misc.dictionaries.buttons_dictionary
+import misc.dictionaries.changes_dictionary
 from config import VIP
 from loader import bot, log
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
