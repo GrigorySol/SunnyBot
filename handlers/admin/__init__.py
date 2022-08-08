@@ -4,6 +4,6 @@ from .singer_info import bot
 from .command_rules import bot
 from .admin_event import bot
 from .admin_changes import bot
-from .admin_songs import bot
+from .admin_songs_and_suits import bot
 
 __all__ = ["bot"]

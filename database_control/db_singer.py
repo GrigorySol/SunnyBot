@@ -235,7 +235,32 @@ def get_suits_and_amount():
         return cursor.fetchall()
 
 
-def search_suits_by_id(suit_id):
+def get_suit_owners(suit_id):
+    """Return (singer_id, fullname) of owners of a suit from the database."""
+    with sqlite3.connect(BOT_DB) as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT singers.id, first_name || ' ' || last_name AS fullname FROM singers "
+                       "JOIN singer_suit ON singer_suit.singer_id = singers.id "
+                       "WHERE singer_suit.suit_id = ?", (suit_id,))
+        return cursor.fetchall()
+
+
+def get_not_suit_owners(suit_id):
+    """Return (singer_id, fullname) of NOT owners of a suit from the database."""
+    with sqlite3.connect(BOT_DB) as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT singers.id, first_name || ' ' || last_name AS fullname FROM singers EXCEPT "
+                       "SELECT singers.id, first_name || ' ' || last_name AS fullname FROM singers "
+                       "JOIN singer_suit ON singer_suit.singer_id = singers.id "
+                       "WHERE singer_suit.suit_id = ?", (suit_id,))
+        return cursor.fetchall()
+
+
+def search_suit_by_id(suit_id):
     """Return (suit_name, photo) from the database."""
     with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()

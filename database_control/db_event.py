@@ -30,7 +30,7 @@ def get_event_date(event_id):
 
 
 def get_suit_by_event_id(event_id):
-    """Return is, suit_name, photo from the database."""
+    """Return suit_id, suit_name, photo from the database."""
     with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()
 

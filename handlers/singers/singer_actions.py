@@ -55,13 +55,13 @@ def edit_singer_suits(message: Message):
             {"text": " ", "callback_data": f"{cd.EMTPY_FIELD}"}
         ]
     elif len(singer_suits) == len(suits):
-        msg = f"{suit_names}\n\n{dicts.singers.too_many_suits}"
+        msg = f"{dicts.singers.available_suits_text}\n{suit_names}\n\n{dicts.singers.too_many_suits_text}"
         data = [
             {"text": " ", "callback_data": f"{cd.EMTPY_FIELD}"},
             {"text": dicts.buttons.remove_btn_text, "callback_data": f"{cd.singer_suit_text}:remove:{singer_id}"}
         ]
     else:
-        msg = f"{suit_names}\n\n{dicts.singers.what_to_do_text}"
+        msg = f"{dicts.singers.available_suits_text}\n{suit_names}\n\n{dicts.singers.what_to_do_text}"
         data = [
             {"text": dicts.buttons.add_btn_text, "callback_data": f"{cd.singer_suit_text}:add:{singer_id}"},
             {"text": dicts.buttons.remove_btn_text, "callback_data": f"{cd.singer_suit_text}:remove:{singer_id}"}
@@ -71,8 +71,8 @@ def edit_singer_suits(message: Message):
     bot.send_message(message.chat.id, msg, reply_markup=keys.buttons.buttons_markup(data))
 
     if db_singer.is_admin(message.chat.id):
-        admin_msg = f"{dicts.buttons.admin_buttons_text}\n{dicts.changes.edit_text}"
-        data = [{"text": dicts.buttons.change_btn_text, "callback_data": f"{cd.display_suit_buttons_text}"}]
+        admin_msg = f"{dicts.buttons.admin_buttons_text}"
+        data = [{"text": dicts.buttons.more_options_btn_text, "callback_data": f"{cd.display_suit_buttons_text}"}]
         bot.send_message(message.chat.id, admin_msg, reply_markup=keys.buttons.buttons_markup(data))
 
 
@@ -131,7 +131,7 @@ def edit_suits_buttons(call: CallbackQuery):
         bot.delete_message(call.message.chat.id, call.message.id)
         return
 
-    msg, data = tools.generate_items_data(option, singer_id, items, "suit")
+    msg, data = tools.generate_items_data_with_option(option, singer_id, items, "suit")
     bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.buttons_markup(data))
 
 
@@ -247,41 +247,6 @@ def rolling_callback_buttons(call: CallbackQuery):
         reply_markup=keys.buttons.buttons_markup(data=btn_keeper.data, roll_bar_id=roll_bar_id,
                                                  multiple=True, row=btn_keeper.row)
     )
-
-
-@bot.message_handler(commands=["events"])
-def nothing_to_say(message: Message):
-
-    # debug
-    func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
-             f"{message.from_user.username} {message.from_user.full_name}")
-
-    bot.send_sticker(message.chat.id,
-                     "CAACAgIAAxkBAAETnXxicIxNf0TYCRSrmzD9SD-iTjSr1QAClBQAAsBCeEsVRtvoCLXI0iQE")
-
-
-@bot.message_handler(commands=["rehearsal"])
-def nothing_to_say(message: Message):
-
-    func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
-             f"{message.from_user.username} {message.from_user.full_name}")
-
-    bot.send_sticker(message.chat.id,
-                     "CAACAgIAAxkBAAETnX5icIyDshGmTfhQFatW5TJnbJkjkQACtBoAApsZwUq8_BZS0faNxyQE")
-
-
-@bot.message_handler(commands=["concerts"])
-def nothing_to_say(message: Message):
-
-    # debug
-    func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
-             f"{message.from_user.username} {message.from_user.full_name}")
-
-    bot.send_audio(message.chat.id,
-                   "CQACAgIAAxkBAAETnYJicIzUt04joDIy7_uLOkUpHENW3wACKBoAAhFE4UpblvEevwxe_yQE")
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.show_event_callback.filter())

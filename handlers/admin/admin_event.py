@@ -5,10 +5,9 @@ from config import VIP
 from loader import bot, log
 from database_control import db_event, db_attendance, db_singer
 from telebot.types import Message, CallbackQuery
-from misc.tools import enter_new_event_time
-from misc import dicts, keys
+from misc import dicts, keys, tools
 from misc.dictionaries import callback_dictionary as cd
-from handlers.admin.admin_changes import create_option_buttons
+from handlers.admin.admin_changes import enter_new_event_time
 
 
 class EventData:
@@ -249,7 +248,7 @@ def event_buttons(message):
         options = dicts.changes.edit_concert_text_tuple
     else:
         options = dicts.changes.edit_event_text_tuple
-    create_option_buttons(message, call_config, event_data.event_id, options)
+    tools.create_option_buttons(message, call_config, event_data.event_id, options)
 
 
 def save_new_event(location_id, message):

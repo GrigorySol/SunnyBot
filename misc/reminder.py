@@ -34,6 +34,9 @@ def check_event_date():
     day_events = search_event_by_date(before_day)
     week_events = search_event_by_date(before_week)
 
+    if not today_events and not day_events and not week_events:
+        print("Nothing to send")
+        return
     if today_events:
         for event_id, _, event_name, event_time in today_events:
             print(f"Events for today:\n{event_name}")
@@ -71,6 +74,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
         msg_date = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
 
     markup = buttons_markup(data)
+    count = 0
 
     for telegram_id, attendance in get_singers_id_by_event(event_id):
         try:
@@ -82,13 +86,17 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
                        f"{dicts.attends.set_attendance_text_tuple[1]}\n" \
                        f"\n{dicts.attends.wanna_change_text}"
                 bot.send_message(telegram_id, msg)
+                count += 1
 
             elif attendance == 2:
                 msg += f"{rem_d.select_attendance_text}"
                 bot.send_message(telegram_id, msg, reply_markup=markup)
+                count += 1
 
         except Exception as e:
             print(f"{e}\n\n❗️ {telegram_id} not exists ❗️\n\n")
+
+    print(f"Sent {count} messages")
 
 
 def database_sender():

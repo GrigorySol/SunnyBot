@@ -61,12 +61,12 @@ def generate_calendar_days(telegram_id: int, year: int, month: int, event_type=0
             else:
                 event = search_event_by_date(f"{current_day}%")
             if current_day == str(today):
-                day_name = '☀️'
+                day_name = '🥦'  # '⚛️'     # '🥦'
             elif day and event:
                 if event[-1][1] == 1:
                     day_name = '💃'
                 elif event[-1][1] == 2:
-                    day_name = '🎪'      # 🏛 🪗 👨‍🦽  📝
+                    day_name = '🎪'      # 🏛 🪗 👨‍🦽       📝
                 else:
                     day_name = '🔔'
             elif day:

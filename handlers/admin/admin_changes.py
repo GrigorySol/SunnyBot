@@ -4,9 +4,8 @@ import inspect
 import misc.dictionaries.buttons_dictionary
 from config import VIP
 from loader import bot, log
-from telebot.types import CallbackQuery, Message, InputMediaPhoto
-from misc.tools import enter_new_event_time
-from misc import dicts, keys, bot_speech
+from telebot.types import CallbackQuery, Message
+from misc import dicts, keys, tools, bot_speech
 from misc.dictionaries import callback_dictionary as cd
 from database_control import db_songs, db_singer, db_event, db_attendance
 
@@ -37,7 +36,7 @@ def display_event_options_to_change(call: CallbackQuery):
     else:
         options = dicts.changes.edit_event_text_tuple
 
-    create_option_buttons(call.message, call_config, item_id, options)
+    tools.create_option_buttons(call.message, call_config, item_id, options)
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
@@ -64,7 +63,7 @@ def display_location_options_to_change(call: CallbackQuery):
     bot.send_message(call.from_user.id, msg, disable_web_page_preview=True)
 
     call_config = cd.selected_location_text
-    create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_location_text_tuple)
+    tools.create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_location_text_tuple)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.change_callback.filter(type="suit"))
@@ -78,7 +77,7 @@ def display_suit_options_to_change(call: CallbackQuery):
 
     *_, item_id = call.data.split(":")
 
-    suit = db_singer.search_suits_by_id(int(item_id))
+    suit = db_singer.search_suit_by_id(int(item_id))
 
     if not suit:
         sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
@@ -87,18 +86,7 @@ def display_suit_options_to_change(call: CallbackQuery):
         return
 
     call_config = cd.selected_suit_text
-    create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_suit_text_tuple)
-
-
-def create_option_buttons(message: Message, call_config, item_id, options):
-    data = []
-
-    for option_id, text in enumerate(options):
-        data.append({"text": text, "callback_data": f"{call_config}:{option_id}:{item_id}"})
-
-    msg = dicts.changes.edit_text
-    markup = keys.buttons.buttons_markup(data)
-    bot.send_message(message.chat.id, msg, reply_markup=markup)
+    tools.create_option_buttons(call.message, call_config, item_id, dicts.changes.edit_suit_text_tuple)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.selected_callback.filter(option_id="0"))
@@ -114,6 +102,43 @@ def edit_event_name(call: CallbackQuery):
     msg = bot.send_message(call.message.chat.id, dicts.changes.enter_new_event_name_text)
     bot.register_next_step_handler(msg, enter_new_event_name, event_id)
     bot.delete_message(call.message.chat.id, call.message.id)
+
+
+def enter_new_event_time(message: Message, event_id: int, date):
+    """Update the time for an event"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
+
+    if not message.text or "/" in message.text or message.text[0].isalpha():
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
+
+    time = message.text
+    if '-' in time:
+        hours, minutes = time.split("-")
+        time = f"{hours}:{minutes}"
+    elif ' ' in time:
+        hours, minutes = time.split(" ")
+        time = f"{hours}:{minutes}"
+    elif ':' not in time:
+        msg_data = bot.send_message(message.chat.id, dicts.events.wrong_event_time_text)
+        bot.register_next_step_handler(msg_data, enter_new_event_time)
+        return
+
+    print(f"enter_new_event_time {date} {time}")
+    if db_event.event_datetime_exists(date, time):
+        print("Time exists")
+        msg_data = bot.send_message(message.chat.id, dicts.changes.event_time_busy)
+        bot.register_next_step_handler(msg_data, enter_new_event_time)
+        return
+
+    if db_event.edit_event_datetime(event_id, date, time):
+        msg = dicts.changes.event_time_changed_text
+        markup = keys.buttons.buttons_markup(event_id=event_id, menu_btn=True)
+        bot.send_message(message.chat.id, msg, reply_markup=markup)
 
 
 def enter_new_event_name(message: Message, event_id):
@@ -232,7 +257,7 @@ def enter_new_event_comment(message: Message, event_id):
         else:
             options = dicts.changes.edit_event_text_tuple
 
-        create_option_buttons(message, call_config, event_id, options)
+        tools.create_option_buttons(message, call_config, event_id, options)
 
     else:
         msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
@@ -488,7 +513,7 @@ def change_suit_for_concert(call: CallbackQuery):
 
         call_config = cd.selected_text
         options = dicts.changes.edit_concert_text_tuple
-        create_option_buttons(call.message, call_config, concert_id, options)
+        tools.create_option_buttons(call.message, call_config, concert_id, options)
         bot.delete_message(call.message.chat.id, call.message.id)
 
     else:
@@ -701,7 +726,7 @@ def edit_suit_name(call: CallbackQuery):
 
     *_, suit_id = call.data.split(":")
 
-    item_name = db_singer.search_suits_by_id(suit_id)[0]
+    item_name = db_singer.search_suit_by_id(suit_id)[0]
     item_type = "suit"
     delete_confirmation_buttons(call, suit_id, item_name, item_type)
 
@@ -747,12 +772,12 @@ def delete_item(call: CallbackQuery):
 
     elif item_type == "sheets":
         db_songs.delete_sheets_by_song_id(item_id)
-        from handlers.admin.admin_songs import edit_song_menu
+        from handlers.admin.admin_songs_and_suits import edit_song_menu
         edit_song_menu(call.message, item_id, misc.dicts.changes.edit_text)
 
     elif item_type == "sounds":
         db_songs.delete_sound_by_song_id(item_id)
-        from handlers.admin.admin_songs import edit_song_menu
+        from handlers.admin.admin_songs_and_suits import edit_song_menu
         edit_song_menu(call.message, item_id, misc.dicts.changes.edit_text)
 
     elif item_type == "suit":

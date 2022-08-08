@@ -1,9 +1,9 @@
 from loader import bot
 from config import VIP
-from telebot.types import InputMediaPhoto, Message
+from telebot.types import InputMediaPhoto
 from keyboards.inline.choice_buttons import buttons_markup
 from misc import dicts, keys
-from database_control import db_singer, db_event
+from database_control import db_singer
 
 
 def display_suit_photos(message, suits):
@@ -20,7 +20,7 @@ def display_suit_photos(message, suits):
         bot.send_media_group(message.chat.id, suit_data[n:n+9])
 
 
-def generate_items_data(option, singer_id, items, item_type):
+def generate_items_data_with_option(option, singer_id, items, item_type):
     """Generates msg and data to add ot remove items for a singer."""
 
     if option == "add":
@@ -36,6 +36,14 @@ def generate_items_data(option, singer_id, items, item_type):
     ]
 
     return msg, data
+
+
+def generate_simple_items_data(call_config, items):
+    data = [
+        {"text": text, "callback_data": f"{call_config}:{item_id}"}
+        for item_id, text, *args in items
+    ]
+    return data
 
 
 def display_voices(message, sid):
@@ -56,7 +64,7 @@ def display_voices(message, sid):
         voice_names = []
         for _, name in voices:
             voice_names.append(name)
-        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{dicts.singers.too_many_voices}\n" \
+        msg = f"{singer_name} поёт в {', '.join(voice_names)}.\n{dicts.singers.too_many_voices_text}\n" \
               f"{dicts.changes.edit_text}"
 
     else:
@@ -93,36 +101,15 @@ def edit_voices(call):
     bot.send_message(call.message.chat.id, msg, reply_markup=buttons_markup(data))
 
 
-def enter_new_event_time(message: Message, event_id: int, date):
-    """Update the time for an event"""
+def create_option_buttons(message, call_config, item_id, options):
+    data = []
 
-    if not message.text or "/" in message.text or message.text[0].isalpha():
-        bot.send_message(message.chat.id, dicts.singers.CANCELED)
-        return
+    for option_id, text in enumerate(options):
+        data.append({"text": text, "callback_data": f"{call_config}:{option_id}:{item_id}"})
 
-    time = message.text
-    if '-' in time:
-        hours, minutes = time.split("-")
-        time = f"{hours}:{minutes}"
-    elif ' ' in time:
-        hours, minutes = time.split(" ")
-        time = f"{hours}:{minutes}"
-    elif ':' not in time:
-        msg_data = bot.send_message(message.chat.id, dicts.events.wrong_event_time_text)
-        bot.register_next_step_handler(msg_data, enter_new_event_time)
-        return
-
-    print(f"enter_new_event_time {date} {time}")
-    if db_event.event_datetime_exists(date, time):
-        print("Time exists")
-        msg_data = bot.send_message(message.chat.id, dicts.changes.event_time_busy)
-        bot.register_next_step_handler(msg_data, enter_new_event_time)
-        return
-
-    if db_event.edit_event_datetime(event_id, date, time):
-        msg = dicts.changes.event_time_changed_text
-        markup = keys.buttons.buttons_markup(event_id=event_id, menu_btn=True)
-        bot.send_message(message.chat.id, msg, reply_markup=markup)
+    msg = dicts.changes.edit_text
+    markup = keys.buttons.buttons_markup(data)
+    bot.send_message(message.chat.id, msg, reply_markup=markup)
 
 
 def admin_checker(message):

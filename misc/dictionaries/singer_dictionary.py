@@ -5,10 +5,10 @@ need_telegram_name_text = "В настройках необходимо указ
 no_voice_text = "Нужно выбрать голос из списка по кнопке 'Добавить'."
 no_suit_text = "Нужно добавить костюмы из списка по кнопке 'Добавить'."
 suits_not_available_text = "В базе пока нет ни одного костюма."
-available_suits = "Сохранённые костюмы для участия в концертах:"
+available_suits_text = "Добавленные костюмы для участия в концертах:"
 enter_name_text = "Введи имя и/или фамилию певуна. Тебе за это ничего не будет."
-too_many_voices = "В хоре не осталось голосов."
-too_many_suits = "Все доступные костюмы добавлены."
+too_many_voices_text = "В хоре не осталось голосов."
+too_many_suits_text = "Все доступные костюмы добавлены."
 do_you_wanna_my_joke_text = "Рассказать анекдот?"
 
 calendar_command_text = "Чтобы посмотреть события, нужно вызвать команду /calendar " \
@@ -39,6 +39,8 @@ trying_to_register_text = "пытается зарегистрироваться
 right_answer_text = "Правильный ответ"
 
 # singer_info
+owned_suit_text = "✅ У кого есть костюм:"
+not_owned_suit_text = "❌ У кого нет костюма:"
 show_singers_text = "Можешь выбрать по имени, по голосу или посмотреть всех."
 no_singers_text = "Здесь никто не поёт."
 choose_voice_text = "Выбери голос:"

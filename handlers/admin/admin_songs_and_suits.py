@@ -5,8 +5,55 @@ from config import VIP
 from loader import bot, log
 from telebot.types import Message, CallbackQuery, InputMediaAudio, InputMediaDocument
 from database_control import db_songs, db_singer
-from misc import dicts, keys
+from misc import dicts, keys, tools
 from misc.dictionaries import callback_dictionary as cd
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.display_suit_buttons_callback.filter())
+def display_buttons_of_suits(call: CallbackQuery):
+    """Display suit buttons to choose"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
+
+    suits = db_singer.get_all_suits()
+    call_config = f"{dicts.call_dic.change_item_text}:suit"
+    msg = dicts.changes.choose_suit_text
+    data = tools.generate_simple_items_data(call_config, suits)
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=keys.buttons.buttons_markup(data))
+
+
+@bot.callback_query_handler(func=None, singer_config=keys.call.change_callback.filter(type="suit"))
+def suit_options(call: CallbackQuery):
+    """Display suit description and options to edit"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
+
+    *_, item_id = call.data.split(":")
+
+    suit = db_singer.search_suit_by_id(item_id)
+    if not suit:
+        sticker_id = "CAACAgIAAxkBAAET3UVielVmblxfxH0PWmMyPceLASLkoQACRAADa-18Cs96SavCm2JLJAQ"
+        bot.send_message(call.message.chat.id, dicts.changes.suit_not_found_text)
+        bot.send_sticker(call.message.chat.id, sticker_id)
+        return
+
+    call_config = cd.selected_suit_text
+    options = dicts.changes.edit_suit_text_tuple
+    suit_owners = '\n'.join([name for _, name in db_singer.get_suit_owners(item_id)])
+    not_owners = '\n'.join([name for _, name in db_singer.get_not_suit_owners(item_id)])
+    msg = f"🥋 {suit[0]}" \
+          f"\n\n{dicts.singers.owned_suit_text}\n{suit_owners}" \
+          f"\n\n{dicts.singers.not_owned_suit_text}\n{not_owners}"
+
+    bot.send_photo(call.message.chat.id, suit[1], reply_markup=keys.buttons.close_markup)
+    bot.send_message(call.message.chat.id, msg, reply_markup=keys.buttons.close_markup)
+    tools.create_option_buttons(call.message, call_config, item_id, options)
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.song_info_callback.filter())

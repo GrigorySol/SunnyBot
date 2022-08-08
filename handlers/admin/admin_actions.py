@@ -4,7 +4,7 @@ import inspect
 from loader import bot, log
 from datetime import date
 from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
-from handlers.admin.admin_songs import add_sheets_or_sounds
+from handlers.admin.admin_songs_and_suits import add_sheets_or_sounds
 from misc import dicts, keys, tools
 from misc.dictionaries import callback_dictionary as cd
 from database_control import db_singer, db_songs, db_event, db_attendance
@@ -267,8 +267,8 @@ def song_query(query: InlineQuery):
 
 
 @bot.callback_query_handler(func=None, calendar_config=keys.call.add_new_callback.filter())
-def song_or_event(call: CallbackQuery):
-    """Get id from data and call a song or an event creation."""
+def add_new_item(call: CallbackQuery):
+    """Get id from data and start an event/song/suit/location creation."""
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
