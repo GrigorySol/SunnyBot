@@ -92,7 +92,7 @@ def show_song_info(call: CallbackQuery):
             if not sheet_voice_id:
                 media_sheets.append(InputMediaDocument(sheet_id))
                 continue
-            if sheet_voice_id in singer_voices or is_admin:
+            if (sheet_voice_id,) in singer_voices or is_admin:
                 media_sheets.append(InputMediaDocument(sheet_id))
         bot.send_media_group(telegram_id, media_sheets)
 
@@ -104,7 +104,7 @@ def show_song_info(call: CallbackQuery):
             if not sound_voice_id:
                 media_sounds.append(InputMediaAudio(sound_id))
                 continue
-            if sound_voice_id in singer_voices or is_admin:
+            if (sound_voice_id,) in singer_voices or is_admin:
                 media_sounds.append(InputMediaAudio(sound_id))
         bot.send_media_group(telegram_id, media_sounds)
     else:
