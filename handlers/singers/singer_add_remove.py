@@ -1,5 +1,6 @@
 import inspect
 
+from handlers.singers.singer_actions import edit_singer_suits
 from loader import bot, log
 from database_control import db_singer
 from telebot.types import CallbackQuery
@@ -20,7 +21,7 @@ def add_singer_suit(call: CallbackQuery):
     _, item, singer_id, item_id = call.data.split(":")
     db_singer.add_singer_suit(singer_id, item_id)
     bot.send_message(call.message.chat.id, dicts.singers.suit_added_text)
-
+    edit_singer_suits(call.message)
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
@@ -55,7 +56,7 @@ def remove_singer_suit(call: CallbackQuery):
 
     db_singer.remove_suit(singer_id, item_id)
     bot.send_message(call.message.chat.id, dicts.singers.suit_removed_text)
-
+    edit_singer_suits(call.message)
     bot.delete_message(call.message.chat.id, call.message.id)
 
 
