@@ -1,7 +1,7 @@
 import datetime
 import inspect
 
-from loader import bot, log
+from loader import bot, log, JOKES
 from datetime import date
 from telebot.types import Message, CallbackQuery, InlineQuery, InlineQueryResultArticle, InputTextMessageContent
 from handlers.admin.admin_songs_and_suits import add_sheets_or_sounds
@@ -166,6 +166,22 @@ def menu_tutorial(message: Message):
     bot.register_next_step_handler(msg, edit_menu_photo_id)
 
 
+@bot.message_handler(commands=["joke"])
+def add_joke(message: Message):
+    """Change menu screenshot"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
+
+    if not tools.admin_checker(message):
+        return
+
+    msg = bot.send_message(message.chat.id, dicts.changes.add_joke_text)
+    bot.register_next_step_handler(msg, add_new_joke)
+
+
 def edit_menu_photo_id(message: Message):
     """Save photo file_id in the .env file in 'MENU_IMAGE' variable"""
 
@@ -189,6 +205,29 @@ def edit_menu_photo_id(message: Message):
         file.close()
 
         bot.send_message(message.chat.id, dicts.changes.added_menu_photo_text)
+
+    except Exception as e:
+        print(e)
+        bot.send_message(message.chat.id, e)
+
+
+def add_new_joke(message: Message):
+    """Save a joke into joke file"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
+             f"{message.from_user.username} {message.from_user.full_name}")
+
+    if not message.text or "/" in message.text:
+        bot.send_message(message.chat.id, dicts.singers.CANCELED)
+        return
+    try:
+        file = open("jokes.txt", "a")
+        file.write(repr(message.text) + '\n')
+        file.close()
+        JOKES.append(repr(message.text))
+        bot.send_message(message.chat.id, dicts.changes.joke_saved_text)
 
     except Exception as e:
         print(e)

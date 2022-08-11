@@ -3,7 +3,7 @@ import inspect
 from random import randint
 
 from config import VIP, VIP2
-from loader import bot, log
+from loader import bot, log, JOKES
 from database_control import db_singer, db_songs, db_event, db_attendance
 from telebot.custom_filters import TextFilter
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
@@ -447,7 +447,11 @@ def nothing_to_say(message: Message):
              f"{message.from_user.username} {message.from_user.full_name}")
     log.info(f"Saved Messages: {keys.buttons.ButtonsKeeper.get_saved_messages()}")
 
-    text = randomizer(dicts.jokes.random_answer_text_tuple)
+    if JOKES:
+        text = eval(randomizer(JOKES))
+    else:
+        text = dicts.singers.nothing_to_say_text
+
     bot.forward_message(VIP, message.chat.id, message.id, disable_notification=True)
     bot.send_message(VIP, text, disable_notification=True)
     bot.send_message(message.chat.id, text)
