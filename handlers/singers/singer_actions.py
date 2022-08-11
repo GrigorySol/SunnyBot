@@ -200,7 +200,7 @@ def concert_songs(call: CallbackQuery):
             data.append({"text": text, "callback_data": f"{call_config}:{song_id}"})
 
         msg = dicts.songs.which_song_text
-        markup = keys.buttons.buttons_markup(data, event_id=event_id, menu_btn=True)
+        markup = keys.buttons.buttons_markup(data, event_id=event_id)
         bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
     else:
