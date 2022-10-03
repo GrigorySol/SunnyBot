@@ -243,7 +243,7 @@ def get_suit_owners(suit_id):
         # language=SQLITE-SQL
         cursor.execute("SELECT singers.id, first_name || ' ' || last_name AS fullname FROM singers "
                        "JOIN singer_suit ON singer_suit.singer_id = singers.id "
-                       "WHERE singer_suit.suit_id = ?", (suit_id,))
+                       "WHERE singer_suit.suit_id = ? ORDER BY fullname", (suit_id,))
         return cursor.fetchall()
 
 

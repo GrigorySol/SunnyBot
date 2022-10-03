@@ -63,7 +63,7 @@ def get_all_telegram_singer_id_by_event_id(event_id):
         # language=SQLITE-SQL
         cursor.execute("SELECT singers.telegram_id FROM singers "
                        "JOIN attendance ON attendance.singer_id = singers.id "
-                       "WHERE attendance.event_id = ?", (event_id,))
+                       "WHERE attendance.event_id = ? ORDER BY singers.first_name", (event_id,))
         return cursor.fetchall()
 
 
