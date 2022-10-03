@@ -117,7 +117,7 @@ def get_all_non_admins():
         return cursor.fetchall()
 
 
-def get_singers_id_by_event(event_id):
+def get_telegram_id_attend_by_event(event_id):
     """Return (telegram_id, attend) from singers for event_id from the database."""
     with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()

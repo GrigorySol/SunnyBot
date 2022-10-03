@@ -122,13 +122,19 @@ def singer_name_step(message: Message, singer: SingerRegister):
     name = message.text
     if name and "/" in name:
         bot.send_message(message.chat.id, dicts.singers.CANCELED)
-        return
 
-    elif name.isdigit():
-        msg = bot.send_message(message.chat.id, dicts.singers.name_is_digit_text)
+    elif name.isalpha():
+        singer.telegram_id = message.from_user.id
+        singer.telegram_name = message.from_user.username
+        singer.name = name
+        msg = bot.send_message(message.chat.id, dicts.singers.enter_your_lastname_text)
+        bot.register_next_step_handler(msg, singer_lastname_step, singer)
+
+    elif name.isnumeric() or len(name) < 2:
+        msg = bot.send_message(message.chat.id, dicts.singers.name_too_short_text)
         bot.register_next_step_handler(msg, singer_name_step, singer)
 
-    elif " " in name and len(name) > 3:
+    elif " " in name and name.count(" ") == 1:
         name, lastname = name.split(" ")
         singer.name = name
         singer.telegram_id = message.from_user.id
@@ -144,16 +150,9 @@ def singer_name_step(message: Message, singer: SingerRegister):
             add_admin(singer.telegram_id)
         finalize_registration(lastname, message, singer)
 
-    elif len(name) < 2 or " " in name:
-        msg = bot.send_message(message.chat.id, dicts.singers.name_too_short_text)
-        bot.register_next_step_handler(msg, singer_name_step, singer)
-
     else:
-        singer.telegram_id = message.from_user.id
-        singer.telegram_name = message.from_user.username
-        singer.name = name
-        msg = bot.send_message(message.chat.id, dicts.singers.enter_your_lastname_text)
-        bot.register_next_step_handler(msg, singer_lastname_step, singer)
+        msg = bot.send_message(message.chat.id, dicts.singers.name_incorrect_text)
+        bot.register_next_step_handler(msg, singer_name_step, singer)
 
 
 def finalize_registration(lastname, message, singer):
@@ -189,7 +188,7 @@ def singer_lastname_step(message: Message, singer: SingerRegister):
     if lastname.isdigit():
         msg = bot.send_message(message.chat.id, dicts.singers.lastname_is_digit_text)
         bot.register_next_step_handler(msg, singer_lastname_step, singer)
-    else:
+    elif lastname.isalpha():
         singer.lastname = lastname
         print(f"all data:\n{singer.__dict__}")
         if MENU_IMAGE:
@@ -199,3 +198,6 @@ def singer_lastname_step(message: Message, singer: SingerRegister):
         if singer.is_admin:
             add_admin(singer.telegram_id)
         finalize_registration(lastname, message, singer)
+    else:
+        msg = bot.send_message(message.chat.id, dicts.changes.ERROR_text)
+        bot.register_next_step_handler(msg, singer_lastname_step, singer)
