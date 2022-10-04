@@ -5,6 +5,8 @@ calendar_zoom_text = "calendar_zoom"
 event_display_text = "show_event"
 event_repeat_text = "repeat"
 event_interval_text = "interval"
+upcoming_month_text = "upcoming_month"
+spam_month_text = "spam_month"
 
 add_new_text = "add_new"
 change_item_text = "change"
@@ -49,6 +51,7 @@ add_all_participants_text = "add_all_participants"
 remove_participation_text = "remove_participation"
 remove_all_participants_text = "remove_all_participants"
 singer_attendance_text = "singer_attendance"
+mass_edit_attendance_text = "mass_edit_attendance_text"
 
 delete_confirmation_text = "delete_confirmation"
 

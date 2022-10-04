@@ -72,6 +72,16 @@ def search_event_by_date(date):
         return cursor.fetchall()
 
 
+def search_events_by_date_interval(start_date, end_date):
+    """Return (id, event_type, event_name, date, time) from the database."""
+    with sqlite3.connect(BOT_DB) as db:
+        cursor = db.cursor()
+
+        cursor.execute("SELECT id, event_type, event_name, date, time "
+                       "FROM events WHERE date BETWEEN ? AND ? ORDER BY date", (start_date, end_date,))
+        return cursor.fetchall()
+
+
 def search_event_by_date_and_telegram_id(date, telegram_id):
     """Return (id, event_type, event_name, time) from the database."""
     with sqlite3.connect(BOT_DB) as db:

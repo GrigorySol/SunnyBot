@@ -943,8 +943,31 @@ def edit_singer_attendance(call: CallbackQuery):
 
     *_, event_id, decision = call.data.split(":")
     db_attendance.edit_singer_attendance(event_id, call.from_user.id, decision)
-    bot.send_message(call.message.chat.id, f"{dicts.attends.attendance_changed_text}")
+    event = db_event.get_event_by_id(event_id)
+    bot.send_message(
+        call.message.chat.id, f"{event[2]} на {event[3]} в {event[4]} "
+                              f"{dicts.attends.set_attendance_text_tuple[int(decision)][0]} "
+                              f"{dicts.attends.attendance_changed_text}"
+    )
     bot.delete_message(call.message.chat.id, call.message.id)
+
+
+@bot.callback_query_handler(func=None, calendar_config=keys.call.mass_edit_attendance_callback.filter())
+def mass_edit_singer_attendance(call: CallbackQuery):
+    """Edit a singer attendance by a singer for an event"""
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
+
+    _, event_id, decision = call.data.split(":")
+    db_attendance.edit_singer_attendance(event_id, call.from_user.id, decision)
+    event = db_event.get_event_by_id(event_id)
+    bot.send_message(
+        call.message.chat.id, f"{event[2]} на {event[3]} в {event[4]} "
+                              f"- {dicts.attends.set_attendance_text_tuple[int(decision)][0]}"
+    )
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.edit_admin_callback.filter())

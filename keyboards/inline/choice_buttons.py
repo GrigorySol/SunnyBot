@@ -100,6 +100,7 @@ def buttons_markup(
             buttons = partial_buttons(data, line, roll_bar_id, row)
             next_btn, previous_btn = rolling_buttons(roll_bar_id, event_id)
             markup.add(*buttons)
+            markup.row_width = 2
             markup.add(previous_btn, next_btn)
 
         else:
@@ -110,13 +111,16 @@ def buttons_markup(
             markup.add(*buttons)
 
     if participant:
+        markup.row_width = 1
         add_remove_participant_buttons(markup, event_id=event_id)
 
     if menu_btn:
+        markup.row_width = 1
         call_btn = f"{cd.change_item_text}:event:{event_id}"
         go_btn = InlineKeyboardButton(but_d.go_menu_btn_text, callback_data=call_btn)
         markup.add(go_btn)
 
+    markup.row_width = 1
     markup.add(close_btn(roll_bar_id))
     return markup
 

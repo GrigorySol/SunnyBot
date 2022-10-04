@@ -10,6 +10,8 @@ calendar_zoom = CallbackData("event_type", "event_id", "year", prefix=cd.calenda
 show_event_callback = CallbackData("event_id", prefix=cd.event_display_text)
 repeat_callback = CallbackData("event_id", prefix=cd.event_repeat_text)
 interval_callback = CallbackData("event_id", "repeat_id", prefix=cd.event_interval_text)
+upcoming_month = CallbackData("year", "month", "day", prefix=cd.upcoming_month_text)
+spam_month = CallbackData("year", "month", "day", prefix=cd.spam_month_text)
 
 # changes
 add_new_callback = CallbackData("type", prefix=cd.add_new_text)
@@ -57,7 +59,8 @@ add_participant_callback = CallbackData("event_id", prefix=cd.add_participant_te
 add_all_participants_callback = CallbackData("event_id", prefix=cd.add_all_participants_text)
 remove_participation_callback = CallbackData("event_id", prefix=cd.remove_participation_text)
 remove_all_participants_callback = CallbackData("event_id", prefix=cd.remove_all_participants_text)
-singer_attendance_callback = CallbackData("action", "event_id", "singer_id", prefix=cd.singer_attendance_text)
+singer_attendance_callback = CallbackData("action", "event_id", "option", prefix=cd.singer_attendance_text)
+mass_edit_attendance_callback = CallbackData("event_id", "decision", prefix=cd.mass_edit_attendance_text)
 
 delete_confirmation_callback = CallbackData("item_type", "item_id", "action_id", prefix=cd.delete_confirmation_text)
 

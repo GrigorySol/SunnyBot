@@ -68,7 +68,7 @@ def count_singers():
 
 
 def get_all_singers():
-    """Return (firstname lastname, id) of the all singers from the database."""
+    """Return (firstname lastname, id) of all singers from the database."""
     with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()
 
@@ -76,6 +76,17 @@ def get_all_singers():
         cursor.execute("SELECT first_name || ' ' || last_name AS fullname, id "
                        "FROM singers "
                        "ORDER BY first_name")
+        return cursor.fetchall()
+
+
+def get_singer_telegram_ids_with_voice():
+    """Return telegram ids of all singers witch has voice from the database."""
+    with sqlite3.connect(BOT_DB) as db:
+        cursor = db.cursor()
+
+        # language=SQLITE-SQL
+        cursor.execute("SELECT DISTINCT singers.telegram_id FROM singer_voice "
+                       "JOIN singers ON singer_voice.singer_id = singers.id")
         return cursor.fetchall()
 
 

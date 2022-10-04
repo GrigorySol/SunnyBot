@@ -70,7 +70,7 @@ def get_all_telegram_singer_id_by_event_id(event_id):
 # INSERT
 
 def add_all_singers_attendance(event_id: int):
-    """Add singers with voices and an event to the attendance table in the database."""
+    """Add an event and singers with voices to the attendance table in the database."""
     with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()
 

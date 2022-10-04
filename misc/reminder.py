@@ -10,7 +10,6 @@ from database_control.db_singer import get_telegram_id_attend_by_event
 from database_control.db_event import search_event_by_date, search_location_by_event_id
 from keyboards.inline.choice_buttons import buttons_markup
 from misc import dicts, keys
-from misc.dictionaries import attendance_dictionary as at_d, event_dictionary as ev_d, reminder_dictionary as rem_d
 
 
 def schedule_pending():
@@ -61,17 +60,17 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
     location = search_location_by_event_id(event_id)
     location_name = "Не определена." if not location else location[0]
 
-    call_config = "singer_attendance"
+    call_config = dicts.call_dic.singer_attendance_text
     data = [
         {"text": text, "callback_data": f"{call_config}:edit:{event_id}:{i}"}
-        for i, text in enumerate(at_d.set_attendance_text_tuple)
+        for i, text in enumerate(dicts.attends.set_attendance_text_tuple)
     ]
 
     msg_date = f"{event_date} в {event_time}"
 
     if event_date != dicts.attends.today_text:
         year, month, day = event_date.split("-")
-        msg_date = f"{int(day)} {ev_d.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
+        msg_date = f"{int(day)} {dicts.events.chosen_months_text_tuple[int(month) - 1]} в {event_time}"
 
     markup = buttons_markup(data)
     count = 0
@@ -79,7 +78,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
     for telegram_id, attendance in get_telegram_id_attend_by_event(event_id):
         try:
             msg = f"{msg_date}:\n{event_name}\n{dicts.events.location_text} {location_name}\n" \
-                  f"{rem_d.info_in_calendar_text}\n"
+                  f"{dicts.reminds.info_in_calendar_text}\n"
 
             if attendance == 1 and event_date == dicts.attends.today_text:
                 msg += f"\n{dicts.attends.chosen_attendance_text}\n" \
@@ -89,7 +88,7 @@ def event_reminder(event_id: int, event_name: str, event_date: str, event_time: 
                 count += 1
 
             elif attendance == 2:
-                msg += f"{rem_d.select_attendance_text}"
+                msg += f"{dicts.reminds.select_attendance_text}"
                 bot.send_message(telegram_id, msg, reply_markup=markup)
                 count += 1
 

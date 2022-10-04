@@ -168,7 +168,7 @@ def menu_tutorial(message: Message):
 
 @bot.message_handler(commands=["joke"])
 def add_joke(message: Message):
-    """Change menu screenshot"""
+    """Add a joke into the bot library"""
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]

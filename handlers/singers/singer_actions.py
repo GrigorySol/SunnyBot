@@ -1,5 +1,6 @@
 import datetime
 import inspect
+from calendar import monthrange, weekday
 from random import randint
 
 from config import VIP, VIP2
@@ -11,22 +12,49 @@ from misc import dicts, keys, tools
 from misc.dictionaries import callback_dictionary as cd
 
 
-@bot.message_handler(commands=["voice"])
-def show_voice(message: Message):
-    """Display singer voices"""
+@bot.message_handler(commands=["attendance"])
+def display_months_to_send_spam(message: Message):
+    """Display buttons of months with upcoming events"""
 
     # debug
     func_name = f"{inspect.currentframe()}".split(" ")[-1]
     log.info(f"{__name__} <{func_name}\t{message.text}\t\t"
              f"{message.from_user.username} {message.from_user.full_name}")
 
-    singer_id = db_singer.get_singer_id(message.from_user.id)
-    voices = db_singer.get_singer_voices(singer_id)
-    if not voices:
-        bot.send_message(message.chat.id, dicts.singers.no_voice_text)
-    else:
-        text = ", ".join(voice for _, voice in voices)
-        bot.send_message(message.chat.id, f"Вы поёте в {text}.")
+    call_config = cd.upcoming_month_text
+    data = []
+    current_date = datetime.date.today()
+    year = current_date.year
+    months = [i-1 for i in range(current_date.month, current_date.month + 6)]
+
+    for month_id in months:
+        start_year = year if month_id < 12 else year+1
+        start_month = (month_id % 12) + 1
+        start_day = 1 if current_date.month != start_month else current_date.day
+        time_delta = datetime.timedelta(days=monthrange(start_year, start_month)[1])
+
+        event_list = db_event.search_events_by_date_interval(
+            f"{start_year}-{start_month:02}-{start_day:02}",
+            f"{datetime.date(start_year, start_month, 1) + time_delta}"
+        )
+
+        rehearsals, events, concerts = 0, 0, 0
+        for _, event_type, *_ in event_list:
+            if event_type == 1:
+                events += 1
+            elif event_type == 2:
+                concerts += 1
+            elif event_type == 3:
+                rehearsals += 1
+
+        text = f"{start_year} {dicts.events.MONTHS[month_id % 12]}:     {rehearsals} 🔔  {events} 💃  {concerts} 🎪"
+        data.append(
+            {"text": text, "callback_data": f"{call_config}:{start_year}:{start_month:02}:{start_day:02}"}
+        )
+
+    bot.send_message(
+        message.chat.id, dicts.events.select_month_text, reply_markup=keys.buttons.buttons_markup(data, row=1, line=6)
+    )
 
 
 @bot.message_handler(commands=["suits"])
@@ -94,6 +122,41 @@ def chose_song_filter(message: Message):
         message.chat.id, dicts.singers.choose_filter_text,
         reply_markup=keys.buttons.buttons_markup(data)
     )
+
+
+@bot.callback_query_handler(func=None, calendar_config=keys.call.upcoming_month.filter())
+def display_event_and_attendance_buttons(call: CallbackQuery):
+    """Display list of event and attendance buttons"""
+
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t {call.data}\t\t {call.from_user.username} {call.from_user.full_name}")
+
+    _, year, month, day = call.data.split(":")
+
+    call_config_event = cd.event_display_text
+    call_config_attendance = cd.mass_edit_attendance_text
+    time_delta = datetime.timedelta(days=monthrange(int(year), int(month))[1])
+    event_list = db_event.search_events_by_date_interval(
+        f"{year}-{month}-{day}",
+        f"{datetime.date(int(year), int(month), 1) + time_delta}"
+    )
+
+    data = []
+
+    for event_id, event_type, event_name, event_date, event_time in event_list:
+        event_year, event_month, event_day = event_date.split("-")
+        week_day_index = weekday(int(event_year), int(event_month), int(event_day))
+        event_text = f"{int(event_day)}{dicts.events.WEEK_DAYS[week_day_index]}" \
+                     f"{dicts.events.event_type_pics_tuple[int(event_type)]} {event_time}"
+        data.append({"text": event_text, "callback_data": f"{call_config_event}:{event_id}"})
+        for i, attendance_text in enumerate(dicts.attends.set_attendance_text_tuple):
+            data.append({"text": attendance_text, "callback_data": f"{call_config_attendance}:{event_id}:{i}"})
+
+    msg = f"{dicts.events.current_events_text} " \
+          f"{dicts.events.MONTHS[int(month) - 1]} {year} года:"
+    markup = keys.buttons.buttons_markup(data, row=3)
+
+    bot.edit_message_text(msg, call.message.chat.id, call.message.id, reply_markup=markup)
 
 
 @bot.callback_query_handler(func=None, singer_config=keys.call.display_suit_photos_callback.filter())
