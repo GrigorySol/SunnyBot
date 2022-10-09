@@ -111,7 +111,6 @@ def buttons_markup(
             markup.add(*buttons)
 
     if participant:
-        markup.row_width = 1
         add_remove_participant_buttons(markup, event_id=event_id)
 
     if menu_btn:

@@ -35,7 +35,8 @@ def display_months_to_send_spam(message: Message):
 
         event_list = db_event.search_events_by_date_interval(
             f"{start_year}-{start_month:02}-{start_day:02}",
-            f"{datetime.date(start_year, start_month, 1) + time_delta}"
+            f"{datetime.date(start_year, start_month, 1) + time_delta}",
+            message.from_user.id
         )
 
         rehearsals, events, concerts = 0, 0, 0
@@ -138,7 +139,8 @@ def display_event_and_attendance_buttons(call: CallbackQuery):
     time_delta = datetime.timedelta(days=monthrange(int(year), int(month))[1])
     event_list = db_event.search_events_by_date_interval(
         f"{year}-{month}-{day}",
-        f"{datetime.date(int(year), int(month), 1) + time_delta}"
+        f"{datetime.date(int(year), int(month), 1) + time_delta}",
+        call.message.chat.id
     )
 
     data = []
