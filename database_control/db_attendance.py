@@ -81,7 +81,7 @@ def add_all_singers_attendance(event_id: int):
 
 
 def add_singer_attendance(event_id, singer_id):
-    """Add singers  with voices and an event to the attendance table in the database."""
+    """Add singer with voice to the attendance table in the database."""
     with sqlite3.connect(BOT_DB) as db:
         cursor = db.cursor()
 
