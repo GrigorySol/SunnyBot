@@ -62,11 +62,6 @@ def show_song_info(call: CallbackQuery):
     Show song info and allow admin to edit.
     """
 
-    # debug
-    func_name = f"{inspect.currentframe()}".split(" ")[-1]
-    log.info(f"{__name__} <{func_name}\t{call.data}\t\t"
-             f"{call.from_user.username} {call.from_user.full_name}")
-
     song_id = call.data.split(":")[1]
     song_name = db_songs.get_song_name(song_id)
     sheets = db_songs.get_sheets_by_song_id(song_id)
@@ -75,6 +70,11 @@ def show_song_info(call: CallbackQuery):
     media_sheets = []
     media_sounds = []
     telegram_id = call.from_user.id
+
+    # debug
+    func_name = f"{inspect.currentframe()}".split(" ")[-1]
+    log.info(f"{__name__} <{func_name}\t{call.data}\t{song_name}\t\t"
+             f"{call.from_user.username} {call.from_user.full_name}")
 
     if not db_singer.singer_exists(telegram_id):
         from handlers.singers.singer_registration import start_registration
