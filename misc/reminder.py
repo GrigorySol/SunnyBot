@@ -111,5 +111,5 @@ def database_sender():
     keys.buttons.ButtonsKeeper.clear_saved_ids()
 
 
-schedule.every().day.at("01:27").do(database_sender)
-schedule.every().day.at("07:15").do(check_event_date)
+schedule.every().day.at("02:27").do(database_sender)
+schedule.every().day.at("10:15").do(check_event_date)
