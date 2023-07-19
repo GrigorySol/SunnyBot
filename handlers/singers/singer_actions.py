@@ -25,7 +25,7 @@ def display_months_to_send_spam(message: Message):
     data = []
     current_date = datetime.date.today()
     year = current_date.year
-    months = [i-1 for i in range(current_date.month, current_date.month + 6)]
+    months = [i-1 for i in range(current_date.month, current_date.month + 3)]
 
     for month_id in months:
         start_year = year if month_id < 12 else year+1
