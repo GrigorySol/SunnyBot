@@ -300,7 +300,7 @@ def song_query(query: InlineQuery):
 
             image_url = "https://images-na.ssl-images-amazon.com/images/I/71EodKggiQL.png"
             markup = keys.buttons.query_button(name, f"{call_config}:{song_id}")
-            data.append(InlineQueryResultArticle(i, f"🎵 {name}", content, reply_markup=markup, thumb_url=image_url))
+            data.append(InlineQueryResultArticle(i, f"🎵 {name}", content, reply_markup=markup, thumbnail_url=image_url))
 
     bot.answer_inline_query(query.id, data)
 
