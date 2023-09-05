@@ -49,7 +49,7 @@ def singer_not_registered(message: Message):
 
 def start_registration(telegram_name, telegram_id, singer_time):
     if not telegram_name:
-        bot.send_message(telegram_id, dicts.singers.need_telegram_name_text)
+        bot.send_message(telegram_id, f"{dicts.singers.need_telegram_name_text} @GrigorySol")
         return
 
     msg = f"{greetings(singer_time)}\n{dicts.singers.not_registered_text}"
@@ -87,11 +87,6 @@ def security_control_step(message: Message, singer: SingerRegister):
         msg_data = bot.send_message(message.chat.id, dicts.singers.enter_your_name_text)
         bot.register_next_step_handler(msg_data, singer_name_step, singer)
 
-    elif singer.count == 7:
-        msg_data = bot.send_message(message.chat.id, dicts.singers.how_many_times_text)
-        bot.register_next_step_handler(msg_data, security_control_step, singer)
-        singer.decrease_count()
-
     elif singer.count > 1:
         msg_data = bot.send_message(message.chat.id, dicts.singers.wrong_security_phrase_text)
         bot.register_next_step_handler(msg_data, security_control_step, singer)
@@ -107,7 +102,7 @@ def security_control_step(message: Message, singer: SingerRegister):
 
     else:
         block_user(message.from_user.id, message.from_user.username)
-        bot.send_message(message.chat.id, dicts.singers.bye_bye_text)
+        bot.send_message(message.chat.id, f"{dicts.singers.bye_bye_text} @GrigorySol")
         del singer
 
 
