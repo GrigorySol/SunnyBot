@@ -3,7 +3,7 @@ import inspect
 
 from handlers.admin.singer_info import singer_info_markup
 from loader import bot, log
-from config import PASS_PHRASE, SECRET_PASS_PHRASE, VIP, MENU_IMAGE
+from config import PASS_PHRASE, SECRET_PASS_PHRASE, VIP, VIP2, MENU_IMAGE
 from telebot.types import Message, CallbackQuery
 from keyboards.inline.choice_buttons import new_singer_markup
 from keyboards.inline.callback_datas import register_callback
@@ -161,9 +161,11 @@ def finalize_registration(lastname, message, singer):
           f"{message.from_user.first_name} -> {singer.name} " \
           f"{message.from_user.last_name} -> {lastname} registered"
     print(msg)
-    singer_id = get_singer_id(singer.telegram_id)
-    markup = singer_info_markup(singer_id)
-    bot.send_message(VIP, msg, reply_markup=markup)
+    if VIP2:
+        singer_id = get_singer_id(singer.telegram_id)
+        markup = singer_info_markup(singer_id)
+        bot.send_message(VIP2, msg, reply_markup=markup)
+
     del singer
 
 
