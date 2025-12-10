@@ -89,11 +89,12 @@ def show_song_info(call: CallbackQuery):
 
     if sheets:
         for _, _, sheet_voice_id, sheet_id in sheets:
-            if not sheet_voice_id:
-                media_sheets.append(InputMediaDocument(sheet_id))
-                continue
-            if (sheet_voice_id,) in singer_voices or is_admin:
-                media_sheets.append(InputMediaDocument(sheet_id))
+            media_sheets.append(InputMediaDocument(sheet_id))
+            # if not sheet_voice_id:
+            #     media_sheets.append(InputMediaDocument(sheet_id))
+            #     continue
+            # if (sheet_voice_id,) in singer_voices or is_admin:
+            #     media_sheets.append(InputMediaDocument(sheet_id))
         if media_sheets:
             bot.send_media_group(telegram_id, media_sheets)
 
@@ -102,11 +103,12 @@ def show_song_info(call: CallbackQuery):
 
     if sounds:
         for _, _, sound_voice_id, sound_id in sounds:
-            if not sound_voice_id:
-                media_sounds.append(InputMediaAudio(sound_id))
-                continue
-            if (sound_voice_id,) in singer_voices or is_admin:
-                media_sounds.append(InputMediaAudio(sound_id))
+            media_sounds.append(InputMediaAudio(sound_id))
+            # if not sound_voice_id:
+            #     media_sounds.append(InputMediaAudio(sound_id))
+            #     continue
+            # if (sound_voice_id,) in singer_voices or is_admin:
+            #     media_sounds.append(InputMediaAudio(sound_id))
         if media_sounds:
             bot.send_media_group(telegram_id, media_sounds)
     else:
